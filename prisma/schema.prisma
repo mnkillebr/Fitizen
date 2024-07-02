@@ -1,0 +1,376 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// // (2) Workout Model
+// model Workout {
+//   id          Int             @id @default(autoincrement())
+//   name        String
+//   description String?
+//   tags        String[]
+//   exercises   WorkoutExercise[]
+// }
+
+// // (2b) WorkoutExercise Junction Table 
+// model WorkoutExercise {
+//   id        Int      @id @default(autoincrement())
+//   workoutId Int
+//   workout   Workout  @relation(fields: [workoutId], references: [id])
+//   // exerciseId Int
+//   // exercise   Exercise  @relation(fields: [exerciseId], references: [id])
+// }
+
+// enum SectionType {
+//   WARMUP
+//   MAIN
+//   COOLDOWN
+// }
+
+// // (3) Program Model
+// model Program {
+//   id            Int            @id @default(autoincrement())
+//   name          String
+//   description   String?
+//   tags          String[]
+//   workouts      ProgramWorkout[] 
+// }
+
+// model ProgramWorkout {
+//   id        Int      @id @default(autoincrement())
+//   programId Int
+//   program   Program  @relation(fields: [programId], references: [id])
+//   workoutId Int
+//   workout   Workout  @relation(fields: [workoutId], references: [id])
+// }
+
+// // (4) User Model and Authentication 
+// model User {
+//   id              Int             @id @default(autoincrement())
+//   name            String?
+//   email           String?         @unique
+//   authProvider    AuthProvider   
+//   authId          String?         
+//   purchasedPrograms Program[]   @relation(references: [id])
+//   subscription   Subscription?
+//   logs            WorkoutLog[]
+// }
+
+// enum AuthProvider {
+//   EMAIL_PASSWORD
+//   FACEBOOK
+//   TWITTER
+//   GITHUB
+//   GOOGLE
+// }
+
+// enum Subscription {
+//   MONTHLY_BASIC
+//   ANNUAL_BASIC
+//   MONTHLY_PREMIUM
+//   ANNUAL_PREMIUM
+// }
+
+// // (5) Workout Tracking
+// model WorkoutLog {
+//   id        Int          @id @default(autoincrement())
+//   userId    Int
+//   user      User         @relation(fields: [userId], references: [id])
+//   workoutId Int
+//   workout   Workout       @relation(fields: [workoutId], references: [id])
+//   startTime DateTime
+//   endTime   DateTime?
+//   exercises ExerciseLog[]
+// }
+
+// model ExerciseLog {
+//   id           Int         @id @default(autoincrement())
+//   workoutLogId  Int
+//   workoutLog   WorkoutLog   @relation(fields: [workoutLogId], references: [id])
+//   workoutExerciseId Int // Track the WorkoutExercise entry, not just the Exercise itself
+//   workoutExercise WorkoutExercise @relation(fields: [workoutExerciseId], references: [id]) // Relationship to WorkoutExercise
+//   sets         Int
+//   repetitions  Int
+//   load         Float
+// }
+// model Routine {
+//   id String @id @default(cuid())
+//   name String?
+//   duration Int
+
+//   routine ExerciseBlock[]
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+
+// model ExerciseBlock {
+//   id String @id @default(cuid())
+//   name String
+//   sets Int
+//   reps Int?
+//   load Int?
+//   loadUnits LoadUnit?
+//   time Int? // denoted in seconds
+//   block Block
+//   exerciseId String
+//   routineId String
+//   exercise Exercise @relation(fields: [exerciseId], references: [id])
+//   routine Routine @relation(fields: [routineId], references: [id])
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  passwordHash      String?
+  name              String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  socialLogins      SocialLogin[]
+  userSubscriptions UserSubscription[]
+  workoutLogs       WorkoutLog[]
+  leaderboardScores Leaderboard[]
+}
+
+model SocialLogin {
+  id             String    @id @default(cuid())
+  provider       String
+  providerUserId String
+  user           User   @relation(fields: [userId], references: [id])
+  userId         String
+
+  @@unique([provider, providerUserId])
+}
+
+model Subscription {
+  id                String             @id @default(cuid())
+  name              String
+  price             Decimal
+  description       String?
+  userSubscriptions UserSubscription[]
+}
+
+model UserSubscription {
+  id             String          @id @default(cuid())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String
+  startDate      DateTime
+  endDate        DateTime?
+}
+
+model Program {
+  id          Int              @id @default(autoincrement())
+  name        String
+  description String?
+  isFree      Boolean          @default(false)
+  price       Decimal?
+  routines    ProgramRoutine[]
+}
+
+model Routine {
+  id          Int              @id @default(autoincrement())
+  name        String
+  description String?
+  isFree      Boolean          @default(false)
+  programs    ProgramRoutine[]
+  exercises   RoutineExercise[]
+  workoutLogs WorkoutLog[]
+  leaderboard Leaderboard[]
+}
+
+model ProgramRoutine {
+  program   Program @relation(fields: [programId], references: [id])
+  programId Int
+  routine   Routine @relation(fields: [routineId], references: [id])
+  routineId Int
+
+  @@id([programId, routineId])
+}
+
+model Exercise {
+  id            String               @id @default(cuid())
+  name          String
+  description   String?
+  isFree        Boolean           @default(false)
+  routines      RoutineExercise[]
+  exerciseLogs  ExerciseLog[]
+  cues          String[]
+  tips          String[]
+
+  youtubeLink   String?
+  s3ImageKey    String?
+  s3VideoKey    String?
+  tags          String[]
+
+  balance       BalanceType?
+  balanceLevel  BalanceLevel?
+  body          BodyFocus[]
+  contraction   ContractionType?
+  equipment     Equipment[]
+  joint         Joint[]
+  lift          LiftType?
+  muscles       MuscleGroup[]
+  pattern       MovementPattern[]
+  plane         MovementPlane[]
+  stretch       StretchType?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model RoutineExercise {
+  routine        Routine @relation(fields: [routineId], references: [id])
+  routineId      Int
+  exercise       Exercise @relation(fields: [exerciseId], references: [id])
+  exerciseId     String
+  orderInRoutine Int
+
+  @@id([routineId, exerciseId])
+}
+
+model WorkoutLog {
+  id          String           @id @default(cuid())
+  user        User          @relation(fields: [userId], references: [id])
+  userId      String
+  routine     Routine       @relation(fields: [routineId], references: [id])
+  routineId   Int
+  date        DateTime      @default(now())
+  exerciseLogs ExerciseLog[]
+}
+
+model ExerciseLog {
+  id           String        @id @default(cuid())
+  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id])
+  workoutLogId String
+  exercise     Exercise   @relation(fields: [exerciseId], references: [id])
+  exerciseId   String
+  sets         Int?
+  reps         Int?
+  weight       Decimal?
+  unit         LoadUnit   @default(pound)
+  duration     Int?        // Duration in seconds
+}
+
+model Leaderboard {
+  id       Int      @id @default(autoincrement())
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String
+  routine  Routine  @relation(fields: [routineId], references: [id])
+  routineId Int
+  score    Int
+  date     DateTime @default(now())
+}
+
+// Enums for Exercise Properties
+enum BalanceType {
+  bilateral
+  unilateral
+}
+
+enum BalanceLevel {
+  static
+  dynamic
+}
+
+enum BodyFocus {
+  upper
+  lower
+  core
+  full
+}
+
+enum ContractionType {
+  isometric
+  isotonic
+}
+
+enum Equipment {
+  bodyweight
+  dumbbell
+  kettlebell
+  barbell
+  resistance_band
+  suspension
+  parallette
+  slider_discs
+  gymnastics_rings
+}
+
+enum Joint {
+  ankle
+  knee
+  hip
+  shoulder
+  elbow
+  wrist
+}
+
+enum LiftType {
+  compound
+  isolation
+}
+
+enum MuscleGroup {
+  quads
+  hamstrings
+  glutes
+  calves
+  shoulders
+  biceps
+  triceps
+  forearms
+  pecs
+  lats
+  traps
+  hip_flexors
+  erectors
+  adductors
+  abductors
+  abs
+  obliques
+  serratus
+  pelvic_floor
+}
+
+enum MovementPattern {
+  push
+  pull
+  core
+  squat
+  hinge
+  lunge
+  rotational
+  locomotive
+}
+
+enum MovementPlane {
+  frontal
+  sagittal
+  transverse
+}
+
+enum StretchType {
+  static
+  dynamic
+}
+
+enum LoadUnit {
+  kilogram
+  pound
+}
