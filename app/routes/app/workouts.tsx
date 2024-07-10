@@ -6,14 +6,15 @@ import { PrimaryButton } from "~/components/form";
 import { createExercise, deleteExercise, getAllExercises, updateExerciseName } from "~/models/exercise.server";
 import { z } from "zod";
 import { validateForm } from "~/utils/validation";
-import { createWorkoutWithExercise, getAllWorkouts } from "~/models/workout.server";
+import { ExerciseSchemaType, createWorkoutWithExercise, createWorkoutWithExercises, getAllWorkouts } from "~/models/workout.server";
 import { useMatchesData } from "~/utils/api";
+import { Exercise as ExerciseType } from "@prisma/client";
+import clsx from "clsx";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const workouts = await getAllWorkouts(query);
-  // const exercises = await getAllExercises(null);
   return json({ workouts })
 }
 
@@ -23,21 +24,55 @@ export async function action({ request }: ActionFunctionArgs) {
     case "createWorkout": {
       return createWorkoutWithExercise();
     }
+    case "createCustomWorkout": {
+      const exercisesString = formData.get("selectedExercises") as string;
+      const name = formData.get("name") as string
+      const description = formData.get("description") as string
+      const exercisesObject = JSON.parse(exercisesString);
+      const mappedExercises =
+        Object.entries(exercisesObject).reduce((result, curr) => {
+          let resultArr = result
+          const [section, exercises]: [string, any] = curr
+          if (section === "0") {
+            return resultArr.concat(exercises.map((item: ExerciseType) => ({
+              exerciseId: item.id,
+              section: "warmup"
+            })))
+          }
+          if (section === "1") {
+            return resultArr.concat(exercises.map((item: ExerciseType) => ({
+              exerciseId: item.id,
+              section: "main"
+            })))
+          }
+          if (section === "2") {
+            return resultArr.concat(exercises.map((item: ExerciseType) => ({
+              exerciseId: item.id,
+              section: "cooldown"
+            })))
+          }
+          return resultArr
+        }, []).map((exercise: ExerciseSchemaType, idx) => ({
+          ...exercise,
+          orderInRoutine: idx + 1,
+        }))
+      return createWorkoutWithExercises(name, description, mappedExercises)
+    }
     default: {
       return null;
     }
   }
 }
 
-export function shouldRevalidate({ nextUrl, currentUrl }: ShouldRevalidateFunctionArgs) {
-  // Always revalidate if we're coming from the workouts create route
-  // console.log('current url', currentUrl)
-  if (currentUrl.pathname === "/app/workouts/create") {
-    return true;
-  }
-  // Otherwise, use the default behavior
-  return false;
-};
+// export function shouldRevalidate({ nextUrl, currentUrl }: ShouldRevalidateFunctionArgs) {
+//   // Always revalidate if we're coming from the workouts create route
+//   console.log('current url', currentUrl)
+//   if (currentUrl.pathname === "/app/workouts/create") {
+//     return true;
+//   }
+//   // Otherwise, use the default behavior
+//   return false;
+// };
 
 export default function Workouts() {
   const data = useLoaderData<typeof loader>();
@@ -48,10 +83,13 @@ export default function Workouts() {
 
   const isSearching = navigation.formData?.has("q");
   const isCreatingWorkout = createWorkoutFetcher.formData?.get("_action") === "createWorkout";
-  const inWorkoutsSubRoute = matches.map(m => m.id).includes("routes/app/workouts/create");
-  // console.log('loader data', data, 'navigation state', navigation.state)
+  const inCreateSubRoute = matches.map(m => m.id).includes("routes/app/workouts/create");
+  const isNavigatingSubRoute =
+    navigation.state === "loading" &&
+    navigation.location.pathname === "/app/workouts/create" &&
+    navigation.formData === undefined;
 
-  if (inWorkoutsSubRoute) {
+  if (inCreateSubRoute) {
     return (
       <div className="flex flex-col h-full">
         <Outlet />
@@ -81,7 +119,7 @@ export default function Workouts() {
         </Form>
         <createWorkoutFetcher.Form method="post">
           <PrimaryButton
-            className="w-full sm:w-1/2 md:w-fit md:active:scale-95"
+            className="w-full sm:w-1/2 xl:w-1/3 md:active:scale-95"
             name="_action"
             value="createWorkout"
             isLoading={isCreatingWorkout}
@@ -90,7 +128,16 @@ export default function Workouts() {
             <span>Add Workout</span>
           </PrimaryButton>
         </createWorkoutFetcher.Form>
-        <Link to="create" className="w-full sm:w-1/2 md:w-fit md:active:scale-95 md:px-3 bg-secondary hover:bg-secondary-light rounded-md text-center text-white py-2">Create Workout</Link>
+        <Link
+          to="create"
+          className={clsx(
+            "w-full sm:w-1/2 xl:w-1/3 md:active:scale-95 md:px-3",
+            "bg-secondary hover:bg-secondary-light rounded-md text-center text-white py-2",
+            isNavigatingSubRoute ? "animate-pulse" : ""
+          )}
+        >
+          Create Workout
+        </Link>
       </div>
       <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2">
         {data.workouts.map((workout) => (
@@ -115,8 +162,8 @@ function Workout({ workout }: WorkoutProps) {
       <div className="flex gap-4">
         <div className="size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
         <div className="flex flex-col self-center">
-          <p className="font-bold max-w-48 xs:max-w-64 sm:hidden truncate">{workout.name}</p>
-          <p className="text-sm max-w-48 xs:max-w-64 sm:hidden truncate">{workout.description}</p>
+          <p className="font-bold max-w-48 xs:max-w-64 truncate sm:overflow-visible">{workout.name}</p>
+          <p className="text-sm max-w-48 xs:max-w-64 truncate sm:overflow-visible">{workout.description}</p>
         </div>
       </div>
     </div>

@@ -13,126 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// // (2) Workout Model
-// model Workout {
-//   id          Int             @id @default(autoincrement())
-//   name        String
-//   description String?
-//   tags        String[]
-//   exercises   WorkoutExercise[]
-// }
-
-// // (2b) WorkoutExercise Junction Table 
-// model WorkoutExercise {
-//   id        Int      @id @default(autoincrement())
-//   workoutId Int
-//   workout   Workout  @relation(fields: [workoutId], references: [id])
-//   // exerciseId Int
-//   // exercise   Exercise  @relation(fields: [exerciseId], references: [id])
-// }
-
-enum SectionType {
-  warmup
-  main
-  cooldown
-}
-
-// // (3) Program Model
-// model Program {
-//   id            Int            @id @default(autoincrement())
-//   name          String
-//   description   String?
-//   tags          String[]
-//   workouts      ProgramWorkout[] 
-// }
-
-// model ProgramWorkout {
-//   id        Int      @id @default(autoincrement())
-//   programId Int
-//   program   Program  @relation(fields: [programId], references: [id])
-//   workoutId Int
-//   workout   Workout  @relation(fields: [workoutId], references: [id])
-// }
-
-// // (4) User Model and Authentication 
-// model User {
-//   id              Int             @id @default(autoincrement())
-//   name            String?
-//   email           String?         @unique
-//   authProvider    AuthProvider   
-//   authId          String?         
-//   purchasedPrograms Program[]   @relation(references: [id])
-//   subscription   Subscription?
-//   logs            WorkoutLog[]
-// }
-
-// enum AuthProvider {
-//   EMAIL_PASSWORD
-//   FACEBOOK
-//   TWITTER
-//   GITHUB
-//   GOOGLE
-// }
-
-// enum Subscription {
-//   MONTHLY_BASIC
-//   ANNUAL_BASIC
-//   MONTHLY_PREMIUM
-//   ANNUAL_PREMIUM
-// }
-
-// // (5) Workout Tracking
-// model WorkoutLog {
-//   id        Int          @id @default(autoincrement())
-//   userId    Int
-//   user      User         @relation(fields: [userId], references: [id])
-//   workoutId Int
-//   workout   Workout       @relation(fields: [workoutId], references: [id])
-//   startTime DateTime
-//   endTime   DateTime?
-//   exercises ExerciseLog[]
-// }
-
-// model ExerciseLog {
-//   id           Int         @id @default(autoincrement())
-//   workoutLogId  Int
-//   workoutLog   WorkoutLog   @relation(fields: [workoutLogId], references: [id])
-//   workoutExerciseId Int // Track the WorkoutExercise entry, not just the Exercise itself
-//   workoutExercise WorkoutExercise @relation(fields: [workoutExerciseId], references: [id]) // Relationship to WorkoutExercise
-//   sets         Int
-//   repetitions  Int
-//   load         Float
-// }
-// model Routine {
-//   id String @id @default(cuid())
-//   name String?
-//   duration Int
-
-//   routine ExerciseBlock[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
-
-// model ExerciseBlock {
-//   id String @id @default(cuid())
-//   name String
-//   sets Int
-//   reps Int?
-//   load Int?
-//   loadUnits LoadUnit?
-//   time Int? // denoted in seconds
-//   block Block
-//   exerciseId String
-//   routineId String
-//   exercise Exercise @relation(fields: [exerciseId], references: [id])
-//   routine Routine @relation(fields: [routineId], references: [id])
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
 model User {
   id                String             @id @default(cuid())
   email             String             @unique
@@ -189,19 +69,21 @@ model Program {
 }
 
 model Routine {
-  id          String              @id @default(cuid())
-  name        String
-  description String?
-  isFree      Boolean          @default(false)
+  id            String             @id @default(cuid())
+  name          String
+  description   String?
+  isFree        Boolean            @default(false)
 
   youtubeLink   String?
   s3ImageKey    String?
   s3VideoKey    String?
 
-  programs    ProgramRoutine[]
-  exercises   RoutineExercise[]
-  workoutLogs WorkoutLog[]
-  leaderboard Leaderboard[]
+  programs      ProgramRoutine[]
+  exercises     RoutineExercise[]
+  workoutLogs   WorkoutLog[]
+  leaderboard   Leaderboard[]
+
+  createdAt     DateTime           @default(now())
 }
 
 model ProgramRoutine {
@@ -337,6 +219,11 @@ enum LiftType {
   isolation
 }
 
+enum LoadUnit {
+  kilogram
+  pound
+}
+
 enum MuscleGroup {
   quads
   hamstrings
@@ -381,7 +268,8 @@ enum StretchType {
   dynamic
 }
 
-enum LoadUnit {
-  kilogram
-  pound
+enum SectionType {
+  warmup
+  main
+  cooldown
 }

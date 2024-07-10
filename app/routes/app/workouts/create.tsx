@@ -1,19 +1,16 @@
-import { ChevronDownIcon, ChevronUpIcon, PlusCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { ChevronDownIcon, PlusCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon as SearchIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Form, Link, json, redirect, useLoaderData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
-import { Description, Field, Fieldset, Input, Label, Legend, Select, Textarea } from "@headlessui/react";
-import { AnimatePresence, motion, easeOut } from "framer-motion";
+import { Form, Link, json, useLoaderData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
+import { Field, Fieldset, Input, Label, Legend, Textarea } from "@headlessui/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button, PrimaryButton } from "~/components/form";
-import { useMatchesData } from "~/utils/api";
-import { useCallback, useState, } from "react";
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { useCallback, useState } from "react";
+import { LoaderFunctionArgs } from "@remix-run/node";
 import { getAllExercises } from "~/models/exercise.server";
 import { Exercise } from "../library";
 import clsx from "clsx";
 import { FieldErrors } from "~/utils/validation";
 import { isEmptyObject } from "~/utils/misc";
-import { createWorkoutWithExercises } from "~/models/workout.server";
-import { Exercise as ExerciseType } from "@prisma/client"
 
 type ExerciseProps = {
   id: string
@@ -104,52 +101,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return json({ exercises })
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const exercisesString = formData.get("selectedExercises") as string;
-  const name = formData.get("name") as string
-  const description = formData.get("description") as string
-  const exercisesObject = JSON.parse(exercisesString);
-  const mappedExercises = Object.entries(exercisesObject).reduce((result, curr) => {
-    let resultArr = result
-    const [section, exercises]: [string, any] = curr
-    if (section === "0") {
-      return resultArr.concat(exercises.map((item: ExerciseType, idx: number) => ({
-        exerciseId: item.id,
-        orderInRoutine: idx,
-        section: "warmup"
-      })))
-    }
-    if (section === "1") {
-      return resultArr.concat(exercises.map((item: ExerciseType, idx: number) => ({
-        exerciseId: item.id,
-        orderInRoutine: idx,
-        section: "main"
-      })))
-    }
-    if (section === "2") {
-      return resultArr.concat(exercises.map((item: ExerciseType, idx: number) => ({
-        exerciseId: item.id,
-        orderInRoutine: idx,
-        section: "cooldown"
-      })))
-    }
-    return resultArr
-}, [])
-  createWorkoutWithExercises(name, description, mappedExercises)
-  console.log("create workout", exercisesString, mappedExercises)
-
-  return redirect("/app/workouts");
-};
-
 export default function Create() {
   const data = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const submit = useSubmit();
   const [searchParams, setSearchParams] = useSearchParams();
-  // const matchesData = useMatchesData("routes/app/workouts");
 
   const isSearching = navigation.formData?.has("q");
+  const isSavingWorkout = navigation.formData?.get("_action") === "createCustomWorkout";
 
   const [openExercisesPanel, setOpenExercisesPanel] = useState(false);
   const [openIndex, setOpenIndex] = useState<null | number>(1);
@@ -183,11 +142,12 @@ export default function Create() {
     }
     if (isEmptyObject(errors)) {
       const formData = new FormData();
+      formData.append("_action", "createCustomWorkout")
       formData.append("name", workoutName)
       formData.append("description", workoutDescription)
       formData.append("selectedExercises", JSON.stringify(selectedExercises));
   
-      return submit(formData, { method: "post" });
+      return submit(formData, { method: "post", action: "/app/workouts" });
     }
   }, [selectedExercises, workoutName, workoutDescription, errors, setErrors])
 
@@ -227,7 +187,6 @@ export default function Create() {
     },
   ];
 
-  // console.log("matches data", matchesData)
   return (
     <>
       {/* <AnimatePresence> */}
@@ -245,6 +204,7 @@ export default function Create() {
                 <Input
                   type="text"
                   value={workoutName}
+                  autoComplete="off"
                   onChange={(e) => {
                     const inputValue = e.target.value
                     setWorkoutName(inputValue)
@@ -311,6 +271,7 @@ export default function Create() {
               <PrimaryButton
                 className="w-full"
                 type="submit"
+                isLoading={isSavingWorkout}
               >
                 Save
               </PrimaryButton>

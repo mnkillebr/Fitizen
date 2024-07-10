@@ -7,6 +7,8 @@ import { DeleteButton, ErrorMessage, PrimaryButton } from "~/components/form";
 import { createExercise, deleteExercise, getAllExercises, updateExerciseName } from "~/models/exercise.server";
 import { z } from "zod";
 import { validateForm } from "~/utils/validation";
+import { useIsHydrated } from "~/utils/misc";
+import clsx from "clsx";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -126,6 +128,7 @@ type ExerciseProps = {
 }
 
 export function Exercise({ exercise, selectable, selectFn, selected }: ExerciseProps) {
+  const isHydrated = useIsHydrated();
   const deleteExerciseFetcher = useFetcher<deleteExerciseFetcherType>();
   const updateExerciseNameFetcher = useFetcher<updateNameFetcherType>();
   const isDeletingExercise =
@@ -140,22 +143,43 @@ export function Exercise({ exercise, selectable, selectFn, selected }: ExerciseP
         <div className="flex flex-col self-center">
           <p className="font-bold max-w-48 xs:max-w-64 sm:hidden truncate">{exercise.name}</p>
           <updateExerciseNameFetcher.Form method="post" className="hidden sm:flex">
-            <div className="flex flex-col">
+            <div className="flex flex-col peer">
               <input
                 type="text"
                 className={`font-bold bg-slate-100 focus:outline-none max-w-36 xs:min-w-64 truncate focus:border-b-2 ${
                   updateExerciseNameFetcher.data?.errors?.exerciseName ? "border-b-2 border-b-red-500" : ""
                 }`}
+                required
                 name="exerciseName"
                 placeholder="Exercise Name"
                 defaultValue={exercise.name}
                 autoComplete="off"
+                onChange={(event) => {
+                  event.target.value !== "" &&
+                  updateExerciseNameFetcher.submit(
+                    {
+                      _action: "updateExerciseName",
+                      exerciseId: exercise.id,
+                      exerciseName: event.target.value,
+                    },
+                    { method: "post" }
+                  );
+                }}
               />
               <ErrorMessage>{updateExerciseNameFetcher.data?.errors?.exerciseName}</ErrorMessage>
             </div>
-            <button name="_action" value="updateExerciseName">
-              <ArrowDownTrayIcon className="size-6 hover:text-accent"/>
-            </button>
+            {isHydrated ? null : (
+              <button
+                name="_action"
+                value="updateExerciseName"
+                className={clsx(
+                  "opacity-0 hover:opacity-100 focus:opacity-100",
+                  "peer-focus-within:opacity-100"
+                )}
+              >
+                <ArrowDownTrayIcon className="size-6"/>
+              </button>
+            )}
             <input type="hidden" name="exerciseId" value={exercise.id} />
           </updateExerciseNameFetcher.Form>
           <div className="flex divide-x divide-gray-400 text-sm">
@@ -166,7 +190,7 @@ export function Exercise({ exercise, selectable, selectFn, selected }: ExerciseP
           </div>
         </div>
       </div>
-      {selectable && (
+      {selectable ? (
         <button
           className={`px-2 border-l-2 h-full flex flex-col justify-center hover:bg-secondary hover:text-white hover:rounded-r-lg ${
             selected ? "text-green-600" : ""
@@ -175,20 +199,28 @@ export function Exercise({ exercise, selectable, selectFn, selected }: ExerciseP
         >
           {selected ? <CheckCircleIcon className="size-6" /> : <PlusIcon className="size-6" />}
         </button>
+      ) : (
+        <div className="hidden sm:flex gap-3 items-center p-4">
+          <HeartOutline className="size-6 hover:text-rose-500 cursor-pointer"/>
+          <deleteExerciseFetcher.Form
+            method="post"
+            onSubmit={(event) => {
+              if(!confirm("Are you sure you want to delete this exercise?")) {
+                event.preventDefault();
+              }
+            }}
+          >
+            <input type="hidden" name="exerciseId" value={exercise.id} />
+            <DeleteButton
+              name="_action"
+              value="deleteExercise"
+              >
+              <TrashIcon className="size-6" />
+            </DeleteButton>
+            <ErrorMessage>{deleteExerciseFetcher.data?.errors?.exerciseId}</ErrorMessage>
+          </deleteExerciseFetcher.Form>
+        </div>
       )}
-      <div className="hidden sm:flex gap-3 items-center">
-        <HeartOutline className="size-6 hover:text-rose-500 cursor-pointer"/>
-        <deleteExerciseFetcher.Form method="post">
-          <input type="hidden" name="exerciseId" value={exercise.id} />
-          <DeleteButton
-            name="_action"
-            value="deleteExercise"
-            >
-            <TrashIcon className="size-6" />
-          </DeleteButton>
-          <ErrorMessage>{deleteExerciseFetcher.data?.errors?.exerciseId}</ErrorMessage>
-        </deleteExerciseFetcher.Form>
-      </div>
       {/* <HeartSolid className="size-6 fill-rose-500 hover:fill-rose-600 cursor-pointer"/> */}
     </div>
   )

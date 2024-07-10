@@ -1,7 +1,7 @@
 import { Prisma, SectionType } from "@prisma/client";
 import db from "~/db.server";
 
-type ExerciseSchemaType = {
+export type ExerciseSchemaType = {
   exerciseId: string
   orderInRoutine: number
   section: SectionType
@@ -19,6 +19,9 @@ export function getAllWorkouts(query: string | null) {
       exercises: true,
     },
     orderBy: [
+      {
+        createdAt: "desc",
+      },
       {
         name: "desc",
       }
