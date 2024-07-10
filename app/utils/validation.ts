@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-type FieldErrors = {
+export type FieldErrors = {
   [key: string]: string
 }
 

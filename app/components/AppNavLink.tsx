@@ -71,8 +71,8 @@ export function MobileNavLink({ to, children }: RootNavLinkProps) {
       className={({ isActive }) =>
         `min-w-14 p-1 rounded-lg transition duration-100 flex flex-col text-xs items-center ${
           isActive
-            ? "text-accent bg-white shadow-inner"
-            : "text-gray-900 hover:text-accent"
+            ? "bg-accent text-white shadow-inner"
+            : "text-accent hover:text-yellow-500 hover:bg-slate-200"
         } ${isLoading ? "animate-pulse bg-gray-50" : ""}`
       }
     >

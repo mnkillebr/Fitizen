@@ -31,11 +31,11 @@ datasource db {
 //   // exercise   Exercise  @relation(fields: [exerciseId], references: [id])
 // }
 
-// enum SectionType {
-//   WARMUP
-//   MAIN
-//   COOLDOWN
-// }
+enum SectionType {
+  warmup
+  main
+  cooldown
+}
 
 // // (3) Program Model
 // model Program {
@@ -175,19 +175,29 @@ model UserSubscription {
 }
 
 model Program {
-  id          Int              @id @default(autoincrement())
+  id          String              @id @default(cuid())
   name        String
   description String?
   isFree      Boolean          @default(false)
   price       Decimal?
+
+  youtubeLink   String?
+  s3ImageKey    String?
+  s3VideoKey    String?
+
   routines    ProgramRoutine[]
 }
 
 model Routine {
-  id          Int              @id @default(autoincrement())
+  id          String              @id @default(cuid())
   name        String
   description String?
   isFree      Boolean          @default(false)
+
+  youtubeLink   String?
+  s3ImageKey    String?
+  s3VideoKey    String?
+
   programs    ProgramRoutine[]
   exercises   RoutineExercise[]
   workoutLogs WorkoutLog[]
@@ -196,9 +206,9 @@ model Routine {
 
 model ProgramRoutine {
   program   Program @relation(fields: [programId], references: [id])
-  programId Int
+  programId String
   routine   Routine @relation(fields: [routineId], references: [id])
-  routineId Int
+  routineId String
 
   @@id([programId, routineId])
 }
@@ -236,10 +246,11 @@ model Exercise {
 
 model RoutineExercise {
   routine        Routine @relation(fields: [routineId], references: [id])
-  routineId      Int
+  routineId      String
   exercise       Exercise @relation(fields: [exerciseId], references: [id])
   exerciseId     String
   orderInRoutine Int
+  section        SectionType?
 
   @@id([routineId, exerciseId])
 }
@@ -249,7 +260,7 @@ model WorkoutLog {
   user        User          @relation(fields: [userId], references: [id])
   userId      String
   routine     Routine       @relation(fields: [routineId], references: [id])
-  routineId   Int
+  routineId   String
   date        DateTime      @default(now())
   exerciseLogs ExerciseLog[]
 }
@@ -272,7 +283,7 @@ model Leaderboard {
   user     User     @relation(fields: [userId], references: [id])
   userId   String
   routine  Routine  @relation(fields: [routineId], references: [id])
-  routineId Int
+  routineId String
   score    Int
   date     DateTime @default(now())
 }

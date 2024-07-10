@@ -14,35 +14,42 @@ import { useEffect, useState, } from "react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 // import globalStyles from "~/tailwind.css?url";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, TableCellsIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { /*ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, TableCellsIcon,*/ XMarkIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, FireIcon, TableCellsIcon } from "@heroicons/react/24/solid";
 import logo from "images/Sample Fitizen.png?url";
 import { AppNavLink, MobileNavLink, RootNavLink } from "./components/AppNavLink";
 
 const navigation = [
-  { name: 'Settings', href: 'settings' },
-  { name: 'About', href: 'about' },
-  // { name: 'Marketplace', href: '#' },
-  // { name: 'Company', href: '#' },
+  { name: "Settings", href: "settings" },
+  { name: "About", href: "about" },
+  // { name: "Marketplace", href: "#" },
+  // { name: "Company", href: "#" },
 ]
 
 const dashNavigation = [
   {
-    name: 'Programs',
-    href: 'app/programs',
+    name: "Programs",
+    href: "app/programs",
     icon: <TableCellsIcon />,
-    label: 'Programs',
+    label: "Programs",
   },
   {
-    name: 'Schedule',
-    href: 'app/schedule',
+    name: "Workouts",
+    href: "app/workouts",
+    icon: <FireIcon />,
+    label: "Workouts"
+  },
+  {
+    name: "Schedule",
+    href: "app/schedule",
     icon: <CalendarIcon />,
-    label: 'Schedule',
+    label: "Schedule",
   },
   {
-    name: 'Exercise Library',
-    href: 'app/library',
+    name: "Exercise Library",
+    href: "app/library",
     icon: <BookOpenIcon />,
-    label: 'Library',
+    label: "Library",
   },
 ]
 
@@ -92,24 +99,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const matches = useMatches()
-  const inAppRoute = matches.map(m => m.id).includes('routes/app')
+  const inAppRoute = matches.map(m => m.id).includes("routes/app")
 
   const bodyParts: Exercise[] = [
-    { name: 'Leg', image: '/images/leg.jpg' },
-    { name: 'Shoulders', image: '/images/shoulders.jpg' },
-    { name: 'Biceps', image: '/images/biceps.jpg' },
-    { name: 'Abs', image: '/images/abs.jpg' },
+    { name: "Leg", image: "/images/leg.jpg" },
+    { name: "Shoulders", image: "/images/shoulders.jpg" },
+    { name: "Biceps", image: "/images/biceps.jpg" },
+    { name: "Abs", image: "/images/abs.jpg" },
   ];
 
   const equipmentExercises: Exercise[] = [
-    { name: 'Dumbbells', image: '/images/dumbbells.jpg' },
-    { name: 'Jump Rope', image: '/images/jump-rope.jpg' },
-    { name: 'Kettlebell', image: '/images/kettlebell.jpg' },
+    { name: "Dumbbells", image: "/images/dumbbells.jpg" },
+    { name: "Jump Rope", image: "/images/jump-rope.jpg" },
+    { name: "Kettlebell", image: "/images/kettlebell.jpg" },
   ];
 
   const workouts: WorkoutItem[] = [
-    { title: 'Core Workout', isPro: true, image: '/images/core-workout.jpg' },
-    { title: 'Full Body Workout', isPro: false, image: '/images/full-body-workout.jpg' },
+    { title: "Core Workout", isPro: true, image: "/images/core-workout.jpg" },
+    { title: "Full Body Workout", isPro: false, image: "/images/full-body-workout.jpg" },
   ];
 
   // useEffect(() => {
@@ -213,7 +220,7 @@ export default function App() {
   //               <div key={index} className="flex-none w-64 relative rounded-lg overflow-hidden">
   //                 <div className="w-full h-48 object-cover bg-slate-500" />
   //                 <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 text-xs rounded">
-  //                   {workout.isPro ? 'Pro' : 'Free'}
+  //                   {workout.isPro ? "Pro" : "Free"}
   //                 </div>
   //                 <div className="absolute bottom-2 right-2 bg-white rounded-full p-2">
   //                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -268,7 +275,7 @@ export default function App() {
     return (
       <div className="bg-white h-screen">
         <div className="flex flex-col-reverse xs:flex-col md:flex-row h-full">
-          <div className="flex bg-slate-300 text-white px-8 py-2 sm:py-4 md:bg-slate-100 md:w-80 md:flex-col md:flex-none md:shadow-lg md:px-4 md:py-8">
+          <div className="flex shadow-[0_-5px_3px_-3px_rgba(0,0,0,0.1)] xs:shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] text-white px-8 py-2 sm:py-4 sm:bg-slate-100 md:bg-slate-100 md:w-80 md:flex-col md:flex-none md:shadow-[5px_0_3px_-3px_rgba(0,0,0,0.1)] md:px-4 md:py-8">
             <div className="flex md:flex-col md:gap-y-4 items-center justify-center xs:justify-between w-full">
               <div className="hidden md:flex justify-center">
                 <img className="rounded-full drop-shadow-lg" src="https://i.pravatar.cc/200?img=16"/>
@@ -299,7 +306,7 @@ export default function App() {
                       <p>{item.label}</p>
                     </MobileNavLink>
                   ))}
-                  <Link to="/" className="min-w-14 p-1 xs:hidden flex-none text-gray-900 hover:text-accent flex flex-col text-xs items-center">
+                  <Link to="/" className="min-w-14 p-1 xs:hidden flex-none rounded-lg text-accent hover:text-yellow-500 hover:bg-slate-200 flex flex-col text-xs items-center">
                     <div className="size-6"><ArrowLeftEndOnRectangleIcon /></div>
                     <p>Log Out</p>
                   </Link>
@@ -313,16 +320,16 @@ export default function App() {
               <Link to="/" className="hidden sm:max-md:flex md:hidden sm:block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100">
                 Log Out
               </Link>
-              <Link to="/" className="hidden xs:flex sm:hidden flex-none text-gray-900 hover:text-accent flex-col text-xs items-center">
+              <Link to="/" className="hidden xs:flex sm:hidden flex-none rounded-lg text-accent hover:text-yellow-500 hover:bg-slate-200 p-1 flex-col text-xs items-center">
                 <div className="size-6"><ArrowLeftEndOnRectangleIcon /></div>
                 <p>Log Out</p>
               </Link>
             </div>
           </div>
-          <div className="flex-1 px-6 pt-6 pb-2 md:p-8 max-h-[calc(100vh-8.1875rem)] md:max-h-screen"> 
+          <div className="flex-1 p-6 md:p-8 max-h-[calc(100vh-8.125rem)] xs:max-h-[calc(100vh-4.125rem)] sm:max-h-[calc(100vh-5.125rem)] md:max-h-screen"> 
             <Outlet />
           </div>
-          <div className="border-b px-8 py-2 flex gap-4 xs:hidden">
+          <div className="shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] px-8 py-2 flex gap-4 xs:hidden">
             <img className="xs:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
             <div className="flex flex-col self-center">
               <p className="font-bold">Welcome back, homie 👋</p>

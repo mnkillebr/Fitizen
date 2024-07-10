@@ -1,6 +1,4 @@
-import { useState } from "react";
-
-import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid, PlusIcon, TrashIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
@@ -75,38 +73,42 @@ export default function Library() {
   const isSearching = navigation.formData?.has("q");
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
   return (
-    <div className="flex flex-col h-full gap-x-6 gap-y-4 snap-y snap-mandatory overflow-y-auto px-2 pb-4 mb-4">
-      <Form
-        className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-1/2 ${
-          isSearching ? "animate-pulse" : ""
-        }`}
-      >
-        <button type="submit">
-          <SearchIcon className="size-6 ml-2" />
-        </button>
-        <input
-          defaultValue={searchParams.get("q") ?? ""}
-          type="text"
-          name="q"
-          placeholder="Search exercises ..."
-          autoComplete="off"
-          className="w-full p-2 outline-none rounded-md"
-        />
-      </Form>
-      <createExerciseFetcher.Form method="post">
-        <PrimaryButton
-          className="w-full sm:w-1/2 md:w-fit md:active:scale-95"
-          name="_action"
-          value="createExercise"
-          isLoading={isCreatingExercise}
+    <div className="flex flex-col h-full gap-y-4 mb-4">
+      <div className="flex flex-col gap-y-4 px-2">
+        <Form
+          className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-1/2 ${
+            isSearching ? "animate-pulse" : ""
+          }`}
         >
-          <PlusIcon className="size-6 pr-1" />
-          <span>Add Exercise</span>
-        </PrimaryButton>
-      </createExerciseFetcher.Form>
-      {data.exercises.map((ex_item) => (
-        <Exercise key={ex_item.id} exercise={ex_item} />
-      ))}
+          <button type="submit">
+            <SearchIcon className="size-6 ml-2" />
+          </button>
+          <input
+            defaultValue={searchParams.get("q") ?? ""}
+            type="text"
+            name="q"
+            placeholder="Search exercises ..."
+            autoComplete="off"
+            className="w-full p-2 outline-none rounded-md"
+          />
+        </Form>
+        <createExerciseFetcher.Form method="post">
+          <PrimaryButton
+            className="w-full sm:w-1/2 md:w-fit md:active:scale-95"
+            name="_action"
+            value="createExercise"
+            isLoading={isCreatingExercise}
+          >
+            <PlusIcon className="size-6 pr-1" />
+            <span>Add Exercise</span>
+          </PrimaryButton>
+        </createExerciseFetcher.Form>
+      </div>
+      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2">
+        {data.exercises.map((ex_item) => (
+          <Exercise key={ex_item.id} exercise={ex_item} />
+        ))}
+      </div>
     </div>
   )
 }
@@ -118,24 +120,30 @@ type ExerciseProps = {
     body: string[]
     contraction: string | null
   }
+  selectable?: boolean
+  selectFn?: (...args: any[]) => void
+  selected?: boolean
 }
 
-function Exercise({ exercise }: ExerciseProps) {
+export function Exercise({ exercise, selectable, selectFn, selected }: ExerciseProps) {
   const deleteExerciseFetcher = useFetcher<deleteExerciseFetcherType>();
   const updateExerciseNameFetcher = useFetcher<updateNameFetcherType>();
   const isDeletingExercise =
     deleteExerciseFetcher.formData?.get("_action") === "deleteExercise" &&
     deleteExerciseFetcher.formData?.get("exerciseId") === exercise.id
   return isDeletingExercise ? null : (
-    <div className="p-4 bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md hover:shadow-accent snap-start">
-      <div className="flex gap-4">
-        <div className="size-20 bg-white rounded-lg text-center content-center">Image</div>
+    <div className={`bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md snap-start ${
+      selectable ? "" : "hover:shadow-accent"
+    }`}>
+      <div className="p-2 xs:p-4 flex gap-2 xs:gap-4">
+        <div className="size-12 xs:size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
         <div className="flex flex-col self-center">
-          <updateExerciseNameFetcher.Form method="post" className="flex">
+          <p className="font-bold max-w-48 xs:max-w-64 sm:hidden truncate">{exercise.name}</p>
+          <updateExerciseNameFetcher.Form method="post" className="hidden sm:flex">
             <div className="flex flex-col">
               <input
                 type="text"
-                className={`font-bold bg-slate-100 focus:outline-none focus:border-b-2 ${
+                className={`font-bold bg-slate-100 focus:outline-none max-w-36 xs:min-w-64 truncate focus:border-b-2 ${
                   updateExerciseNameFetcher.data?.errors?.exerciseName ? "border-b-2 border-b-red-500" : ""
                 }`}
                 name="exerciseName"
@@ -151,14 +159,24 @@ function Exercise({ exercise }: ExerciseProps) {
             <input type="hidden" name="exerciseId" value={exercise.id} />
           </updateExerciseNameFetcher.Form>
           <div className="flex divide-x divide-gray-400 text-sm">
-            {exercise.body.map((body, body_idx) => (
+            {exercise.body.slice(0,2).map((body, body_idx) => (
               <p key={body_idx} className={`${body_idx > 0 ? "px-1" : "pr-1"} text-xs capitalize`}>{`${body} body`}</p>
             ))}
             <p className="px-1 text-xs capitalize">{exercise.contraction}</p>
           </div>
         </div>
       </div>
-      <div className="flex gap-3 items-center">
+      {selectable && (
+        <button
+          className={`px-2 border-l-2 h-full flex flex-col justify-center hover:bg-secondary hover:text-white hover:rounded-r-lg ${
+            selected ? "text-green-600" : ""
+          }`}
+          onClick={() => selectFn ? selectFn(exercise) : null}
+        >
+          {selected ? <CheckCircleIcon className="size-6" /> : <PlusIcon className="size-6" />}
+        </button>
+      )}
+      <div className="hidden sm:flex gap-3 items-center">
         <HeartOutline className="size-6 hover:text-rose-500 cursor-pointer"/>
         <deleteExerciseFetcher.Form method="post">
           <input type="hidden" name="exerciseId" value={exercise.id} />
