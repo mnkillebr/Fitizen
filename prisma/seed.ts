@@ -1,6 +1,16 @@
 import { BalanceLevel, BalanceType, BodyFocus, ContractionType, Equipment, Joint, LiftType, MovementPattern, MovementPlane, MuscleGroup, PrismaClient } from "@prisma/client";
 const db = new PrismaClient();
 
+function createUser() {
+  return db.user.create({
+    data: {
+      email: "test@email.com",
+      firstName: "Marcus",
+      lastName: "Killebrew"
+    }
+  })
+}
+
 function getKettlebellExercises() {
   return [
     {
@@ -155,6 +165,7 @@ function getKettlebellExercises() {
 };
 
 async function seed() {
+  await createUser();
   await Promise.all(
     getKettlebellExercises().map((exercise) => db.exercise.create({ data: exercise }))
   );

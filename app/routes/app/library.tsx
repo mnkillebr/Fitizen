@@ -117,14 +117,14 @@ export default function Library() {
 
 type ExerciseProps = {
   exercise: {
-    id: string
-    name: string
-    body: string[]
-    contraction: string | null
-  }
-  selectable?: boolean
-  selectFn?: (...args: any[]) => void
-  selected?: boolean
+    id: string;
+    name: string;
+    body: string[];
+    contraction: string | null;
+  };
+  selectable?: boolean;
+  selectFn?: (...args: any[]) => void;
+  selected?: boolean;
 }
 
 export function Exercise({ exercise, selectable, selectFn, selected }: ExerciseProps) {
@@ -141,7 +141,7 @@ export function Exercise({ exercise, selectable, selectFn, selected }: ExerciseP
       <div className="p-2 xs:p-4 flex gap-2 xs:gap-4">
         <div className="size-12 xs:size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
         <div className="flex flex-col self-center">
-          <p className="font-bold max-w-48 xs:max-w-64 sm:hidden truncate">{exercise.name}</p>
+          <p className="font-bold max-w-56 xs:max-w-64 sm:hidden truncate">{exercise.name}</p>
           <updateExerciseNameFetcher.Form method="post" className="hidden sm:flex">
             <div className="flex flex-col peer">
               <input

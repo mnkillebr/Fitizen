@@ -13,21 +13,21 @@ import { FieldErrors } from "~/utils/validation";
 import { isEmptyObject } from "~/utils/misc";
 
 type ExerciseProps = {
-  id: string
-  name: string
-  body: string[]
-  contraction: string | null
+  id: string;
+  name: string;
+  body: string[];
+  contraction: string | null;
 }
 
 type PanelItemProps = {
-  addCallbackFn: () => void
-  removeCallbackFn: (item: ExerciseProps) => void
-  panelText: string
-  subItems?: Array<ExerciseProps>
+  addCallbackFn: () => void;
+  removeCallbackFn: (item: ExerciseProps) => void;
+  panelText: string;
+  subItems?: Array<ExerciseProps>;
 }
 
 type SelectedExercisesType = {
-  [key: string]: Array<ExerciseProps>
+  [key: string]: Array<ExerciseProps>;
 }
 
 const PanelItem = ({ addCallbackFn, removeCallbackFn, panelText, subItems = [] }: PanelItemProps) => {
@@ -53,10 +53,10 @@ const PanelItem = ({ addCallbackFn, removeCallbackFn, panelText, subItems = [] }
 }
 
 type AccordionItemProps = {
-  title: string
-  content: React.ReactNode
-  isOpen: boolean
-  onClick: () => void
+  title: string;
+  content: React.ReactNode;
+  isOpen: boolean;
+  onClick: () => void;
 }
 
 const AccordionItem = ({ title, content, isOpen, onClick }: AccordionItemProps) => {

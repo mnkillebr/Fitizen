@@ -381,8 +381,8 @@ export default function App() {
                 <ArrowLeftEndOnRectangleIcon />
               </Link>
             ) : (
-              <Link to="signin" className="text-md font-semibold leading-6 text-gray-900 hover:text-accent">
-                Sign In <span aria-hidden="true">&rarr;</span>
+              <Link to="login" className="text-md font-semibold leading-6 text-gray-900 hover:text-accent">
+                Log In <span aria-hidden="true">&rarr;</span>
               </Link>
             )}
           </div>
@@ -428,10 +428,10 @@ export default function App() {
                 ) : (
                   <div className="py-6">
                     <a
-                      href="signin"
+                      href="login"
                       className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100"
                     >
-                      Sign In
+                      Log In
                     </a>
                   </div>
                 )}

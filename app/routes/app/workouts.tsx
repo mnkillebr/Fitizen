@@ -150,10 +150,10 @@ export default function Workouts() {
 
 type WorkoutProps = {
   workout: {
-    id: string
-    name: string
-    description: string | null
-  }
+    id: string;
+    name: string;
+    description: string | null;
+  };
 }
 
 function Workout({ workout }: WorkoutProps) {
