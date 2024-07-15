@@ -8,6 +8,7 @@ import { getUserByEmail } from "~/models/user.server";
 import { commitSession, getSession } from "~/sessions";
 import { validateForm } from "~/utils/validation";
 import { v4 as uuid } from "uuid";
+import { requireLoggedOutUser } from "~/utils/auth.server";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -21,13 +22,13 @@ type loginActionType = {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const cookieHeader = request.headers.get("cookie");
-  const session = await getSession(cookieHeader);
-  // console.log("session data", session.data)
+  await requireLoggedOutUser(request);
   return null
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  await requireLoggedOutUser(request);
+  
   const cookieHeader = request.headers.get("cookie");
   const session = await getSession(cookieHeader);
   const formData = await request.formData();

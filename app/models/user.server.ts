@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import db from "~/db.server";
 
 export function getUserByEmail(email: string) {
@@ -9,9 +9,18 @@ export function getUserByEmail(email: string) {
   });
 };
 
+export function getUserById(userId: string) {
+  return db.user.findUnique({
+    where: {
+      id: userId,
+    }
+  });
+};
+
 export function createUser(email: string, firstName: string, lastName: string) {
   return db.user.create({
     data: {
+      role: Role.user,
       email,
       firstName,
       lastName,

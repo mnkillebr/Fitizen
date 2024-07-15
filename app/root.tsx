@@ -8,16 +8,22 @@ import {
   ScrollRestoration,
   useMatches,
   useRouteError,
+  isRouteErrorResponse,
+  json,
+  useSubmit,
 } from "@remix-run/react";
 import "./tailwind.css";
 import { useEffect, useState, } from "react";
-import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 // import globalStyles from "~/tailwind.css?url";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { /*ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, TableCellsIcon,*/ XMarkIcon } from "@heroicons/react/24/outline";
 import { ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, FireIcon, TableCellsIcon } from "@heroicons/react/24/solid";
 import logo from "images/Sample Fitizen.png?url";
 import { AppNavLink, MobileNavLink, RootNavLink } from "./components/AppNavLink";
+import { getCurrentUser } from "./utils/auth.server";
+import { destroySession, getSession } from "./sessions";
+import clsx from "clsx";
 
 const navigation = [
   { name: "Settings", href: "settings" },
@@ -96,10 +102,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await getCurrentUser(request);
+  return json({ isLoggedIn: user !== null })
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const cookieHeader = request.headers.get("cookie")
+  const session = await getSession(cookieHeader)
+  return json("logging out", {
+    headers: {
+      "Set-Cookie": await destroySession(session)
+    }
+  });
+}
+
 export default function App() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const matches = useMatches()
-  const inAppRoute = matches.map(m => m.id).includes("routes/app")
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const matches = useMatches();
+  const inAppRoute = matches.map(m => m.id).includes("routes/app");
+  const submit = useSubmit();
+
+  const handleLogout = () => {
+    return submit("logging out", { method: "post" })
+  }
 
   const bodyParts: Exercise[] = [
     { name: "Leg", image: "/images/leg.jpg" },
@@ -306,24 +332,48 @@ export default function App() {
                       <p>{item.label}</p>
                     </MobileNavLink>
                   ))}
-                  <Link to="/" className="min-w-14 p-1 xs:hidden flex-none rounded-lg text-accent hover:text-yellow-500 hover:bg-slate-200 flex flex-col text-xs items-center">
+                  <button
+                    onClick={handleLogout}
+                    className={clsx(
+                      "min-w-14 p-1 xs:hidden flex-none rounded-lg text-accent",
+                      "hover:text-yellow-500 hover:bg-slate-200 flex flex-col text-xs items-center"
+                    )}
+                  >
                     <div className="size-6"><ArrowLeftEndOnRectangleIcon /></div>
                     <p>Log Out</p>
-                  </Link>
+                  </button>
                 </div>
                 <div className="hidden md:flex md:py-2 md:mx-1">
-                  <Link to="/" className="hidden sm:block md:w-full rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100">
+                  <button
+                    onClick={handleLogout}
+                    className={clsx(
+                      "hidden sm:block md:w-full rounded-lg px-3 py-2 text-base font-semibold leading-7",
+                      "text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100 text-start"
+                    )}
+                  >
                     Log Out
-                  </Link>
+                  </button>
                 </div>
               </div>
-              <Link to="/" className="hidden sm:max-md:flex md:hidden sm:block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100">
+              <button
+                onClick={handleLogout}
+                className={clsx(
+                  "hidden sm:max-md:flex md:hidden sm:block rounded-lg px-3 py-2 text-base font-semibold leading-7",
+                  "text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100"
+                )}
+              >
                 Log Out
-              </Link>
-              <Link to="/" className="hidden xs:flex sm:hidden flex-none rounded-lg text-accent hover:text-yellow-500 hover:bg-slate-200 p-1 flex-col text-xs items-center">
+              </button>
+              <button
+                onClick={handleLogout}
+                className={clsx(
+                  "hidden xs:flex sm:hidden flex-none rounded-lg text-accent",
+                  "hover:text-yellow-500 hover:bg-slate-200 p-1 flex-col text-xs items-center"
+                )}
+              >
                 <div className="size-6"><ArrowLeftEndOnRectangleIcon /></div>
                 <p>Log Out</p>
-              </Link>
+              </button>
             </div>
           </div>
           <div className="flex-1 p-6 md:p-8 max-h-[calc(100vh-8.125rem)] xs:max-h-[calc(100vh-4.125rem)] sm:max-h-[calc(100vh-5.125rem)] md:max-h-screen"> 
@@ -377,9 +427,12 @@ export default function App() {
           )} 
           <div className="hidden md:flex md:flex-1 md:justify-end">
             {inAppRoute ? (
-              <Link to="/" className="text-gray-900 hover:text-accent h-6 w-6">
+              <button
+                onClick={handleLogout}
+                className="text-gray-900 hover:text-accent h-6 w-6"
+              >
                 <ArrowLeftEndOnRectangleIcon />
-              </Link>
+              </button>
             ) : (
               <Link to="login" className="text-md font-semibold leading-6 text-gray-900 hover:text-accent">
                 Log In <span aria-hidden="true">&rarr;</span>
@@ -422,9 +475,9 @@ export default function App() {
                   ))}
                 </div>
                 {inAppRoute ? (
-                  <Link to="/" className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100">
+                  <button className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100">
                     Log Out
-                  </Link>
+                  </button>
                 ) : (
                   <div className="py-6">
                     <a
@@ -490,9 +543,19 @@ export function ErrorBoundary() {
       </head>
       <body>
         <div className="p-4">
-          <h1 className="text-2xl pb-2">Uh oh!</h1>
-          <p>You are seeing this page because an unexpected error occurred.</p>
-          {error instanceof Error ? <p>{error.message}</p> : null}
+          {isRouteErrorResponse(error) ? (
+            <>
+              <h1 className="text-2xl pb-2">{error.status} - {error.statusText}</h1>
+              <p>You are seeing this page because an error occurred.</p>
+              <p className="my-2 font-bold">{error.data.message}</p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl pb-2">Uh oh!</h1>
+              <p>You are seeing this page because an unexpected error occurred.</p>
+              {error instanceof Error ? <p className="my-2 font-bold">{error.message}</p> : null}
+            </>
+          )}
           <Link to="app" className="text-primary">Home Page</Link>
         </div>
       </body>

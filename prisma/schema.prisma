@@ -21,10 +21,15 @@ model User {
   lastName          String
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+
   socialLogins      SocialLogin[]
   userSubscriptions UserSubscription[]
   workoutLogs       WorkoutLog[]
+  userRoutines      Routine[]
+  userPrograms      Program[]
   leaderboardScores Leaderboard[]
+
+  role              Role
 }
 
 model SocialLogin {
@@ -67,13 +72,16 @@ model Program {
   s3VideoKey    String?
 
   routines    ProgramRoutine[]
+
+  user        User?      @relation(fields: [userId], references: [id])
+  userId      String?
 }
 
 model Routine {
   id            String             @id @default(cuid())
   name          String
   description   String?
-  isFree        Boolean            @default(false)
+  isFree        Boolean?            @default(false)
 
   youtubeLink   String?
   s3ImageKey    String?
@@ -85,7 +93,28 @@ model Routine {
   leaderboard   Leaderboard[]
 
   createdAt     DateTime           @default(now())
+  
+  user        User?                @relation(fields: [userId], references: [id])
+  userId      String?
 }
+
+// model UserProgram {
+//   user        User      @relation(fields: [userId], references: [id])
+//   userId      String
+//   program     Program   @relation(fields: [programId], references: [id])
+//   programId   String
+
+//   @@id([userId, programId])
+// }
+
+// model UserRoutine {
+//   user        User      @relation(fields: [userId], references: [id])
+//   userId      String
+//   routine     Routine   @relation(fields: [routineId], references: [id])
+//   routineId   String
+
+//   @@id([userId, routineId])
+// }
 
 model ProgramRoutine {
   program   Program @relation(fields: [programId], references: [id])
@@ -169,6 +198,11 @@ model Leaderboard {
   routineId String
   score    Int
   date     DateTime @default(now())
+}
+
+enum Role {
+  admin
+  user
 }
 
 // Enums for Exercise Properties

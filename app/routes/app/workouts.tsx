@@ -1,24 +1,40 @@
 import { MagnifyingGlassIcon as SearchIcon } from "@heroicons/react/24/outline";
-import { PlusIcon, } from "@heroicons/react/24/solid";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { Form, Link, Outlet, ShouldRevalidateFunction, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData, useMatches, useNavigation, useSearchParams } from "@remix-run/react";
-import { PrimaryButton } from "~/components/form";
+import { Form, Link, Outlet, ShouldRevalidateFunction, ShouldRevalidateFunctionArgs, isRouteErrorResponse, useFetcher, useLoaderData, useMatches, useNavigation, useRouteError, useSearchParams } from "@remix-run/react";
+import { DeleteButton, ErrorMessage, PrimaryButton } from "~/components/form";
 import { createExercise, deleteExercise, getAllExercises, updateExerciseName } from "~/models/exercise.server";
 import { z } from "zod";
 import { validateForm } from "~/utils/validation";
-import { ExerciseSchemaType, createWorkoutWithExercise, createWorkoutWithExercises, getAllWorkouts } from "~/models/workout.server";
+import { ExerciseSchemaType, createWorkoutWithExercise, createUserWorkoutWithExercises, getAllWorkouts, getAllUserWorkouts, deleteWorkout, getWorkout } from "~/models/workout.server";
 import { useMatchesData } from "~/utils/api";
-import { Exercise as ExerciseType } from "@prisma/client";
+import { Exercise as ExerciseType, Role as RoleType } from "@prisma/client";
 import clsx from "clsx";
+import { requireLoggedInUser } from "~/utils/auth.server";
+
+const deleteWorkoutSchema = z.object({
+  workoutId: z.string(),
+})
+
+interface deleteWorkoutFetcherType extends ActionFunctionArgs{
+  errors?: {
+    workoutId?: string
+  }
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await requireLoggedInUser(request);
+  const role = user.role;
+
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
-  const workouts = await getAllWorkouts(query);
-  return json({ workouts })
+  const workouts = await getAllUserWorkouts(user.id, query);
+
+  return json({ workouts, role })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  const user = await requireLoggedInUser(request);
   const formData = await request.formData();
   switch (formData.get("_action")) {
     case "createWorkout": {
@@ -56,7 +72,25 @@ export async function action({ request }: ActionFunctionArgs) {
           ...exercise,
           orderInRoutine: idx + 1,
         }))
-      return createWorkoutWithExercises(name, description, mappedExercises)
+      return createUserWorkoutWithExercises(user.id, name, description, mappedExercises)
+    }
+    case "deleteWorkout": {
+      return validateForm(
+        formData,
+        deleteWorkoutSchema,
+        async ({ workoutId }) => {
+          const workout = await getWorkout(workoutId);
+
+          if (workout !== null && workout.userId !== user.id) {
+            throw json(
+              { message: "This workout routine is not yours, so you cannot delete it."},
+              { status: 401 }
+            )
+          }
+          return deleteWorkout(workoutId);
+        },
+        (errors) => json({ errors }, { status: 400 })
+      )
     }
     default: {
       return null;
@@ -117,17 +151,19 @@ export default function Workouts() {
             className="w-full p-2 outline-none rounded-md"
           />
         </Form>
-        <createWorkoutFetcher.Form method="post">
-          <PrimaryButton
-            className="w-full sm:w-1/2 xl:w-1/3 md:active:scale-95"
-            name="_action"
-            value="createWorkout"
-            isLoading={isCreatingWorkout}
-          >
-            <PlusIcon className="size-6 pr-1" />
-            <span>Add Workout</span>
-          </PrimaryButton>
-        </createWorkoutFetcher.Form>
+        {data.role === "admin" ? (
+          <createWorkoutFetcher.Form method="post">
+            <PrimaryButton
+              className="w-full sm:w-1/2 xl:w-1/3 md:active:scale-95"
+              name="_action"
+              value="createWorkout"
+              isLoading={isCreatingWorkout}
+            >
+              <PlusIcon className="size-6 pr-1" />
+              <span>Add Workout</span>
+            </PrimaryButton>
+          </createWorkoutFetcher.Form>
+        ) : null}
         <Link
           to="create"
           className={clsx(
@@ -141,7 +177,7 @@ export default function Workouts() {
       </div>
       <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2">
         {data.workouts.map((workout) => (
-          <Workout key={workout.id} workout={workout} />
+          <Workout key={workout.id} workout={workout} role={data.role} />
         ))}
       </div>
     </div>
@@ -153,10 +189,13 @@ type WorkoutProps = {
     id: string;
     name: string;
     description: string | null;
+    userId: string | null;
   };
+  role?: RoleType;
 }
 
-function Workout({ workout }: WorkoutProps) {
+function Workout({ workout, role }: WorkoutProps) {
+  const deleteWorkoutFetcher = useFetcher<deleteWorkoutFetcherType>();
   return (
     <div className="p-4 bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md hover:shadow-accent snap-start">
       <div className="flex gap-4">
@@ -166,6 +205,43 @@ function Workout({ workout }: WorkoutProps) {
           <p className="text-sm max-w-48 xs:max-w-64 truncate sm:overflow-visible">{workout.description}</p>
         </div>
       </div>
+      {role === "admin" || workout.userId ? (
+        <deleteWorkoutFetcher.Form
+          method="post"
+          onSubmit={(event) => {
+            if(!confirm("Are you sure you want to delete this workout?")) {
+              event.preventDefault();
+            }
+          }}
+        >
+          <input type="hidden" name="workoutId" value={workout.id} />
+          <DeleteButton
+            name="_action"
+            value="deleteWorkout"
+            >
+            <TrashIcon className="size-6" />
+          </DeleteButton>
+          <ErrorMessage>{deleteWorkoutFetcher.data?.errors?.workoutId}</ErrorMessage>
+        </deleteWorkoutFetcher.Form>
+      ) : null}
     </div>
-  )
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div className="p-4 bg-red-500 text-white rounded-md">
+        <h1 className="text-2xl pb-2">{error.status} - {error.statusText}</h1>
+        <p className="my-2 font-bold">{error.data.message}</p>
+      </div>
+    )
+  }
+  return (
+    <div className="p-4 bg-red-500 text-white rounded-md">
+      <h1>An unexpected error occurred</h1>
+    </div>
+  );
 }

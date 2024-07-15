@@ -1,5 +1,12 @@
+import { LoaderFunctionArgs } from "@remix-run/node";
 import boxDude from "images/metin-ozer-S1kp1toFK0A-unsplash.jpg"
 import squatGirl from "images/sven-mieke-jO6vBWX9h9Y-unsplash.jpg"
+import { requireLoggedInUser } from "~/utils/auth.server";
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  await requireLoggedInUser(request);
+  return null;
+}
 
 export default function Programs() {
   return (

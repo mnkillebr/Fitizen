@@ -1,12 +1,13 @@
-import { BalanceLevel, BalanceType, BodyFocus, ContractionType, Equipment, Joint, LiftType, MovementPattern, MovementPlane, MuscleGroup, PrismaClient } from "@prisma/client";
+import { BalanceLevel, BalanceType, BodyFocus, ContractionType, Equipment, Joint, LiftType, MovementPattern, MovementPlane, MuscleGroup, PrismaClient, Role } from "@prisma/client";
 const db = new PrismaClient();
 
 function createUser() {
   return db.user.create({
     data: {
+      role: Role.user,
       email: "test@email.com",
-      firstName: "Marcus",
-      lastName: "Killebrew"
+      firstName: "Marikusu",
+      lastName: "Kiriburu"
     }
   })
 }

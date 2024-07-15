@@ -61,7 +61,7 @@ type AccordionItemProps = {
 
 const AccordionItem = ({ title, content, isOpen, onClick }: AccordionItemProps) => {
   return (
-    <div className="border-b">
+    <div className="border-b lg:w-2/3 xl:w-1/2">
       <button
         className="w-full py-4 flex justify-between items-center focus:outline-none"
         onClick={onClick}
@@ -211,7 +211,7 @@ export default function Create() {
                     inputValue.length ? setErrors({ ...errors, "workoutName": "" }) : null
                   }}
                   className={clsx(
-                    "p-2 rounded-md border-2 focus:outline-accent md:w-1/2 text-sm/6",
+                    "p-2 rounded-md border-2 focus:outline-accent lg:w-2/3 xl:w-1/2 text-sm/6",
                     errors["workoutName"] ? "border-red-500" : ""
                   )}
                   placeholder="Name your workout"
@@ -224,7 +224,7 @@ export default function Create() {
                   A good way to reference the goals of the workout
                 </Description> */}
                 <Textarea
-                  className="p-2 rounded-md border-2 focus:outline-accent md:w-1/2 text-sm/6 resize-none"
+                  className="p-2 rounded-md border-2 focus:outline-accent lg:w-2/3 xl:w-1/2 text-sm/6 resize-none"
                   placeholder="Optional"
                   rows={3}
                   value={workoutDescription}
@@ -261,7 +261,7 @@ export default function Create() {
               <PlusCircleIcon className="size-10 text-accent"/>
             </button>
           </div> */}
-          <div className="w-full flex flex-none gap-x-2 items-center">
+          <div className="w-full lg:w-2/3 xl:w-1/2 flex flex-none gap-x-2 items-center">
             <Link to="/app/workouts" className="flex-1">
               <Button className="w-full border-2 text-accent border-accent hover:bg-gray-50">
                 Cancel
@@ -282,7 +282,7 @@ export default function Create() {
       <AnimatePresence>
         {openExercisesPanel && (
           <motion.div
-            className="absolute bottom-0 left-0 flex flex-col gap-y-2 h-2/3 bg-slate-400 w-screen rounded-t-lg text-white px-8 py-6"
+            className="absolute bottom-0 left-0 md:left-80 md:max-w-[calc(100vw-20rem)] flex flex-col gap-y-2 h-2/3 bg-slate-400 w-screen rounded-t-lg text-white px-8 py-6"
             initial={{ translateY: "100%" }}
             animate={{ translateY: "0%" }}
             exit={{ translateY: "100%" }}
@@ -301,7 +301,7 @@ export default function Create() {
               </button>
             </div>
             <Form
-              className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-1/2 bg-white ${
+              className={`flex content-center border-2 rounded-md focus-within:border-accent lg:w-2/3 xl:w-1/2 bg-white ${
                 isSearching ? "animate-pulse" : ""
               }`}
             >

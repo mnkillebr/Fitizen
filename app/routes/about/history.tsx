@@ -31,6 +31,6 @@ export function ErrorBoundary() {
   }
 
   return (
-    <div className="text-red-500">An unexpected error occured</div>
+    <div className="text-red-500">An unexpected error occurred</div>
   );
 };
