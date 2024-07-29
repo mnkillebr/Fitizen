@@ -80,7 +80,7 @@ export default function Library() {
   const isSearching = navigation.formData?.has("q");
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
   return (
-    <div className="flex flex-col h-full gap-y-4 mb-4">
+    <div className="flex flex-col h-full gap-y-4">
       <div className="flex flex-col gap-y-4 px-2">
         <Form
           className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-2/3 lg:w-1/2 xl:w-1/3 ${
@@ -113,7 +113,7 @@ export default function Library() {
           </createExerciseFetcher.Form>
         ) : null}
       </div>
-      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2">
+      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2 pb-1">
         {data.exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={data.role} />
         ))}
@@ -143,11 +143,11 @@ export function Exercise({ exercise, selectable, selectFn, selected, role }: Exe
     deleteExerciseFetcher.formData?.get("_action") === "deleteExercise" &&
     deleteExerciseFetcher.formData?.get("exerciseId") === exercise.id
   return isDeletingExercise ? null : (
-    <div className={`bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md snap-start ${
+    <div className={`bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md snap-start shadow-md ${
       selectable ? "" : "hover:shadow-accent"
     }`}>
-      <div className="p-2 xs:p-4 flex gap-2 xs:gap-4">
-        <div className="size-12 xs:size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
+      <div className="flex gap-2 xs:gap-4">
+        <div className="size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
         <div className="flex flex-col self-center">
           {role === "admin" ? (
             <updateExerciseNameFetcher.Form method="post" className="hidden sm:flex">

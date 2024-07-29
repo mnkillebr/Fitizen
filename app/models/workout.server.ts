@@ -1,10 +1,19 @@
-import { Prisma, SectionType } from "@prisma/client";
+import { GroupType, Prisma, SectionType, ExerciseTarget, Side } from "@prisma/client";
 import db from "~/db.server";
 
 export type ExerciseSchemaType = {
   exerciseId: string
   orderInRoutine: number
-  section: SectionType
+  target: ExerciseTarget;
+  sets: number;
+  rounds: number;
+  reps: number;
+  notes: string;
+  time: string;
+  rest: string;
+  side: Side;
+  groupId: string;
+  groupType: GroupType;
 }
 
 export function getWorkout(workoutId: string) {
@@ -112,7 +121,15 @@ export async function createWorkoutWithExercise() {
           create: [
             {
               exerciseId: "cly8yojji0005kyq4pdfm0v5f",
-              orderInRoutine: 1
+              orderInRoutine: 1,
+              target: ExerciseTarget.reps,
+              sets: 3,
+              reps: 12,
+              rest: "60 sec",
+              notes: null,
+              side: null,
+              groupId: null,
+              groupType: GroupType.regular,
             },
           ],
         }
@@ -147,6 +164,9 @@ export async function deleteWorkout(workoutId: string) {
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2025") {
+        return error.message
+      }
+      if (error.code === "P2003") {
         return error.message
       }
     }

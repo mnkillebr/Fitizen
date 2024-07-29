@@ -157,12 +157,22 @@ model Exercise {
 }
 
 model RoutineExercise {
-  routine        Routine @relation(fields: [routineId], references: [id])
-  routineId      String
-  exercise       Exercise @relation(fields: [exerciseId], references: [id])
-  exerciseId     String
-  orderInRoutine Int
-  section        SectionType?
+  routine           Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  routineId         String
+  exercise          Exercise @relation(fields: [exerciseId], references: [id])
+  exerciseId        String
+  orderInRoutine    Int
+  section           SectionType?
+  groupId           String?
+  groupType         GroupType?
+  target            ExerciseTarget
+  sets              Int?
+  rounds            Int?
+  reps              Int?
+  rest              String
+  time              String?
+  notes             String?
+  side              Side?
 
   @@id([routineId, exerciseId])
 }
@@ -307,4 +317,20 @@ enum SectionType {
   warmup
   main
   cooldown
+}
+
+enum GroupType {
+  circuit
+  regular
+  superset
+}
+
+enum ExerciseTarget {
+  reps
+  time
+}
+
+enum Side {
+  left
+  right
 }
