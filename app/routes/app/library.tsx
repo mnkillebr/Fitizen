@@ -1,5 +1,5 @@
 import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import { HeartIcon as HeartSolid, PlusIcon, TrashIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
+import { HeartIcon as HeartSolid, PlusIcon, TrashIcon, ArrowDownTrayIcon, Bars3Icon } from "@heroicons/react/24/solid";
 
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData, useNavigation, useSearchParams } from "@remix-run/react";
@@ -11,6 +11,7 @@ import { useIsHydrated } from "~/utils/misc";
 import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { Role as RoleType } from "@prisma/client";
+import { useDrag, useDrop } from "react-dnd";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -80,8 +81,8 @@ export default function Library() {
   const isSearching = navigation.formData?.has("q");
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
   return (
-    <div className="flex flex-col h-full gap-y-4">
-      <div className="flex flex-col gap-y-4 px-2">
+    <div className="py-6 px-5 md:py-8 md:px-7 flex flex-col h-full gap-y-4">
+      <div className="flex flex-col gap-y-4 px-1">
         <Form
           className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-2/3 lg:w-1/2 xl:w-1/3 ${
             isSearching ? "animate-pulse" : ""
@@ -113,7 +114,7 @@ export default function Library() {
           </createExerciseFetcher.Form>
         ) : null}
       </div>
-      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2 pb-1">
+      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1">
         {data.exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={data.role} />
         ))}
@@ -122,31 +123,47 @@ export default function Library() {
   )
 }
 
+interface ExerciseItemProps {
+  id: string;
+  name: string;
+  body: string[];
+  contraction: string | null;
+}
+
 type ExerciseProps = {
-  exercise: {
-    id: string;
-    name: string;
-    body: string[];
-    contraction: string | null;
-  };
+  exercise: ExerciseItemProps;
   selectable?: boolean;
   selectFn?: (...args: any[]) => void;
   selected?: boolean;
   role?: RoleType;
+  onDragExercise?: (exerciseItem: ExerciseItemProps) => void;
 }
 
-export function Exercise({ exercise, selectable, selectFn, selected, role }: ExerciseProps) {
+export function Exercise({ exercise, selectable, selectFn, selected, role, onDragExercise = () => {}}: ExerciseProps) {
   const isHydrated = useIsHydrated();
   const deleteExerciseFetcher = useFetcher<deleteExerciseFetcherType>();
   const updateExerciseNameFetcher = useFetcher<updateNameFetcherType>();
   const isDeletingExercise =
     deleteExerciseFetcher.formData?.get("_action") === "deleteExercise" &&
     deleteExerciseFetcher.formData?.get("exerciseId") === exercise.id
+
+  const [, drop] = useDrop({
+    accept: 'exerciseItem',
+    drop: (item: ExerciseItemProps) => onDragExercise(item),
+  });
+
   return isDeletingExercise ? null : (
-    <div className={`bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md snap-start shadow-md ${
-      selectable ? "" : "hover:shadow-accent"
-    }`}>
-      <div className="flex gap-2 xs:gap-4">
+    <div
+      className={clsx(
+        "bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md snap-start shadow-md",
+        selectable ? "" : "hover:shadow-accent"
+      )}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
+      }}
+    >
+      <div ref={drop} className="flex gap-2 xs:gap-4">
         <div className="size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
         <div className="flex flex-col self-center">
           {role === "admin" ? (
@@ -201,9 +218,15 @@ export function Exercise({ exercise, selectable, selectFn, selected, role }: Exe
           </div>
         </div>
       </div>
+      <div className="hidden lg:flex self-center pr-2" draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
+      }}>
+        <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing" />
+      </div>
       {selectable ? (
         <button
-          className={`px-2 border-l-2 h-full flex flex-col justify-center hover:bg-secondary hover:text-white hover:rounded-r-lg ${
+          className={`lg:hidden px-2 border-l-2 h-full flex flex-col justify-center hover:bg-secondary hover:text-white hover:rounded-r-lg ${
             selected ? "text-green-600" : ""
           }`}
           onClick={() => selectFn ? selectFn(exercise) : null}

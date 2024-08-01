@@ -2,8 +2,8 @@ import { GroupType, Prisma, SectionType, ExerciseTarget, Side } from "@prisma/cl
 import db from "~/db.server";
 
 export type ExerciseSchemaType = {
-  exerciseId: string
-  orderInRoutine: number
+  exerciseId: string;
+  orderInRoutine: number;
   target: ExerciseTarget;
   sets: number;
   rounds: number;
@@ -100,6 +100,64 @@ export async function createUserWorkoutWithExercises(userId: string, workoutName
       }
     });
     return createWorkout;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2011") {
+        return error.message
+      }
+    }
+    throw error
+  };
+}
+
+export async function updateUserWorkoutWithExercises(userId: string, workoutId: string, workoutName: string, workoutDescription: string, updatedExercises: Array<ExerciseSchemaType>, newExercises: Array<ExerciseSchemaType>, deletedExercises: Array<string>) {
+  try {
+    const updateWorkout = await db.routine.update({
+      where: {
+        id: workoutId,
+      },
+      data: {
+        userId,
+        name: workoutName,
+        description: workoutDescription,
+        exercises: {
+          update: updatedExercises.map(exercise => ({
+            where: {
+              routineId_exerciseId: {
+                exerciseId: exercise.exerciseId,
+                routineId: workoutId,
+              }
+            },
+            data: {
+              orderInRoutine: exercise.orderInRoutine,
+              target: exercise.target === "reps" ? ExerciseTarget.reps : ExerciseTarget.time,
+              sets: exercise.sets,
+              reps: exercise.reps,
+              rest: exercise.rest,
+              notes: exercise.notes,
+              side: exercise.side === "left" ? Side.left : exercise.side === "right" ? Side.right : Side.none,
+              rounds: exercise.rounds,
+              time: exercise.time,
+              groupId: exercise.groupId,
+              groupType: exercise.groupType === "circuit" ? GroupType.circuit : GroupType.regular,
+            },
+          })),
+          create: newExercises,
+          delete: deletedExercises.map(exerciseId => ({ routineId_exerciseId: {
+            exerciseId,
+            routineId: workoutId,
+          }}))
+        }
+      },
+      include: {
+        exercises: {
+          include: {
+            exercise: true
+          }
+        }
+      }
+    });
+    return updateWorkout;
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2011") {

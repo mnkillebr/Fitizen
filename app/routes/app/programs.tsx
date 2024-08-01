@@ -10,7 +10,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Programs() {
   return (
-    <div className="flex flex-col h-full gap-x-6 gap-y-4 snap-y snap-mandatory overflow-y-auto px-2 pb-4">
+    <div className="p-6 md:p-8 flex flex-col h-full gap-x-6 gap-y-4 snap-y snap-mandatory overflow-y-auto">
       <div
         className="relative flex-1 shadow-md cursor-pointer rounded-lg hover:shadow-accent transition duration-150 bg-cover bg-center snap-start text-center"
         style={{backgroundImage: `url(${boxDude})`}}

@@ -301,14 +301,14 @@ export default function App() {
     return (
       <div className="bg-white h-screen">
         <div className="flex flex-col-reverse xs:flex-col md:flex-row h-full">
-          <div className="flex shadow-[0_-5px_3px_-3px_rgba(0,0,0,0.1)] xs:shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] text-white px-8 py-2 sm:py-4 sm:bg-slate-100 md:bg-slate-100 md:w-80 md:flex-col md:flex-none md:shadow-[5px_0_3px_-3px_rgba(0,0,0,0.1)] md:px-4 md:py-8">
+          <div className="flex shadow-[0_-5px_3px_-3px_rgba(0,0,0,0.1)] xs:shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] text-white px-8 py-2 sm:py-4 sm:bg-slate-100 md:bg-slate-100 md:w-64 md:flex-col md:flex-none md:shadow-[5px_0_3px_-3px_rgba(0,0,0,0.1)] md:px-4 md:py-8">
             <div className="flex md:flex-col md:gap-y-4 items-center justify-center xs:justify-between w-full">
               <div className="hidden md:flex justify-center">
                 <img className="rounded-full drop-shadow-lg" src="https://i.pravatar.cc/200?img=16"/>
               </div>
               <img className="hidden xs:max-lg:flex md:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
               <div className="hidden md:flex md:flex-col self-start pl-4 text-slate-900">
-                <h1 className="text-xl font-bold">Welcome back, homie 👋</h1>
+                <h1 className="text-xl font-bold">Welcome back 👋</h1>
                 <p>Let's get active 💪</p>
               </div>
               <div className="md:divide-y divide-gray-500/10 md:w-full">
@@ -376,13 +376,13 @@ export default function App() {
               </button>
             </div>
           </div>
-          <div className="flex-1 p-6 md:p-8 max-h-[calc(100vh-8.125rem)] xs:max-h-[calc(100vh-4.125rem)] sm:max-h-[calc(100vh-5.125rem)] md:max-h-screen"> 
+          <div className="flex-1 /*p-6 md:p-8*/ max-h-[calc(100vh-8.125rem)] xs:max-h-[calc(100vh-4.125rem)] sm:max-h-[calc(100vh-5.125rem)] md:max-h-screen"> 
             <Outlet />
           </div>
           <div className="shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] px-8 py-2 flex gap-4 xs:hidden">
             <img className="xs:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
             <div className="flex flex-col self-center">
-              <p className="font-bold">Welcome back, homie 👋</p>
+              <p className="font-bold">Welcome back 👋</p>
               <p className="text-xs">Let's get active 💪</p>
             </div>
           </div>

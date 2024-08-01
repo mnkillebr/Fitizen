@@ -157,7 +157,7 @@ model Exercise {
 }
 
 model RoutineExercise {
-  routine           Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  routine           Routine @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   routineId         String
   exercise          Exercise @relation(fields: [exerciseId], references: [id])
   exerciseId        String
@@ -322,7 +322,6 @@ enum SectionType {
 enum GroupType {
   circuit
   regular
-  superset
 }
 
 enum ExerciseTarget {
@@ -333,4 +332,5 @@ enum ExerciseTarget {
 enum Side {
   left
   right
+  none
 }
