@@ -147,10 +147,10 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, onDra
     deleteExerciseFetcher.formData?.get("_action") === "deleteExercise" &&
     deleteExerciseFetcher.formData?.get("exerciseId") === exercise.id
 
-  const [, drop] = useDrop({
-    accept: 'exerciseItem',
-    drop: (item: ExerciseItemProps) => onDragExercise(item),
-  });
+  // const [, drop] = useDrop({
+  //   accept: 'exerciseItem',
+  //   drop: (item: ExerciseItemProps) => onDragExercise(item),
+  // });
 
   return isDeletingExercise ? null : (
     <div
@@ -158,12 +158,12 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, onDra
         "bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md snap-start shadow-md",
         selectable ? "" : "hover:shadow-accent"
       )}
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
-      }}
+      // draggable
+      // onDragStart={(e) => {
+      //   e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
+      // }}
     >
-      <div ref={drop} className="flex gap-2 xs:gap-4">
+      <div className="flex gap-2 xs:gap-4">
         <div className="size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
         <div className="flex flex-col self-center">
           {role === "admin" ? (
@@ -218,12 +218,9 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, onDra
           </div>
         </div>
       </div>
-      <div className="hidden lg:flex self-center pr-2" draggable
-      onDragStart={(e) => {
-        e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
-      }}>
+      {/* <div className="hidden lg:flex self-center pr-2">
         <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing" />
-      </div>
+      </div> */}
       {selectable ? (
         <button
           className={`lg:hidden px-2 border-l-2 h-full flex flex-col justify-center hover:bg-secondary hover:text-white hover:rounded-r-lg ${

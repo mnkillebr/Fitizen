@@ -13,7 +13,7 @@ import { FieldErrors } from "~/utils/validation";
 import { isEmptyObject } from "~/utils/misc";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import Tooltip from "~/components/Tooltips";
+import Tooltip from "~/components/Tooltip";
 
 const targetOptions = ["reps", "time"]
 

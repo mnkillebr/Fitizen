@@ -12,7 +12,7 @@ import { requireLoggedInUser } from "~/utils/auth.server";
 import { FieldErrors } from "~/utils/validation";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import Tooltip from "~/components/Tooltips";
+import Tooltip from "~/components/Tooltip";
 import db from "~/db.server";
 import { Button, PrimaryButton } from "~/components/form";
 import { isEmptyObject } from "~/utils/misc";
