@@ -8,7 +8,7 @@ import { z } from "zod";
 import { validateForm } from "~/utils/validation";
 import { ExerciseSchemaType, createWorkoutWithExercise, createUserWorkoutWithExercises, getAllWorkouts, getAllUserWorkouts, deleteWorkout, getWorkout, updateUserWorkoutWithExercises } from "~/models/workout.server";
 import { useMatchesData } from "~/utils/api";
-import { Exercise as ExerciseType, GroupType, Role as RoleType } from "@prisma/client";
+import { Exercise as ExerciseType, Role as RoleType } from "@prisma/client";
 import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { ArrowRight } from "images/icons";
@@ -16,8 +16,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { Circuit, Superset } from "./workouts/create";
 
-const createSubRoutes = ["routes/app/workouts/created","routes/app/workouts/circuit","routes/app/workouts/interval"]
-const createPathnames = ["/app/workouts/created","/app/workouts/circuit","/app/workouts/interval"]
+const createSubRoutes = ["routes/app/workouts/deck","routes/app/workouts/create","routes/app/workouts/created"]
+const createPathnames = ["/app/workouts/deck","/app/workouts/create","/app/workouts/created"]
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
@@ -47,49 +47,47 @@ export async function action({ request }: ActionFunctionArgs) {
     case "createWorkout": {
       return createWorkoutWithExercise();
     }
-    case "createCustomWorkout": {
-      const exercisesString = formData.get("selectedExercises") as string;
-      const name = formData.get("name") as string
-      const description = formData.get("description") as string
-      const exercisesArray = JSON.parse(exercisesString);
+    // case "createCustomWorkout": {
+    //   const exercisesString = formData.get("selectedExercises") as string;
+    //   const name = formData.get("name") as string
+    //   const description = formData.get("description") as string
+    //   const exercisesArray = JSON.parse(exercisesString);
 
-      const mappedExercises = exercisesArray.reduce((result: Array<any>, curr: any) => {
-        let resultArr = result
-        let currentItem = curr
-        if (currentItem.exercises) {
-          const groupedExercises = currentItem.exercises.map((ex_item: any) => ({
-            exerciseId: ex_item.id,
-            groupId: currentItem.id,
-            groupType: currentItem.itemType === GroupType.circuit ? GroupType.circuit : GroupType.regular,
-            target: ex_item.target,
-            reps: ex_item.reps,
-            sets: ex_item.sets,
-            rounds: ex_item.rounds,
-            rest: ex_item.rest,
-            notes: ex_item.notes,
-            time: ex_item.time,
-          }))
-          return resultArr.concat(groupedExercises)
-        } else {
-          return resultArr.concat({
-            exerciseId: currentItem.id,
-            groupId: "",
-            groupType: GroupType.regular,
-            target: currentItem.target,
-            reps: currentItem.reps,
-            sets: currentItem.sets,
-            rest: currentItem.rest,
-            notes: currentItem.notes,
-            time: currentItem.time,
-          })
-        }
-      }, []).map((exercise: ExerciseSchemaType, idx: number) => ({
-        ...exercise,
-        orderInRoutine: idx + 1,
-      }))
+    //   const mappedExercises = exercisesArray.reduce((result: Array<any>, curr: any) => {
+    //     let resultArr = result
+    //     let currentItem = curr
+    //     if (currentItem.exercises) {
+    //       const groupedExercises = currentItem.exercises.map((ex_item: any) => ({
+    //         exerciseId: ex_item.id,
+    //         groupId: currentItem.id,
+    //         target: ex_item.target,
+    //         reps: ex_item.reps,
+    //         sets: ex_item.sets,
+    //         rounds: ex_item.rounds,
+    //         rest: ex_item.rest,
+    //         notes: ex_item.notes,
+    //         time: ex_item.time,
+    //       }))
+    //       return resultArr.concat(groupedExercises)
+    //     } else {
+    //       return resultArr.concat({
+    //         exerciseId: currentItem.id,
+    //         groupId: "",
+    //         target: currentItem.target,
+    //         reps: currentItem.reps,
+    //         sets: currentItem.sets,
+    //         rest: currentItem.rest,
+    //         notes: currentItem.notes,
+    //         time: currentItem.time,
+    //       })
+    //     }
+    //   }, []).map((exercise: ExerciseSchemaType, idx: number) => ({
+    //     ...exercise,
+    //     orderInRoutine: idx + 1,
+    //   }))
 
-      return createUserWorkoutWithExercises(user.id, name, description, mappedExercises)
-    }
+    //   return createUserWorkoutWithExercises(user.id, name, description, mappedExercises)
+    // }
     case "updateCustomWorkout": {
       const updatedExercisesString = formData.get("updatedExercises") as string;
       const newExercisesString = formData.get("newExercises") as string;
@@ -104,7 +102,6 @@ export async function action({ request }: ActionFunctionArgs) {
       const updatedMappedExercises = updatedExercisesArray.map((ex_item: any) => ({
         exerciseId: ex_item.id,
         groupId: ex_item.groupId,
-        groupType: ex_item.groupType === GroupType.circuit ? GroupType.circuit : GroupType.regular,
         target: ex_item.target,
         reps: ex_item.reps,
         sets: ex_item.sets,
@@ -117,7 +114,6 @@ export async function action({ request }: ActionFunctionArgs) {
       const newMappedExercises = newExercisesArray.map((ex_item: any) => ({
         exerciseId: ex_item.id,
         groupId: ex_item.id,
-        groupType: ex_item.itemType === GroupType.circuit ? GroupType.circuit : GroupType.regular,
         target: ex_item.target,
         reps: ex_item.reps,
         sets: ex_item.sets,
@@ -233,7 +229,7 @@ export default function Workouts() {
           </createWorkoutFetcher.Form>
         ) : null}
         <Link
-          to="created"
+          to="deck"
           className={clsx(
             "w-full sm:w-1/2 xl:w-1/3 md:active:scale-95 md:px-3",
             "bg-secondary hover:bg-secondary-light rounded-md text-center text-white py-2",

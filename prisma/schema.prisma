@@ -162,16 +162,13 @@ model RoutineExercise {
   exercise          Exercise @relation(fields: [exerciseId], references: [id])
   exerciseId        String
   orderInRoutine    Int
-  section           SectionType?
-  groupId           String?
-  groupType         GroupType?
+  circuitId         String?
+  sets              String?
   target            ExerciseTarget
-  sets              Int?
-  rounds            Int?
-  reps              Int?
-  rest              String
+  reps              String?
   time              String?
   notes             String?
+  rest              String
   side              Side?
 
   @@id([routineId, exerciseId])

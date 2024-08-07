@@ -36,14 +36,14 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
         ...exerciseDetail,
       }
     })
-    const nonGrouped = detailedExercises.filter(ex => ex.groupType === "regular")
-    const grouped = detailedExercises.filter(ex => ex.groupType === "circuit").reduce((result: any, curr: any) => {
+    const nonGrouped = detailedExercises.filter(ex => !ex.circuitId)
+    const grouped = detailedExercises.filter(ex => ex.circuitId).reduce((result: any, curr: any) => {
       let resultArr = result
-      if (curr.groupId?.length) {
-        const groupId = curr.groupId
-        if (resultArr.find((ex_item: any) => ex_item.groupId === groupId)) {
+      if (curr.circuitId?.length) {
+        const circuitId = curr.circuitId
+        if (resultArr.find((ex_item: any) => ex_item.circuitId === circuitId)) {
           return resultArr.map((ex_item: any) => {
-            if (ex_item.groupId === groupId) {
+            if (ex_item.circuitId === circuitId) {
               return {
                 ...ex_item,
                 exercises: ex_item.exercises.concat(curr)
@@ -52,8 +52,7 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
           })
         } else {
           return resultArr.concat({
-            groupId,
-            groupType: curr.groupType,
+            circuitId,
             orderInRoutine: curr.orderInRoutine,
             rounds: curr.rounds,
             rest: curr.rest,
@@ -70,20 +69,20 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
   }
 }
 
-function exerciseDetailMap(exercises: Array<RoutineExerciseType> | undefined, detailsArray: Array<ExerciseType>, section: string) {
-  if (exercises) {
-    return exercises.filter((workoutExercise) => workoutExercise.section === section).map((item) => {
-      const itemId = item.exerciseId
-      const exerciseDetail = detailsArray.find(detail => detail.id === itemId)
-      return {
-        ...item,
-        ...exerciseDetail,
-      }
-    })
-  } else {
-    return []
-  }
-}
+// function exerciseDetailMap(exercises: Array<RoutineExerciseType> | undefined, detailsArray: Array<ExerciseType>, section: string) {
+//   if (exercises) {
+//     return exercises.filter((workoutExercise) => workoutExercise.section === section).map((item) => {
+//       const itemId = item.exerciseId
+//       const exerciseDetail = detailsArray.find(detail => detail.id === itemId)
+//       return {
+//         ...item,
+//         ...exerciseDetail,
+//       }
+//     })
+//   } else {
+//     return []
+//   }
+// }
 
 type ExerciseDetailProps = {
   routineId?: string;
@@ -107,10 +106,10 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
     return (
       <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
         {exerciseDetailsArray.map((exercise: any, idx) => {
-          if (exercise.groupType === "circuit") {
+          if (exercise.circuitId) {
             return (
               <div
-                key={`${exercise.routineId}-${exercise.groupId}-${idx}`}
+                key={`${exercise.routineId}-${exercise.circuitId}-${idx}`}
                 className="flex flex-col gap-2 shadow-inner border-2 border-dashed p-1 rounded-md *:content-center snap-start"
               >
                 <div className="text-sm font-medium">Circuit of {exercise.rounds} rounds</div>

@@ -1,19 +1,17 @@
-import { GroupType, Prisma, SectionType, ExerciseTarget, Side } from "@prisma/client";
+import { Prisma, ExerciseTarget, Side } from "@prisma/client";
 import db from "~/db.server";
 
 export type ExerciseSchemaType = {
   exerciseId: string;
   orderInRoutine: number;
   target: ExerciseTarget;
-  sets: number;
-  rounds: number;
-  reps: number;
+  sets: string;
+  reps: string;
   notes: string;
   time: string;
   rest: string;
   side: Side;
-  groupId: string;
-  groupType: GroupType;
+  circuitId: string;
 }
 
 export function getWorkout(workoutId: string) {
@@ -136,10 +134,8 @@ export async function updateUserWorkoutWithExercises(userId: string, workoutId: 
               rest: exercise.rest,
               notes: exercise.notes,
               side: exercise.side === "left" ? Side.left : exercise.side === "right" ? Side.right : Side.none,
-              rounds: exercise.rounds,
               time: exercise.time,
-              groupId: exercise.groupId,
-              groupType: exercise.groupType === "circuit" ? GroupType.circuit : GroupType.regular,
+              circuitId: exercise.circuitId,
             },
           })),
           create: newExercises,
@@ -181,13 +177,12 @@ export async function createWorkoutWithExercise() {
               exerciseId: "cly8yojji0005kyq4pdfm0v5f",
               orderInRoutine: 1,
               target: ExerciseTarget.reps,
-              sets: 3,
-              reps: 12,
+              sets: "3",
+              reps: "12",
               rest: "60 sec",
               notes: null,
               side: null,
-              groupId: null,
-              groupType: GroupType.regular,
+              circuitId: null,
             },
           ],
         }

@@ -23,3 +23,21 @@ export function validateForm<T>(
   }
   return successFn(result.data);
 }
+
+export function validateObject<T>(
+  object: object,
+  zodSchema: z.Schema<T>,
+  successFn: (data: T) => unknown,
+  errorFn: (errors: FieldErrors) => unknown,
+) {
+  const result = zodSchema.safeParse(object);
+  if (!result.success) {
+    const errors: FieldErrors = {}
+    result.error.issues.forEach((issue) => {
+      const path = issue.path.join(".");
+      errors[path] = issue.message;
+    })
+    return errorFn(errors);
+  }
+  return successFn(result.data);
+}
