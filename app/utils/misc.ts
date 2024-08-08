@@ -57,7 +57,7 @@ export function workoutFormDataToObject(formData: FormData): { [key: string]: an
 
   for (const [key, value] of formData.entries()) {
     const arrayMatch = key.match(/^(\w+)\[(\d+)\]\.(\w+)$/);
-    const subArrayMatch = key.match(/^(\w+)\[(\d+)\]\[(\d+)\]\.(\w+)$/)
+    // const subArrayMatch = key.match(/^(\w+)\[(\d+)\]\[(\d+)\]\.(\w+)$/)
 
     if (arrayMatch) {
       const arrayName = arrayMatch[1];
@@ -85,7 +85,7 @@ export function workoutFormDataToObject(formData: FormData): { [key: string]: an
       } else {
         formDataObject[arrayName][arrayMatchIndex][property] = value;
       }
-    } else if (subArrayMatch) {
+    } /*else if (subArrayMatch) {
       const arrayName = subArrayMatch[1];
       const arrayMatchIndex = parseInt(subArrayMatch[2], 10);
       const subArrayMatchIndex = parseInt(subArrayMatch[3], 10);
@@ -99,8 +99,21 @@ export function workoutFormDataToObject(formData: FormData): { [key: string]: an
         formDataObject[arrayName][arrayMatchIndex+subArrayMatchIndex] = {};
       }
 
+      if (formDataObject[arrayName][arrayMatchIndex+subArrayMatchIndex][property]) {
+        const currentObjects = formDataObject[arrayName]
+        const lastObject = currentObjects[currentObjects.length - 1];
+
+        if (lastObject.hasOwnProperty(property)) {
+          const newObject = { [property]: value };
+          formDataObject[arrayName].push(newObject);
+        } else {
+          formDataObject[arrayName][currentObjects.length-1][property] = value;
+        }
+      } else {
+        formDataObject[arrayName][arrayMatchIndex+subArrayMatchIndex][property] = value;
+      }
       formDataObject[arrayName][arrayMatchIndex+subArrayMatchIndex][property] = value;
-    } else {
+    }*/ else {
       formDataObject[key] = value;
     }
   }

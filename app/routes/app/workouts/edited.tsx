@@ -13,8 +13,10 @@ import clsx from 'clsx';
 import { PrimaryButton } from '~/components/form';
 import Tooltip from '~/components/Tooltip';
 import { requireLoggedInUser } from '~/utils/auth.server';
-import { createUserWorkoutWithExercises } from '~/models/workout.server';
+import { createUserWorkoutWithExercises, updateUserWorkoutWithExercises } from '~/models/workout.server';
 import { Exercise } from '../library';
+import { Exercise as ExerciseType, RoutineExercise as RoutineExerciseType } from "@prisma/client";
+import db from '~/db.server';
 
 const targetOptions = ["reps", "time"]
 
@@ -38,11 +40,76 @@ const restOptions = [
   "5 min",
 ]
 
+function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undefined, exerciseDetails: Array<ExerciseType>) {
+  if (routineExercises) {
+    const detailedExercises = routineExercises.map((item) => {
+      const itemId = item.exerciseId
+      const exerciseDetail = exerciseDetails.find(detail => detail.id === itemId)
+      return {
+        ...item,
+        ...exerciseDetail,
+        id: `${item.exerciseId}-${Date.now()}`,
+      }
+    })
+    const nonGrouped = detailedExercises.filter(ex => !ex.circuitId)
+    const grouped = detailedExercises.filter(ex => ex.circuitId).reduce((result: any, curr: any) => {
+      let resultArr = result
+      if (curr.circuitId?.length) {
+        const circuitId = curr.circuitId
+        if (resultArr.find((ex_item: any) => ex_item.circuitId === circuitId)) {
+          return resultArr.map((ex_item: any) => {
+            if (ex_item.circuitId === circuitId) {
+              return {
+                ...ex_item,
+                exercises: ex_item.exercises.concat(curr)
+              }
+            } else {
+              return ex_item
+            }
+          })
+        } else {
+          return resultArr.concat({
+            circuitId,
+            orderInRoutine: curr.orderInRoutine,
+            exercises: [curr]
+          })
+        }
+      }
+      return resultArr
+    }, [])
+    const detailMappedExercises = [...nonGrouped, ...grouped].sort((a, b) => a.orderInRoutine - b.orderInRoutine)
+    return detailMappedExercises
+
+  } else {
+    return []
+  }
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await requireLoggedInUser(request);
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
-  const exercises = await getAllExercises(query);
-  return json({ exercises })
+  const allExercises = await getAllExercises(query);
+  const workoutId = url.searchParams.get("id") as string;
+  const workout = await db.routine.findUnique({
+    where: { id: workoutId },
+    include: {
+      exercises: true,
+    }
+  });
+  if (workout !== null && workout.userId !== user.id) {
+    throw redirect("/app", 401)
+  }
+  const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
+  const exercises = await db.exercise.findMany({
+    where: {
+      id: {
+        in: exerciseIds
+      }
+    }
+  });
+  const exerciseDetails = exerciseDetailsMap(workout?.exercises, exercises)
+  return json({ workout, exerciseDetails, allExercises })
 }
 
 // Define Zod schema for form validation
@@ -65,7 +132,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const formData = await request.formData();
   switch (formData.get("_action")) {
-    case "createUserWorkout": {
+    case "updateUserWorkout": {
       return validateObject(
         workoutFormDataToObject(formData),
         workoutSchema,
@@ -77,16 +144,19 @@ export async function action({ request }: ActionFunctionArgs) {
             exerciseId: exercise.exerciseId.split("-")[0],
             orderInRoutine: idx + 1,
           }))
-          await createUserWorkoutWithExercises(user.id, workoutName, workoutDescription, mappedExercises)
-          return redirect("/app/workouts");
+          // await updateUserWorkoutWithExercises(user.id, workoutName, workoutDescription, mappedExercises)
+          // return redirect("/app/workouts");
+          return null
         },
         (errors) => json({ errors }, { status: 400 })
       )
     }
   }
+  
+  return null
 }
 
-interface createWorkoutFetcherType extends ActionFunctionArgs{
+interface updateWorkoutFetcherType extends ActionFunctionArgs{
   errors?: {
     workoutName?: string;
     workoutDescription?: string;
@@ -124,15 +194,15 @@ const StrictModeDroppable = ({ children, ...props }: any) => {
   return <Droppable {...props}>{children}</Droppable>;
 };
 
-export default function WorkoutBuilderForm() {
-  const { exercises } = useLoaderData<typeof loader>();
+export default function Edit2() {
+  const { allExercises, exerciseDetails, workout } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
-  const createWorkoutFetcher = useFetcher<createWorkoutFetcherType>();
+  const updateWorkoutFetcher = useFetcher<updateWorkoutFetcherType>();
   const [searchParams, setSearchParams] = useSearchParams();
   const isSearching = navigation.formData?.has("q");
   const isSavingWorkout = navigation.formData?.get("_action") === "createUserWorkout";
 
-  const [workoutCards, setWorkoutCards] = useState<Array<WorkoutCard | ComplexCard>>([]);
+  const [workoutCards, setWorkoutCards] = useState<Array<WorkoutCard | ComplexCard>>(exerciseDetails);
   const [selectedCards, setSelectedCards] = useState<Set<string>>(new Set());
   const [openDescription, setOpenDescription] = useState(false);
   const [openExercisesPanel, setOpenExercisesPanel] = useState(false);
@@ -145,7 +215,7 @@ export default function WorkoutBuilderForm() {
     if (!destination) return;
 
     if (source.droppableId === 'availableCards' && destination.droppableId === 'workoutCards') {
-      const card = exercises[source.index];
+      const card = allExercises[source.index];
       // Create a new unique ID for the duplicate card
       const newId = `${card.id}-${Date.now()}`;
       const newDeckCard: WorkoutCard = {
@@ -305,14 +375,14 @@ export default function WorkoutBuilderForm() {
       }
     }, [])
   }, [workoutCards])
-  console.log(selectedCards, workoutCards)
+  console.log(selectedCards, workoutCards, allExercises)
   return (
     <>
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex h-screen">
-          {/* Create Workout Form */}
-          <createWorkoutFetcher.Form method="post" className="flex flex-col h-[calc(100%-8.125rem)] xs:h-[calc(100%-4.125rem)] sm:h-[calc(100%-5.125rem)] md:h-full w-full sm:w-1/2 p-6 sm:p-4">
-            <h2 className="mb-2 text-lg font-semibold">Create Workout</h2>
+          {/* Edit Workout Form */}
+          <updateWorkoutFetcher.Form method="post" className="flex flex-col h-[calc(100%-8.125rem)] xs:h-[calc(100%-4.125rem)] sm:h-[calc(100%-5.125rem)] md:h-full w-full sm:w-1/2 p-6 sm:p-4">
+            <h2 className="mb-2 text-lg font-semibold">Edit Workout</h2>
             <fieldset className="space-y-4 rounded-xl bg-white/5">
               <div className="flex flex-col">
                 <label className="text-sm/6 font-medium">Name<span className="text-xs ml-1">*</span></label>
@@ -321,14 +391,15 @@ export default function WorkoutBuilderForm() {
                   id="workoutName"
                   name="workoutName"
                   autoComplete="off"
+                  defaultValue={workout?.name}
                   required
                   className={clsx(
                     "p-2 rounded-md border-2 focus:outline-accent /*lg:w-2/3 xl:w-1/2*/ text-sm/6",
-                    createWorkoutFetcher.data?.errors?.workoutName ? "border-red-500" : ""
+                    updateWorkoutFetcher.data?.errors?.workoutName ? "border-red-500" : ""
                   )}
                   placeholder="Name your workout"
                 />
-                {createWorkoutFetcher.data?.errors?.workoutName ? <span className="text-red-500 text-xs">{createWorkoutFetcher.data?.errors?.workoutName}</span> : null}
+                {updateWorkoutFetcher.data?.errors?.workoutName ? <span className="text-red-500 text-xs">{updateWorkoutFetcher.data?.errors?.workoutName}</span> : null}
               </div>
               <div className="flex flex-col">
               <button
@@ -363,6 +434,7 @@ export default function WorkoutBuilderForm() {
                       placeholder="Optional"
                       name="workoutDescription"
                       id="workoutDescription"
+                      defaultValue={workout?.description ? workout.description : undefined}
                       autoFocus
                       rows={3}
                     />
@@ -433,7 +505,7 @@ export default function WorkoutBuilderForm() {
                                   <input
                                     type="number"
                                     className="w-10 text-sm pl-2"
-                                    defaultValue={3}
+                                    defaultValue={card.exercises.find((ex_item: any) => ex_item.sets) ? card.exercises.find((ex_item: any) => ex_item.sets).sets : 3}
                                     min={1}
                                     max={10}
                                     onChange={(event) => {
@@ -484,7 +556,7 @@ export default function WorkoutBuilderForm() {
                                                 <input
                                                   type="number"
                                                   className="w-10 text-sm pl-2 h-5"
-                                                  defaultValue="10"
+                                                  defaultValue={ex_item.reps ? ex_item.reps : 10}
                                                   name={`exercises[${exerciseIndex}].reps`}
                                                 />
                                               </div>
@@ -493,7 +565,7 @@ export default function WorkoutBuilderForm() {
                                                 <label className="text-xs self-start font-medium">Time</label>
                                                 <select
                                                   className="text-xs h-5 self-end"
-                                                  defaultValue="30 sec"
+                                                  defaultValue={ex_item.time ? ex_item.time : "30 sec"}
                                                   name={`exercises[${exerciseIndex}].time`}
                                                 >
                                                   {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
@@ -505,7 +577,7 @@ export default function WorkoutBuilderForm() {
                                                 <input
                                                   type="number"
                                                   className="w-10 text-sm pl-2 h-5"
-                                                  defaultValue="10"
+                                                  defaultValue={ex_item.reps ? ex_item.reps : 10}
                                                   name={`exercises[${exerciseIndex}].reps`}
                                                 />
                                               </div>
@@ -516,6 +588,7 @@ export default function WorkoutBuilderForm() {
                                                 type="text"
                                                 className="w-36 text-sm px-2 h-5 self-end placeholder:text-xs"
                                                 placeholder="tempo, weight, etc."
+                                                defaultValue={ex_item.notes ? ex_item.notes : undefined}
                                                 name={`exercises[${exerciseIndex}].notes`}
                                               />
                                             </div>
@@ -534,7 +607,7 @@ export default function WorkoutBuilderForm() {
                                 <label className="text-xs self-end font-medium">Rest</label>
                                 <select
                                   className="text-xs h-5 self-end"
-                                  defaultValue="60 sec"
+                                  defaultValue={card.exercises.find((ex_item: any) => ex_item.rest) ? card.exercises.find((ex_item: any) => ex_item.rest).rest : "60 sec"}
                                   onChange={(event) => {
                                     const rest = event.target.value
                                     onChangeCircuitRest(card.id, rest)
@@ -574,7 +647,7 @@ export default function WorkoutBuilderForm() {
                                       <input
                                         type="number"
                                         className="w-10 text-sm pl-2 h-5"
-                                        defaultValue="3"
+                                        defaultValue={card.sets ? card.sets : "3"}
                                         min={1}
                                         max={10}
                                         name={`exercises[${exerciseIndex}].sets`}
@@ -584,9 +657,9 @@ export default function WorkoutBuilderForm() {
                                       <label className="text-xs self-start font-medium">Target</label>
                                       <select
                                         className="text-xs h-5 self-end"
-                                        defaultValue="reps"
+                                        defaultValue={card.target ? card.target : "reps"}
                                         name={`exercises[${exerciseIndex}].target`}
-                                        value={card.target}
+                                        // value={card.target}
                                         onChange={(event) => onChangeTarget(event, card.id)}
                                       >
                                         {targetOptions.map((target, target_idx) => <option key={target_idx}>{target}</option>)}
@@ -598,7 +671,7 @@ export default function WorkoutBuilderForm() {
                                         <input
                                           type="number"
                                           className="w-10 text-sm pl-2 h-5"
-                                          defaultValue="10"
+                                          defaultValue={card.reps ? card.reps : "10"}
                                           name={`exercises[${exerciseIndex}].reps`}
                                         />
                                       </div>
@@ -607,7 +680,7 @@ export default function WorkoutBuilderForm() {
                                         <label className="text-xs self-start font-medium">Time</label>
                                         <select
                                           className="text-xs h-5 self-end"
-                                          defaultValue="30 sec"
+                                          defaultValue={card.time ? card.time : "30 sec"}
                                           name={`exercises[${exerciseIndex}].time`}
                                         >
                                           {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
@@ -619,7 +692,7 @@ export default function WorkoutBuilderForm() {
                                         <input
                                           type="number"
                                           className="w-10 text-sm pl-2 h-5"
-                                          defaultValue="10"
+                                          defaultValue={card.reps ? card.reps : "10"}
                                           name={`exercises[${exerciseIndex}].reps`}
                                         />
                                       </div>
@@ -631,13 +704,14 @@ export default function WorkoutBuilderForm() {
                                         className="w-36 text-sm px-2 h-5 self-end"
                                         placeholder="reps, tempo, etc."
                                         name={`exercises[${exerciseIndex}].notes`}
+                                        defaultValue={card.notes ? card.notes : undefined}
                                       />
                                     </div>
                                     <div className="flex flex-col justify-between">
                                       <label className="text-xs self-start font-medium">Rest</label>
                                       <select
                                         className="text-xs h-5 self-end"
-                                        defaultValue="60 sec"
+                                        defaultValue={card.rest ? card.rest : "60 sec"}
                                         name={`exercises[${exerciseIndex}].rest`}
                                       >
                                         {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
@@ -669,13 +743,13 @@ export default function WorkoutBuilderForm() {
                 </motion.div>
               )}
             </StrictModeDroppable>
-            {createWorkoutFetcher.data?.errors?.exercises ? <span className="text-red-500 text-xs">{createWorkoutFetcher.data?.errors?.exercises}</span> : null}
+            {updateWorkoutFetcher.data?.errors?.exercises ? <span className="text-red-500 text-xs">{updateWorkoutFetcher.data?.errors?.exercises}</span> : null}
             <div className="flex-none flex justify-end gap-2">
-              <Link to="/app/workouts" className="bg-gray-300 px-4 py-2 rounded">Cancel</Link>
+              <Link to={`/app/workouts/${workout?.id}`}className="bg-gray-300 px-4 py-2 rounded">Cancel</Link>
               <PrimaryButton
                 type="submit"
                 name="_action"
-                value="createUserWorkout"
+                value="updateUserWorkout"
                 className="bg-blue-500 text-white px-4 py-2 rounded"
                 disabled={isSavingWorkout}
                 isLoading={isSavingWorkout}
@@ -683,16 +757,16 @@ export default function WorkoutBuilderForm() {
                 {navigation.state === 'submitting' ? 'Saving...' : 'Save'}
               </PrimaryButton>
             </div>
-            {/* {createWorkoutFetcher.data?.errors?.cards && (
+            {/* {updateWorkoutFetcher.data?.errors?.cards && (
               <div className="mt-4 text-red-500">
                 <ul>
-                  {Object.values(createWorkoutFetcher.data?.errors?.cards).map((error: any) => (
+                  {Object.values(updateWorkoutFetcher.data?.errors?.cards).map((error: any) => (
                     <li key={error}>{error}</li>
                   ))}
                 </ul>
               </div>
             )} */}
-          </createWorkoutFetcher.Form>
+          </updateWorkoutFetcher.Form>
           {/* Available Exercises */}
           <div className="hidden sm:h-[calc(100%-5.125rem)] md:h-full sm:flex flex-col sm:w-1/2 p-4 bg-gray-200">
             <h2 className="mb-2 text-lg font-semibold">Available Exercises</h2>
@@ -721,7 +795,7 @@ export default function WorkoutBuilderForm() {
                   ref={provided.innerRef}
                   className="overflow-y-auto"
                 >
-                  {exercises.map((card, index) => (
+                  {allExercises.map((card, index) => (
                     <Draggable key={card.id} draggableId={card.id} index={index}>
                       {(provided: DraggableProvided, snapshot) => (
                         <div
@@ -797,7 +871,7 @@ export default function WorkoutBuilderForm() {
               />
             </Form>
             <div className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-0.5 pb-1 text-slate-900">
-              {exercises.map((ex_item) => (
+              {allExercises.map((ex_item) => (
                 <Exercise
                   key={ex_item.id}
                   exercise={ex_item}

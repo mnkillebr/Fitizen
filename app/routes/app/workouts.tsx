@@ -129,7 +129,7 @@ export default function Workouts() {
   const isCreatingWorkout = createWorkoutFetcher.formData?.get("_action") === "createWorkout";
   const inCreateSubRoute = matches.map(m => m.id).some(id => createSubRoutes.includes(id));
   const inWorkoutDetailRoute = matches.map(m => m.id).includes("routes/app/workouts/$workoutId");
-  const inEditSubRoute = matches.map(m => m.id).includes("routes/app/workouts/edit");
+  const inEditSubRoute = matches.map(m => m.id).includes("routes/app/workouts/edited");
   const isNavigatingSubRoute =
     navigation.state === "loading" &&
     createPathnames.includes(navigation.location.pathname) &&

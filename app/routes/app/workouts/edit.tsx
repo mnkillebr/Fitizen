@@ -1,9 +1,11 @@
 import { BaseSyntheticEvent, useCallback, useState } from "react";
+import { Form, Link, useFetcher, useLoaderData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
+import { z } from 'zod';
+import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
 import { Field, Fieldset, Input, Label, Legend, Textarea } from "@headlessui/react";
 import { ChevronDownIcon, PlusCircleIcon, XMarkIcon, Bars3Icon, TrashIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon as SearchIcon } from "@heroicons/react/24/outline";
 import { LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, Link, useLoaderData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { getWorkout } from "~/models/workout.server";
@@ -474,14 +476,14 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
         ...exerciseDetail,
       }
     })
-    const nonGrouped = detailedExercises.filter(ex => ex.groupType === "regular").map(ex => ({...ex, itemType: ex.groupType }))
-    const grouped = detailedExercises.filter(ex => ex.groupType === "circuit").reduce((result: any, curr: any) => {
+    const nonGrouped = detailedExercises.filter(ex => !ex.circuitId)
+    const grouped = detailedExercises.filter(ex => ex.circuitId).reduce((result: any, curr: any) => {
       let resultArr = result
-      if (curr.groupId?.length) {
-        const groupId = curr.groupId
-        if (resultArr.find((ex_item: any) => ex_item.groupId === groupId)) {
+      if (curr.circuitId?.length) {
+        const circuitId = curr.circuitId
+        if (resultArr.find((ex_item: any) => ex_item.circuitId === circuitId)) {
           return resultArr.map((ex_item: any) => {
-            if (ex_item.groupId === groupId) {
+            if (ex_item.circuitId === circuitId) {
               return {
                 ...ex_item,
                 exercises: ex_item.exercises.concat(curr)
@@ -490,13 +492,8 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
           })
         } else {
           return resultArr.concat({
-            groupId,
-            id: groupId,
-            groupType: curr.groupType,
-            itemType: curr.groupType,
+            circuitId,
             orderInRoutine: curr.orderInRoutine,
-            rounds: curr.rounds,
-            rest: curr.rest,
             exercises: [curr]
           })
         }
@@ -608,8 +605,6 @@ export default function Edit() {
         rounds: 3,
         rest: "60 sec"
       })),
-      itemType: "circuit",
-      groupType: "circuit",
     }]
 
     setSelectedExercises(listWithCircuit)
@@ -626,9 +621,7 @@ export default function Edit() {
       ...filteredList,
       ...item.exercises.map(subItem => ({
         ...subItem,
-        itemType: "regular",
-        groupType: "regular",
-        groupId: "",
+        circuitId: "",
         sets: subItem.rounds,
       })),
     ]
@@ -694,9 +687,7 @@ export default function Edit() {
           if (curr.exercises) {
             const mappedGroup = curr.exercises.map((ex: any) => ({
               ...ex,
-              groupId: curr.id,
-              groupType: curr.itemType,
-              itemType: curr.itemType
+              circuitId: curr.id,
             }))
             return resultArr.concat(mappedGroup)
           } else {
@@ -746,172 +737,174 @@ export default function Edit() {
     }
   }, [selectedExercises, workoutName, workoutDescription, errors, setErrors, data.workout, data.exerciseDetails])
 
-  // console.log(selectedExercises)
+  console.log(data)
   return (
     <>
-      <div className="px-4 md:px-6 py-6 md:py-8 flex flex-col gap-y-2 h-full relative justify-between">
-        <div className="px-2 overflow-y-auto">
-          <Fieldset className="space-y-4 rounded-xl bg-white/5">
-            <Legend className="text-base/7 font-semibold">Edit Workout</Legend>
-            <Field className="flex flex-col">
-              <Label className="text-sm/6 font-medium">Name<span className="text-xs ml-1">*</span></Label>
-              <Input
-                type="text"
-                value={workoutName}
-                autoComplete="off"
-                onChange={(e) => {
-                  const inputValue = e.target.value
-                  setWorkoutName(inputValue)
-                  inputValue.length ? setErrors({ ...errors, "workoutName": "" }) : null
-                }}
-                className={clsx(
-                  "p-2 rounded-md border-2 focus:outline-accent lg:w-2/3 xl:w-1/2 text-sm/6",
-                  errors["workoutName"] ? "border-red-500" : ""
-                )}
-                placeholder="Name your workout"
-              />
-              {errors["workoutName"] ? <span className="text-red-500 text-xs">{errors["workoutName"]}</span> : null}
-            </Field>
-            <Field className="flex flex-col">
-              <button
-                className="w-full flex justify-between items-center focus:outline-none lg:w-2/3 xl:w-1/2"
-                onClick={() => setOpenDescription(!openDescription)}
-              >
-                <Label className="text-sm/6 font-medium">Description</Label>
-                <motion.div
-                  animate={{ rotate: openDescription ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronDownIcon className="w-5 h-5" />
-                </motion.div>
-              </button>
-              {/* <Description className="text-xs">
-                A good way to reference the goals of the workout
-              </Description> */}
-              <AnimatePresence initial={false}>
-                {openDescription && (
-                  <motion.div
-                    initial="collapsed"
-                    animate="open"
-                    exit="collapsed"
-                    variants={{
-                      open: { opacity: 1, height: "auto" },
-                      collapsed: { opacity: 0, height: 0 }
-                    }}
-                    transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-                  >
-                    <Textarea
-                      className="p-2 rounded-md border-2 focus:outline-accent lg:w-2/3 xl:w-1/2 text-sm/6 resize-none w-full"
-                      placeholder="Optional"
-                      autoFocus
-                      rows={3}
-                      value={workoutDescription}
-                      onChange={(e) => setWorkoutDescription(e.target.value)}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </Field>
-          </Fieldset>
-          <DndProvider backend={HTML5Backend}>
-            <div className="mt-4">
-              <p className="text-sm/6 font-medium">Exercises<span className="text-xs ml-1">*</span></p>
-              <PanelItem
-                addCallbackFn={toggleExercisesPanel}
-                removeCallbackFn={handleRemoveExercises}
-                handleMoveFn={handleMoveExercise}
-                handleCircuitFn={handleCircuit}
-                handleUngroupFn={handleUngroup}
-                handleChangeFieldFn={handleChangeField}
-                panelText="Add exercise(s)"
-                subItems={selectedExercises}
-              />
-            </div>
-          </DndProvider>
-          {errors["exercises"] ? <span className="text-red-500 text-xs">{errors["exercises"]}</span> : null}
-        </div>
-        <div className="w-full lg:w-2/3 xl:w-1/2 flex flex-none gap-x-2 items-center px-2">
-          <Link to={`/app/workouts/${data.workout?.id}`} className="flex-1">
-            <Button className="w-full border-2 text-accent border-accent hover:bg-gray-50">
-              Cancel
-            </Button>
-          </Link>
-          <Form onSubmit={handleUpdateWorkout} className="w-1/2">
-            <PrimaryButton
-              className="w-full"
-              type="submit"
-              isLoading={isUpdatingWorkout}
-            >
-              Save
-            </PrimaryButton>
-          </Form>
-        </div>
-        {/* <div>Edit Page {data.workout?.name}</div> */}
-      </div>
-      <AnimatePresence>
-        {openExercisesPanel && (
-          <motion.div
-            className="absolute bottom-0 left-0 md:left-64 md:max-w-[calc(100vw-16rem)] flex flex-col gap-y-2 h-2/3 bg-slate-400 w-screen rounded-t-lg text-white p-6 md:p-8"
-            initial={{ translateY: "100%" }}
-            animate={{ translateY: "0%" }}
-            exit={{ translateY: "100%" }}
-            transition={{ ease: [0, 0.71, 0.2, 1.01], }}
-          >
-            <div className="flex justify-between">
-              <p>Exercises</p>
-              <button onClick={(event) => {
-                setOpenExercisesPanel(false)
-                setSearchParams((prev) => {
-                  prev.set("q", "");
-                  return prev;
-                });
-              }}>
-                <XMarkIcon className="size-6 hover:text-accent"/>
-              </button>
-            </div>
-            <Form
-              className={`flex content-center border-2 rounded-md focus-within:border-accent lg:w-2/3 xl:w-1/2 bg-white ${
-                isSearching ? "animate-pulse" : ""
-              }`}
-            >
-              <button type="submit">
-                <SearchIcon className="size-6 ml-2 text-slate-400" />
-              </button>
-              <input
-                type="hidden"
-                name="id"
-                value={data.workout?.id}
-              />
-              <input
-                defaultValue={searchParams.get("q") ?? ""}
-                type="text"
-                name="q"
-                placeholder="Search exercises ..."
-                autoComplete="off"
-                className="w-full p-2 outline-none rounded-md text-slate-400"
-              />
-            </Form>
-            <div className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto text-slate-900">
-              {data.allExercises.map((ex_item) => (
-                <Exercise
-                  key={ex_item.id}
-                  exercise={ex_item}
-                  selectable
-                  selectFn={handleAddExercise}
-                  selected={selectedExercises.reduce((result, curr) => {
-                    let resultArr = result
-                    if (curr.exercises) {
-                      return resultArr.concat(curr.exercises)
-                    } else {
-                      return resultArr.concat(curr)
-                    }
-                  }, []).map((sel_ex: ExerciseProps) => sel_ex.id).includes(ex_item.id)}
+      <DragDropContext onDragEnd={() => {}}>
+        <div className="px-4 md:px-6 py-6 md:py-8 flex flex-col gap-y-2 h-full relative justify-between">
+          <div className="px-2 overflow-y-auto">
+            <Fieldset className="space-y-4 rounded-xl bg-white/5">
+              <Legend className="text-base/7 font-semibold">Edit Workout</Legend>
+              <Field className="flex flex-col">
+                <Label className="text-sm/6 font-medium">Name<span className="text-xs ml-1">*</span></Label>
+                <Input
+                  type="text"
+                  value={workoutName}
+                  autoComplete="off"
+                  onChange={(e) => {
+                    const inputValue = e.target.value
+                    setWorkoutName(inputValue)
+                    inputValue.length ? setErrors({ ...errors, "workoutName": "" }) : null
+                  }}
+                  className={clsx(
+                    "p-2 rounded-md border-2 focus:outline-accent lg:w-2/3 xl:w-1/2 text-sm/6",
+                    errors["workoutName"] ? "border-red-500" : ""
+                  )}
+                  placeholder="Name your workout"
                 />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                {errors["workoutName"] ? <span className="text-red-500 text-xs">{errors["workoutName"]}</span> : null}
+              </Field>
+              <Field className="flex flex-col">
+                <button
+                  className="w-full flex justify-between items-center focus:outline-none lg:w-2/3 xl:w-1/2"
+                  onClick={() => setOpenDescription(!openDescription)}
+                >
+                  <Label className="text-sm/6 font-medium">Description</Label>
+                  <motion.div
+                    animate={{ rotate: openDescription ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChevronDownIcon className="w-5 h-5" />
+                  </motion.div>
+                </button>
+                {/* <Description className="text-xs">
+                  A good way to reference the goals of the workout
+                </Description> */}
+                <AnimatePresence initial={false}>
+                  {openDescription && (
+                    <motion.div
+                      initial="collapsed"
+                      animate="open"
+                      exit="collapsed"
+                      variants={{
+                        open: { opacity: 1, height: "auto" },
+                        collapsed: { opacity: 0, height: 0 }
+                      }}
+                      transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                    >
+                      <Textarea
+                        className="p-2 rounded-md border-2 focus:outline-accent lg:w-2/3 xl:w-1/2 text-sm/6 resize-none w-full"
+                        placeholder="Optional"
+                        autoFocus
+                        rows={3}
+                        value={workoutDescription}
+                        onChange={(e) => setWorkoutDescription(e.target.value)}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Field>
+            </Fieldset>
+            <DndProvider backend={HTML5Backend}>
+              <div className="mt-4">
+                <p className="text-sm/6 font-medium">Exercises<span className="text-xs ml-1">*</span></p>
+                <PanelItem
+                  addCallbackFn={toggleExercisesPanel}
+                  removeCallbackFn={handleRemoveExercises}
+                  handleMoveFn={handleMoveExercise}
+                  handleCircuitFn={handleCircuit}
+                  handleUngroupFn={handleUngroup}
+                  handleChangeFieldFn={handleChangeField}
+                  panelText="Add exercise(s)"
+                  subItems={selectedExercises}
+                />
+              </div>
+            </DndProvider>
+            {errors["exercises"] ? <span className="text-red-500 text-xs">{errors["exercises"]}</span> : null}
+          </div>
+          <div className="w-full lg:w-2/3 xl:w-1/2 flex flex-none gap-x-2 items-center px-2">
+            <Link to={`/app/workouts/${data.workout?.id}`} className="flex-1">
+              <Button className="w-full border-2 text-accent border-accent hover:bg-gray-50">
+                Cancel
+              </Button>
+            </Link>
+            <Form onSubmit={handleUpdateWorkout} className="w-1/2">
+              <PrimaryButton
+                className="w-full"
+                type="submit"
+                isLoading={isUpdatingWorkout}
+              >
+                Save
+              </PrimaryButton>
+            </Form>
+          </div>
+          {/* <div>Edit Page {data.workout?.name}</div> */}
+        </div>
+        <AnimatePresence>
+          {openExercisesPanel && (
+            <motion.div
+              className="absolute bottom-0 left-0 md:left-64 md:max-w-[calc(100vw-16rem)] flex flex-col gap-y-2 h-2/3 bg-slate-400 w-screen rounded-t-lg text-white p-6 md:p-8"
+              initial={{ translateY: "100%" }}
+              animate={{ translateY: "0%" }}
+              exit={{ translateY: "100%" }}
+              transition={{ ease: [0, 0.71, 0.2, 1.01], }}
+            >
+              <div className="flex justify-between">
+                <p>Exercises</p>
+                <button onClick={(event) => {
+                  setOpenExercisesPanel(false)
+                  setSearchParams((prev) => {
+                    prev.set("q", "");
+                    return prev;
+                  });
+                }}>
+                  <XMarkIcon className="size-6 hover:text-accent"/>
+                </button>
+              </div>
+              <Form
+                className={`flex content-center border-2 rounded-md focus-within:border-accent lg:w-2/3 xl:w-1/2 bg-white ${
+                  isSearching ? "animate-pulse" : ""
+                }`}
+              >
+                <button type="submit">
+                  <SearchIcon className="size-6 ml-2 text-slate-400" />
+                </button>
+                <input
+                  type="hidden"
+                  name="id"
+                  value={data.workout?.id}
+                />
+                <input
+                  defaultValue={searchParams.get("q") ?? ""}
+                  type="text"
+                  name="q"
+                  placeholder="Search exercises ..."
+                  autoComplete="off"
+                  className="w-full p-2 outline-none rounded-md text-slate-400"
+                />
+              </Form>
+              <div className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto text-slate-900">
+                {data.allExercises.map((ex_item) => (
+                  <Exercise
+                    key={ex_item.id}
+                    exercise={ex_item}
+                    selectable
+                    selectFn={handleAddExercise}
+                    selected={selectedExercises.reduce((result, curr) => {
+                      let resultArr = result
+                      if (curr.exercises) {
+                        return resultArr.concat(curr.exercises)
+                      } else {
+                        return resultArr.concat(curr)
+                      }
+                    }, []).map((sel_ex: ExerciseProps) => sel_ex.id).includes(ex_item.id)}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </DragDropContext>
     </>
   )
 }

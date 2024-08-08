@@ -223,13 +223,15 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
         <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing" />
       </div> */}
       {selectable ? (
-        <div className="border-l-2 h-full group relative content-center hover:bg-secondary hover:text-white hover:rounded-r-lg">
+        <div
+          className="border-l-2 h-full group relative content-center hover:bg-secondary hover:text-white hover:rounded-r-lg cursor-pointer"
+          onClick={() => selectFn ? selectFn(exercise) : null}
+        >
           <button
             className={clsx(
               "lg:hidden px-2 flex flex-col",
               selected ? "text-green-600" : ""
             )}
-            onClick={() => selectFn ? selectFn(exercise) : null}
           >
             {selected ? <CheckCircleIcon className="size-6 group-hover:text-white" /> : <PlusIcon className="size-6" />}
           </button>

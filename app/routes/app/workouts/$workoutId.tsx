@@ -34,36 +34,36 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
       return {
         ...item,
         ...exerciseDetail,
+        circuitId: item.circuitId ? item.circuitId : ""
       }
     })
     const nonGrouped = detailedExercises.filter(ex => !ex.circuitId)
     const grouped = detailedExercises.filter(ex => ex.circuitId).reduce((result: any, curr: any) => {
       let resultArr = result
-      if (curr.circuitId?.length) {
-        const circuitId = curr.circuitId
-        if (resultArr.find((ex_item: any) => ex_item.circuitId === circuitId)) {
-          return resultArr.map((ex_item: any) => {
-            if (ex_item.circuitId === circuitId) {
-              return {
-                ...ex_item,
-                exercises: ex_item.exercises.concat(curr)
-              }
+      if (resultArr.length && resultArr.find((item: any) => item.circuitId === curr.circuitId)) {
+        resultArr = resultArr.map((item: any) => {
+          if (item.circuitId === curr.circuitId) {
+            return {
+              ...item,
+              exercises: [...item.exercises, curr]
             }
-          })
-        } else {
-          return resultArr.concat({
-            circuitId,
-            orderInRoutine: curr.orderInRoutine,
-            sets: curr.sets,
-            rest: curr.rest,
-            exercises: [curr]
-          })
-        }
+          } else {
+            return item
+          }
+        })
+        return resultArr
+      } else {
+        return resultArr.concat({
+          circuitId: curr.circuitId,
+          orderInRoutine: curr.orderInRoutine,
+          sets: curr.sets,
+          rest: curr.rest,
+          exercises: [curr]
+        })
       }
     }, [])
     const detailMappedExercises = [...nonGrouped, ...grouped].sort((a, b) => a.orderInRoutine - b.orderInRoutine)
     return detailMappedExercises
-
   } else {
     return []
   }
@@ -102,7 +102,7 @@ type ExercisesPanelProps = {
 
 function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
   if (exerciseDetailsArray.length) {
-    // console.log(exerciseDetailsArray)
+    console.log(exerciseDetailsArray)
     return (
       <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
         {exerciseDetailsArray.map((exercise: any, idx) => {
@@ -319,7 +319,7 @@ export default function WorkoutDetail() {
                       anchor={{ to: 'bottom end', gap: '8px', }}
                       className="flex flex-col rounded-md bg-white text-sm/6 shadow-md p-0.5 border gap-1"
                     >
-                      <Link to={`/app/workouts/edit?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1">
+                      <Link to={`/app/workouts/edited?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1">
                         <PencilIcon className="h-4" />
                         Edit
                       </Link>
