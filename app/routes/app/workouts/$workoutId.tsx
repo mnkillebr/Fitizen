@@ -54,7 +54,7 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
           return resultArr.concat({
             circuitId,
             orderInRoutine: curr.orderInRoutine,
-            rounds: curr.rounds,
+            sets: curr.sets,
             rest: curr.rest,
             exercises: [curr]
           })
@@ -112,7 +112,7 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
                 key={`${exercise.routineId}-${exercise.circuitId}-${idx}`}
                 className="flex flex-col gap-2 shadow-inner border-2 border-dashed p-1 rounded-md *:content-center snap-start"
               >
-                <div className="text-sm font-medium">Circuit of {exercise.rounds} rounds</div>
+                <div className="text-sm font-medium">Circuit of {exercise.sets} rounds</div>
                 {exercise.exercises.map((ex_item: any, idx: number) => (
                   <div
                     key={`${exercise.routineId}-${ex_item.id}-${idx}`}

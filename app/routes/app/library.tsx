@@ -137,9 +137,10 @@ type ExerciseProps = {
   selected?: boolean;
   role?: RoleType;
   onDragExercise?: (exerciseItem: ExerciseItemProps) => void;
+  selectCount?: number;
 }
 
-export function Exercise({ exercise, selectable, selectFn, selected, role, onDragExercise = () => {}}: ExerciseProps) {
+export function Exercise({ exercise, selectable, selectFn, selected, role, selectCount, onDragExercise = () => {}}: ExerciseProps) {
   const isHydrated = useIsHydrated();
   const deleteExerciseFetcher = useFetcher<deleteExerciseFetcherType>();
   const updateExerciseNameFetcher = useFetcher<updateNameFetcherType>();
@@ -222,14 +223,18 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, onDra
         <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing" />
       </div> */}
       {selectable ? (
-        <button
-          className={`lg:hidden px-2 border-l-2 h-full flex flex-col justify-center hover:bg-secondary hover:text-white hover:rounded-r-lg ${
-            selected ? "text-green-600" : ""
-          }`}
-          onClick={() => selectFn ? selectFn(exercise) : null}
-        >
-          {selected ? <CheckCircleIcon className="size-6" /> : <PlusIcon className="size-6" />}
-        </button>
+        <div className="border-l-2 h-full group relative content-center hover:bg-secondary hover:text-white hover:rounded-r-lg">
+          <button
+            className={clsx(
+              "lg:hidden px-2 flex flex-col",
+              selected ? "text-green-600" : ""
+            )}
+            onClick={() => selectFn ? selectFn(exercise) : null}
+          >
+            {selected ? <CheckCircleIcon className="size-6 group-hover:text-white" /> : <PlusIcon className="size-6" />}
+          </button>
+          {selectCount && selectCount > 1 ? <p className="absolute bottom-2 left-6 z-10 text-xs">{selectCount}</p> : null}
+        </div>
       ) : null}
       {role === "admin" ? (
         <div className="hidden sm:flex gap-3 items-center p-4">

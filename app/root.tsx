@@ -299,20 +299,20 @@ export default function App() {
 
   if (inAppRoute) {
     return (
-      <div className="bg-white h-screen">
+      <div className="bg-white h-screen overflow-y-hidden">
         <div className="flex flex-col-reverse xs:flex-col md:flex-row h-full">
-          <div className="flex shadow-[0_-5px_3px_-3px_rgba(0,0,0,0.1)] xs:shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] text-white px-8 py-2 sm:py-4 sm:bg-slate-100 md:bg-slate-100 md:w-64 md:flex-col md:flex-none md:shadow-[5px_0_3px_-3px_rgba(0,0,0,0.1)] md:px-4 md:py-8">
+          <div className="flex shadow-[0_-5px_3px_-3px_rgba(0,0,0,0.1)] xs:shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] text-white px-8 py-2 sm:py-4 sm:bg-slate-100 md:bg-slate-100 md:w-48 lg:w-64 md:flex-col md:flex-none md:shadow-[5px_0_3px_-3px_rgba(0,0,0,0.1)] md:px-4 md:py-8">
             <div className="flex md:flex-col md:gap-y-4 items-center justify-center xs:justify-between w-full">
               <div className="hidden md:flex justify-center">
                 <img className="rounded-full drop-shadow-lg" src="https://i.pravatar.cc/200?img=16"/>
               </div>
               <img className="hidden xs:max-lg:flex md:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
-              <div className="hidden md:flex md:flex-col self-start pl-4 text-slate-900">
-                <h1 className="text-xl font-bold">Welcome back 👋</h1>
-                <p>Let's get active 💪</p>
+              <div className="hidden md:flex md:flex-col self-start pl-3 text-slate-900">
+                <h1 className="text-base lg:text-xl font-bold">Welcome back 👋</h1>
+                <p className="text-sm lg:text-base">Let's get active 💪</p>
               </div>
               <div className="md:divide-y divide-gray-500/10 md:w-full">
-                <div className="hidden sm:flex sm:flex-row md:flex-col flex-none md:my-2">
+                <div className="hidden sm:flex sm:flex-row md:flex-col flex-none md:my-2 sm:gap-x-2">
                   {dashNavigation.map((item) => (
                     <AppNavLink
                       key={item.name}

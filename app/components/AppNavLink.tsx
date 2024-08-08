@@ -44,7 +44,7 @@ export function AppNavLink({ to, children }: RootNavLinkProps) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `mx-1 rounded-lg block px-3 py-2 text-base font-semibold leading-7 transition duration-100 ${
+        `rounded-lg block px-3 py-2 text-base font-semibold leading-7 transition duration-100 ${
           isActive
             ? "text-accent bg-white shadow-inner"
             : "text-gray-900 hover:bg-gray-50 hover:text-accent"
