@@ -58,6 +58,7 @@ const workoutSchema = z.object({
     time: z.string().optional(),
     rest: z.string(),
     notes: z.string().optional(),
+    orderInRoutine: z.string(),
   })).min(1, "You must add at least one exercise"),
 });
 
@@ -75,7 +76,7 @@ export async function action({ request }: ActionFunctionArgs) {
           const mappedExercises = data.exercises.map((exercise: any, idx: number) => ({
             ...exercise,
             exerciseId: exercise.exerciseId.split("-")[0],
-            orderInRoutine: idx + 1,
+            orderInRoutine: parseInt(exercise.orderInRoutine),
           }))
           await createUserWorkoutWithExercises(user.id, workoutName, workoutDescription, mappedExercises)
           return redirect("/app/workouts");

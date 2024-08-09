@@ -70,6 +70,7 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
         } else {
           return resultArr.concat({
             circuitId,
+            id: circuitId,
             orderInRoutine: curr.orderInRoutine,
             exercises: [curr]
           })
@@ -125,11 +126,20 @@ const workoutSchema = z.object({
     time: z.string().optional(),
     rest: z.string(),
     notes: z.string().optional(),
+    orderInRoutine: z.string(),
   })).min(1, "You must add at least one exercise"),
 });
 
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireLoggedInUser(request);
+  const url = new URL(request.url);
+  const workoutId = url.searchParams.get("id") as string;
+  const prevWorkout = await db.routine.findUnique({
+    where: { id: workoutId },
+    include: {
+      exercises: true,
+    }
+  });
   const formData = await request.formData();
   switch (formData.get("_action")) {
     case "updateUserWorkout": {
@@ -142,11 +152,24 @@ export async function action({ request }: ActionFunctionArgs) {
           const mappedExercises = data.exercises.map((exercise: any, idx: number) => ({
             ...exercise,
             exerciseId: exercise.exerciseId.split("-")[0],
-            orderInRoutine: idx + 1,
+            orderInRoutine: parseInt(exercise.orderInRoutine),
           }))
-          // await updateUserWorkoutWithExercises(user.id, workoutName, workoutDescription, mappedExercises)
-          // return redirect("/app/workouts");
-          return null
+          const prevExercises = prevWorkout?.exercises;
+          const newExercises = mappedExercises.reduce((result: any, curr: any) => {
+            let resultArr = result
+            if (curr) {
+              if (prevExercises && !prevExercises.map((prev: any) => prev.exerciseId).includes(curr.exerciseId)) {
+                return resultArr.concat(curr)
+              }
+            }
+            return resultArr
+          }, []);
+          const updatedExercises = mappedExercises.filter((selected: any) => !newExercises.map((ex: any) => ex.exerciseId).includes(selected.exerciseId));
+          const deletedExercises = prevExercises ? prevExercises.filter((prev: any) => !newExercises.map((ex: any) => ex.exerciseId).includes(prev.exerciseId) && !updatedExercises.map((ex: any) => ex.exerciseId).includes(prev.exerciseId)) : [];
+          const deletedExerciseIds = deletedExercises.map((ex_item: any) => ex_item.exerciseId);
+
+          await updateUserWorkoutWithExercises(user.id, workoutId, workoutName, workoutDescription, updatedExercises, newExercises, deletedExerciseIds)
+          return redirect(`/app/workouts/${prevWorkout?.id}`);
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -309,14 +332,14 @@ export default function Edit2() {
     })
   }, [workoutCards, setWorkoutCards])
 
-  const onChangeCircuitRounds = useCallback((cardId: string, rounds: string) => {
+  const onChangeCircuitRounds = useCallback((cardId: string, sets: string) => {
     setWorkoutCards((prev: Array<WorkoutCard | ComplexCard>) => prev.map((card: any) => {
       if (card.id === cardId) {
         return {
           ...card,
           exercises: card.exercises.map((exercise: WorkoutCard) => ({
             ...exercise,
-            rounds,
+            sets,
           }))
         }
       } else {
@@ -375,7 +398,7 @@ export default function Edit2() {
       }
     }, [])
   }, [workoutCards])
-  console.log(selectedCards, workoutCards, allExercises)
+
   return (
     <>
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -532,7 +555,7 @@ export default function Edit2() {
                                         <div className="flex flex-col gap-1 last:pt-1" key={`${ex_item.name}-${ex_item_idx}`}>
                                           <input type="hidden" name={`exercises[${exerciseIndex}].orderInRoutine`} value={exerciseIndex+1} />
                                           <input type="hidden" name={`exercises[${exerciseIndex}].circuitId`} value={card.circuitId} />
-                                          <input type="hidden" name={`exercises[${exerciseIndex}].sets`} value={ex_item.rounds ? ex_item.rounds : 3} />
+                                          <input type="hidden" name={`exercises[${exerciseIndex}].sets`} value={ex_item.sets ? ex_item.sets : 3} />
                                           <input type="hidden" name={`exercises[${exerciseIndex}].rest`} value={ex_item.rest ? ex_item.rest : "60 sec"} />
                                           <div className="flex flex-col justify-between">
                                             <label className="text-xs self-start font-medium">Name</label>
@@ -745,7 +768,7 @@ export default function Edit2() {
             </StrictModeDroppable>
             {updateWorkoutFetcher.data?.errors?.exercises ? <span className="text-red-500 text-xs">{updateWorkoutFetcher.data?.errors?.exercises}</span> : null}
             <div className="flex-none flex justify-end gap-2">
-              <Link to={`/app/workouts/${workout?.id}`}className="bg-gray-300 px-4 py-2 rounded">Cancel</Link>
+              <Link to={`/app/workouts/${workout?.id}`} className="bg-gray-300 px-4 py-2 rounded">Cancel</Link>
               <PrimaryButton
                 type="submit"
                 name="_action"
