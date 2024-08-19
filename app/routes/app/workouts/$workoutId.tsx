@@ -464,14 +464,23 @@ export default function WorkoutDetail() {
           <div
             className={clsx(
               "flex-shrink-0 w-full snap-center bg-slate-50 h-60 lg:h-72 rounded-md md:rounded-[20px] shadow-md",
-              "lg:flex-none lg:w-[calc(50%-10px)] lg:rounded-lg mb-3"
+              "lg:flex-none lg:w-[calc(50%-10px)] lg:rounded-lg mb-3 lg:flex lg:flex-col lg:shadow-none lg:bg-white lg:gap-y-2"
             )}
             
           >
-            <div className="h-full flex-col py-2 px-4">
+            <div className="h-2/3 flex-col py-2 px-4 bg-slate-50 rounded-md shadow-none lg:shadow-md">
               <div className="font-semibold">Description</div>
               <div>{data.workout.description}</div>
             </div>
+            <Link
+              to={`/app/workouts/log?id=${data.workout?.id}`}
+              className="hidden lg:flex h-1/3 items-center justify-center bg-slate-50 rounded-md shadow-md active:scale-95 hover:cursor-pointer"
+              // onClick={() => setStartWorkout(!startWorkout)}
+            >
+              <div className="size-12"></div>
+              <div className="select-none font-semibold self-center mr-4">Start Workout</div>
+              <div className="bg-slate-400 rounded-full p-3"><PlayIcon /></div>
+            </Link>
           </div>
         </div>
         <div className="mb-3 lg:hidden flex justify-center">
