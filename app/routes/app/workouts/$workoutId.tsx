@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
@@ -336,6 +336,36 @@ export default function WorkoutDetail() {
       behavior: 'smooth'
     });
   };
+
+  useEffect(() => {
+    const imgScrollContainer = imageDescriptionScrollContainerRef.current;
+    const panelScrollContainer = panelScrollContainerRef.current;
+    if (!imgScrollContainer) return;
+    if (!panelScrollContainer) return;
+
+
+    const handleScrollImg = () => {
+      const scrollLeft = imgScrollContainer.scrollLeft;
+      const width = imgScrollContainer.clientWidth;
+      
+      const newIndex = Math.round(scrollLeft / width);
+      setImgIndex(newIndex);
+    };
+    const handleScrollPanel = () => {
+      const scrollLeft = panelScrollContainer.scrollLeft;
+      const width = panelScrollContainer.clientWidth;
+      
+      const newIndex = Math.round(scrollLeft / width);
+      setPanelIndex(newIndex);
+    };
+
+    imgScrollContainer.addEventListener('scroll', handleScrollImg);
+    panelScrollContainer.addEventListener('scroll', handleScrollPanel);
+    return () => {
+      imgScrollContainer.removeEventListener('scroll', handleScrollImg)
+      panelScrollContainer.removeEventListener('scroll', handleScrollPanel)
+    };
+  }, []);
   
   return (
     <div className="px-5 py-6 md:px-7 md:py-8 flex flex-col h-full gap-y-3 select-none">
@@ -490,13 +520,20 @@ export default function WorkoutDetail() {
               {data.logs.map(log => {
                 return (
                   <div key={log.id} className="flex flex-col shadow-md rounded-md *:content-center bg-white snap-start">
-                    <div className="bg-slate-400 w-full rounded-t-md flex px-3 py-1 *:text-white">
-                      <label className="text-sm self-start font-medium w-1/2">Date</label>
-                      <label className="text-sm self-start font-medium w-1/2">Duration</label>
+                    <div className="bg-slate-400 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
+                      <label className="text-sm font-medium w-20">Date</label>
+                      <label className="text-sm font-medium w-24">Duration</label>
+                      <label className="text-sm font-medium invisible">View</label>
                     </div>
-                    <div className="w-full rounded-b-md flex px-3 py-1">
-                      <p className="text-sm h-5 w-1/2">{new Date(log.date).toLocaleDateString()}</p>
-                      <p className="text-sm h-5 w-1/2">{formatDuration(parseInt(log.duration))}</p>
+                    <div className="w-full rounded-b-md flex justify-between px-3 py-1">
+                      <p className="text-sm h-5 w-20">{new Date(log.date).toLocaleDateString()}</p>
+                      <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
+                      <Link
+                        to={`/app/workouts/logview?id=${log.id}`}
+                        className="text-sm h-5 underline text-accent hover:text-yellow-500"
+                      >
+                        View
+                      </Link>
                     </div>
                   </div>
                 )

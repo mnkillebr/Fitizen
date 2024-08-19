@@ -45,6 +45,34 @@ interface ExerciseLogProps {
   }>
 }
 
+type SetType = {
+  name: string;
+  set: string;
+  time: string;
+  target: string;
+  targetReps: string;
+  actualReps: string;
+  load: string;
+  unit: string;
+  notes: string;
+}
+
+interface PastLogProps {
+  exercise: {
+    id?: string;
+    exerciseName?: string;
+    circuitId?: string;
+    target?: string;
+    targetReps?: string;
+    time?: string;
+    sets: Array<SetType>;
+  }
+  index: number;
+  logs: Array<{
+    circuitId?: string;
+  }>
+}
+
 export function CircuitLog({ item, index, unitOptions, exerciseDetails, flatDetails }: CircuitLogProps) {
   const numSets = item.exercises.find((ex_item: ExerciseItemType) => ex_item.sets)?.sets as string;
   return (
@@ -209,6 +237,110 @@ export function ExerciseLog({ item, index, unitOptions, exerciseDetails, flatDet
             </div>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+export function PastCircuitLog({ exercise, index, logs }: PastLogProps) {
+  return (
+    <div key={`${exercise.circuitId}-${index}`} className="flex flex-col">
+      <div className="flex gap-x-1 flex-nowrap">
+        <div className="flex-none font-semibold w-28">{`Circuit #${logs.filter((e: any) => e.circuitId).findIndex((e: any) => e.circuitId === exercise.circuitId) + 1}:`}</div>
+      </div>
+      <div className="border-2 border-dashed border-gray-200 p-2 rounded shadow-inner flex flex-col gap-y-1">
+        {exercise.sets.map((set: SetType, idx: number) =>
+          <div key={`${index}-${idx}`} className="border rounded bg-slate-100 px-2 py-1">
+            <div className="flex w-full mb-1">
+              <div className="text-base font-semibold mr-6">{`Set ${set.set}`}</div>
+              <div className="flex flex-col sm:w-56 truncate">{set.name}</div>
+            </div>
+            <div className="flex flex-wrap gap-x-6">
+              {/* <div className="flex flex-col w-full sm:w-56 truncate">
+                <label className="text-xs font-semibold">Name</label>
+                <div>{set.name}</div>
+              </div> */}
+              {set.target === "reps" ? (
+                <>
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold">Target Reps</label>
+                    <div className="text-center">{set?.targetReps}</div>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold">Actual Reps</label>
+                    <div className="text-center">{set?.actualReps}</div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col">
+                  <label className="text-xs font-semibold capitalize">Time</label>
+                  <div className="text-center">{set?.time}</div>
+                </div>
+              )}
+              <div className="flex flex-col">
+                <label className="text-xs font-semibold">Load</label>
+                <div className="text-center">{set?.load}</div>
+              </div>
+              <div className="flex flex-col">
+                <label className="text-xs font-semibold">Load Units</label>
+                <div className="text-center">{set?.unit === "kilogram" ? "kg(s)" : set?.unit === "pound" ? "lb(s)": set?.unit}</div>
+              </div>
+              <div className="flex flex-col">
+                <label className="text-xs font-semibold">Notes</label>
+                <div className="text-start">{set?.notes}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function PastExerciseLog({ exercise, index, logs }: PastLogProps) {
+  return (
+    <div key={`${exercise.id}-${index}`} className="flex flex-col">
+      <div className="flex gap-x-1 flex-nowrap">
+        <div className="flex-none font-semibold w-28">{`Exercise #${logs.filter((e: any) => !e.circuitId).findIndex((e: any) => e.id === exercise.id) + 1}:`}</div>
+        <div className="flex-1 truncate">{exercise?.exerciseName}</div>
+      </div>
+      <div className="rounded shadow-inner flex flex-col gap-y-1">
+        {exercise.sets.map((set: SetType, idx: number) =>
+          <div key={`${index}-${idx}`} className="border rounded bg-slate-100 px-2 py-1">
+            <div className="text-base font-semibold mb-1">{`Set ${set.set}`}</div>
+            <div className="flex flex-wrap gap-x-6">
+              {exercise.target === "reps" ? (
+                <>
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold">Target Reps</label>
+                    <div className="text-center">{exercise?.targetReps}</div>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold">Actual Reps</label>
+                    <div className="text-center">{set?.actualReps}</div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col">
+                  <label className="text-xs font-semibold capitalize">Time</label>
+                  <div className="text-center">{exercise?.time}</div>
+                </div>
+              )}
+              <div className="flex flex-col">
+                <label className="text-xs font-semibold">Load</label>
+                <div className="text-center">{set?.load}</div>
+              </div>
+              <div className="flex flex-col">
+                <label className="text-xs font-semibold">Load Units</label>
+                <div className="text-center">{set?.unit === "kilogram" ? "kg(s)" : set?.unit === "pound" ? "lb(s)": set?.unit}</div>
+              </div>
+              <div className="flex flex-col">
+                <label className="text-xs font-semibold">Notes</label>
+                <div className="text-start">{set?.notes}</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -3,7 +3,7 @@ import { Form, Link, useLoaderData } from "@remix-run/react";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { exerciseDetailsMap } from "./edit";
-import { ArrowLeft } from "images/icons";
+import { ArrowLeft, ChevronLeft } from "images/icons";
 import CountdownTimer from "~/components/CountdownTimer";
 import { useMemo, useState } from "react";
 import Stopwatch from "~/components/Stopwatch";
@@ -178,17 +178,17 @@ export default function Log() {
       }
     }, [])
   }, [exerciseDetails])
-  // console.log("details", flattenedDetails)
+  // console.log("details", flattenedDetails, exerciseDetails)
   return (
     <Form method="post" className="p-6 md:p-8 flex flex-col h-full gap-y-3 select-none">
       <div className="flex">
         <Link to={`/app/workouts/${workout?.id}`}>
-          <ArrowLeft className="hover:text-accent" />
+          <ChevronLeft className="hover:text-accent" />
         </Link>
       </div>
       {/* Title */}
       <div className="flex justify-between items-center">
-        <div className="font-semibold text-lg">Workout Log</div>
+        <div className="font-semibold text-lg">New Workout Log</div>
         <div className="*:text-sm"><CurrentDate /></div>
         <input
           type="hidden"

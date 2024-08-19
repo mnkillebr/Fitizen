@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
 
-export default function CurrentDate() {
+type CurrentDateProps = {
+  incomingDate?: string;
+}
+
+export default function CurrentDate({ incomingDate }: CurrentDateProps) {
   const [currentDate, setCurrentDate] = useState<string>('');
 
   useEffect(() => {
-    const now = new Date();
+    const now = incomingDate ? new Date(incomingDate) : new Date();
     const formattedDate = now.toLocaleDateString('en-US', {
       weekday: 'short',
       day: 'numeric',
@@ -16,7 +20,7 @@ export default function CurrentDate() {
     });
 
     setCurrentDate(formattedDate);
-  }, []);
+  }, [incomingDate]);
 
   return <div>{currentDate}</div>;
 };

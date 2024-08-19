@@ -127,16 +127,18 @@ export default function Workouts() {
 
   const isSearching = navigation.formData?.has("q");
   const isCreatingWorkout = createWorkoutFetcher.formData?.get("_action") === "createWorkout";
-  const inCreateSubRoute = matches.map(m => m.id).some(id => createSubRoutes.includes(id));
+  // const inCreateSubRoute = matches.map(m => m.id).some(id => createSubRoutes.includes(id));
+  const inCreateSubRoute = matches.map(m => m.id).includes("routes/app/workouts/create");
   const inWorkoutDetailRoute = matches.map(m => m.id).includes("routes/app/workouts/$workoutId");
   const inEditSubRoute = matches.map(m => m.id).includes("routes/app/workouts/edit");
   const inLogSubRoute = matches.map(m => m.id).includes("routes/app/workouts/log");
+  const inLogViewSubRoute = matches.map(m => m.id).includes("routes/app/workouts/logview");
   const isNavigatingSubRoute =
     navigation.state === "loading" &&
     createPathnames.includes(navigation.location.pathname) &&
     navigation.formData === undefined;
 
-  if (inCreateSubRoute || inWorkoutDetailRoute || inEditSubRoute || inLogSubRoute) {
+  if (inCreateSubRoute || inWorkoutDetailRoute || inEditSubRoute || inLogSubRoute || inLogViewSubRoute) {
     return (
       <div className="flex flex-col h-full">
         <Outlet />
