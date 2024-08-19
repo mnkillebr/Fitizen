@@ -175,26 +175,39 @@ model RoutineExercise {
 }
 
 model WorkoutLog {
-  id          String           @id @default(cuid())
-  user        User          @relation(fields: [userId], references: [id])
-  userId      String
-  routine     Routine       @relation(fields: [routineId], references: [id])
-  routineId   String
-  date        DateTime      @default(now())
-  exerciseLogs ExerciseLog[]
+  id            String        @id @default(cuid())
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String
+  routine       Routine       @relation(fields: [routineId], references: [id])
+  routineId     String
+  date          DateTime      @default(now())
+  duration      String        
+  exerciseLogs  ExerciseLog[]
 }
 
 model ExerciseLog {
   id           String        @id @default(cuid())
-  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id])
+  workoutLog   WorkoutLog    @relation(fields: [workoutLogId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   workoutLogId String
-  exercise     Exercise   @relation(fields: [exerciseId], references: [id])
+  exercise     Exercise      @relation(fields: [exerciseId], references: [id])
   exerciseId   String
-  sets         Int?
-  reps         Int?
-  weight       Decimal?
-  unit         LoadUnit   @default(pound)
-  duration     Int?        // Duration in seconds
+  circuitId    String?
+  target       ExerciseTarget
+  time         String?
+  targetReps   String?
+  sets         ExerciseLogSet[]
+
+}
+
+model ExerciseLogSet {
+  id              String        @id @default(cuid())
+  exerciseLog     ExerciseLog   @relation(fields: [exerciseLogId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  exerciseLogId   String
+  set             String
+  actualReps      String?
+  load            Float?
+  notes           String?
+  unit            LoadUnit      @default(pound)
 }
 
 model Leaderboard {
@@ -262,6 +275,7 @@ enum LiftType {
 }
 
 enum LoadUnit {
+  bodyweight
   kilogram
   pound
 }

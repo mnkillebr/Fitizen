@@ -1,25 +1,22 @@
-import { BaseSyntheticEvent, useCallback, useState } from "react";
-import { Form, Link, useFetcher, useLoaderData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
+import { BaseSyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { Form, Link, useFetcher, useLoaderData, useNavigation, useSearchParams, } from '@remix-run/react';
 import { z } from 'zod';
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
-import { Field, Fieldset, Input, Label, Legend, Textarea } from "@headlessui/react";
+import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/node';
+import { getAllExercises } from '~/models/exercise.server';
+import { AnimatePresence, motion } from "framer-motion";
+import { workoutFormDataToObject, } from '~/utils/misc';
 import { ChevronDownIcon, PlusCircleIcon, XMarkIcon, Bars3Icon, TrashIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon as SearchIcon } from "@heroicons/react/24/outline";
-import { LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import clsx from "clsx";
-import { AnimatePresence, motion } from "framer-motion";
-import { getWorkout } from "~/models/workout.server";
+import { validateObject } from '~/utils/validation';
+import clsx from 'clsx';
+import { PrimaryButton } from '~/components/form';
+import Tooltip from '~/components/Tooltip';
+import { requireLoggedInUser } from '~/utils/auth.server';
+import { updateUserWorkoutWithExercises } from '~/models/workout.server';
+import { Exercise } from '../library';
 import { Exercise as ExerciseType, RoutineExercise as RoutineExerciseType } from "@prisma/client";
-import { requireLoggedInUser } from "~/utils/auth.server";
-import { FieldErrors } from "~/utils/validation";
-import { DndProvider, useDrag, useDrop } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import Tooltip from "~/components/Tooltip";
-import db from "~/db.server";
-import { Button, PrimaryButton } from "~/components/form";
-import { isEmptyObject } from "~/utils/misc";
-import { Exercise } from "../library";
-import { getAllExercises } from "~/models/exercise.server";
+import db from '~/db.server';
 
 const targetOptions = ["reps", "time"]
 
@@ -43,430 +40,7 @@ const restOptions = [
   "5 min",
 ]
 
-interface ExerciseProps {
-  id: string;
-  name: string;
-  body: string[];
-  order: number;
-  target: 'reps' | 'time';
-  reps?: number;
-  sets?: number;
-  rounds?: number;
-  time?: number;
-  rest?: number;
-  notes?: string;
-  contraction: string | null;
-  side?: "left" | "right";
-  itemType: "regular";
-}
-
-export interface Circuit {
-  id: string;
-  exercises: ExerciseProps[];
-  itemType: "circuit";
-  rounds: number;
-  rest: string;
-}
-
-type WorkoutItem = ExerciseProps | Circuit;
-
-function isWorkoutItemExercise(item: WorkoutItem): item is ExerciseProps {
-  return item.itemType === "regular";
-}
-function isWorkoutItemCircuit(item: WorkoutItem): item is Circuit {
-  return item.itemType === "circuit";
-}
-
-type DraggableExerciseItemProps = {
-  checkedItems: Array<WorkoutItem>;
-  handleCheckItem: (item: WorkoutItem) => void;
-  index: number;
-  item: WorkoutItem;
-  moveItem: (dragIndex: number, hoverIndex: number) => void;
-  ungroupFn: (item: Circuit) => void;
-  handleChange: (id: string, subId: string | null, field: string, value: string | number) => void;
-}
-
-const DraggableExerciseItem = ({
-  item,
-  handleCheckItem,
-  checkedItems,
-  index,
-  moveItem,
-  ungroupFn,
-  handleChange,
-}: DraggableExerciseItemProps) => {
-  const [{ isDragging }, drag, dragPreview] = useDrag({
-    type: 'exercise',
-    item: { index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  const [, drop] = useDrop({
-    accept: 'exercise',
-    hover(item: { index: number }) {
-      if (item.index !== index) {
-        moveItem(item.index, index);
-        item.index = index;
-      }
-    },
-  });
-
-  const onChangeRest = (event: BaseSyntheticEvent, id: string, subId: string | null) => handleChange(id, subId, "rest", event.target.value)
-  const onChangeTarget = (event: BaseSyntheticEvent, id: string, subId: string | null) => handleChange(id, subId, "target", event.target.value)
-  const onChangeReps = (reps: number, id: string, subId: string | null) => handleChange(id, subId, "reps", reps)
-  const onChangeTime = (event: BaseSyntheticEvent, id: string, subId: string | null) => handleChange(id, subId, "time", event.target.value)
-  const onChangeNotes = (event: BaseSyntheticEvent, id: string, subId: string | null) => handleChange(id, subId, "notes", event.target.value)
-
-  if (isWorkoutItemCircuit(item)) {
-    return (
-      <div
-        key={item.id}
-        ref={dragPreview}
-        className={clsx(
-          "border-2 border-dashed rounded-lg my-2 shadow-inner",
-          isDragging ? "opacity-50" : "",
-        )}
-      >
-        <div ref={drop} className="m-1 p-2 rounded-md bg-slate-100 shadow-md">
-          <div className="flex justify-between">
-            <div className="flex gap-2 mb-2">
-              <label className="text-xs self-end font-medium">Circuit of</label>
-              <input
-                type="number"
-                className="w-10 text-sm pl-2"
-                defaultValue={item.rounds ? item.rounds : 3}
-                min={1}
-                max={10}
-                onChange={(event) => {
-                  const rounds = parseInt(event.target.value)
-                  handleChange(item.id, null, "rounds", rounds)
-                }}
-              />
-              <label className="text-xs self-end font-medium">rounds</label>
-            </div>
-            <button className="text-xs font-medium underline" onClick={() => ungroupFn(item)}>Ungroup</button>
-          </div>
-          <div className="flex h-full w-full justify-between">
-            <div className="flex">
-              <input
-                type="checkbox"
-                className="mr-2 border-r checked:bg-yellow-400"
-                onChange={() => handleCheckItem(item)}
-                checked={checkedItems.map(checked => checked.id).includes(item.id)}
-              />
-              <div className="flex flex-col gap-1 divide-y-4">
-                {item.exercises.map((ex_item, ex_item_idx) => {
-                  return (
-                    <div className="flex flex-col gap-1 last:pt-1" key={`${ex_item.name}-${ex_item_idx}`}>
-                      <div className="flex flex-col justify-between">
-                        <label className="text-xs self-start font-medium">Name</label>
-                        <p className="min-w-40 max-w-60 truncate shrink select-none">{ex_item.name}</p>
-                      </div>
-                      <div className="flex gap-3 h-10">
-                        <div className="flex flex-col justify-between">
-                          <label className="text-xs self-start font-medium">Target</label>
-                          <select
-                            className="text-xs h-5 self-end"
-                            defaultValue={ex_item.target ? ex_item.target : "reps"}
-                            onChange={(event) => onChangeTarget(event, item.id, ex_item.id)}
-                          >
-                            {targetOptions.map((target, target_idx) => <option key={target_idx}>{target}</option>)}
-                          </select>
-                        </div>
-                        {ex_item.target === "reps" ? (
-                          <div className="flex flex-col justify-between">
-                            <label className="text-xs self-start font-medium">Reps</label>
-                            <input
-                              type="number"
-                              className="w-10 text-sm pl-2 h-5"
-                              defaultValue={ex_item.reps ? ex_item.reps : 10}
-                              onChange={(event) => {
-                                const sets = parseInt(event.target.value)
-                                onChangeReps(sets, item.id, ex_item.id)
-                              }}
-                            />
-                          </div>
-                        ) : ex_item.target === "time" ? (
-                          <div className="flex flex-col justify-between">
-                            <label className="text-xs self-start font-medium">Time</label>
-                            <select
-                              className="text-xs h-5 self-end"
-                              defaultValue={ex_item.time ? ex_item.time : "30 sec"}
-                              onChange={(event) => onChangeTime(event, item.id, ex_item.id)}
-                            >
-                              {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
-                            </select>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col justify-between">
-                            <label className="text-xs self-start font-medium">Reps</label>
-                            <input
-                              type="number"
-                              className="w-10 text-sm pl-2 h-5"
-                              defaultValue={ex_item.reps ? ex_item.reps : 10}
-                              onChange={(event) => {
-                                const sets = parseInt(event.target.value)
-                                onChangeReps(sets, item.id, ex_item.id)
-                              }}
-                            />
-                          </div>
-                        )}
-                        <div className="flex flex-col justify-between">
-                          <label className="text-xs self-start font-medium">Notes</label>
-                          <input
-                            type="text"
-                            className="w-36 text-sm px-2 h-5 self-end placeholder:text-xs"
-                            placeholder="tempo, weight, etc."
-                            defaultValue={ex_item.notes ? ex_item.notes : undefined}
-                            onChange={(event) => onChangeNotes(event, item.id, ex_item.id)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-            <div ref={drag} className="self-center">
-              <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing" />
-            </div>
-          </div>
-          <div className="flex gap-2 mt-2 justify-end">
-            <label className="text-xs self-end font-medium">Rest</label>
-            <select
-              className="text-xs h-5 self-end"
-              defaultValue={item.rest ? item.rest : "60 sec"}
-              onChange={(event) => onChangeRest(event, item.id, null)}
-            >
-              {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
-            </select>
-            <label className="text-xs self-end font-medium">between rounds</label>
-          </div>
-        </div>
-      </div>
-    )
-  } else if (isWorkoutItemExercise(item)) {
-    return (
-      <div
-        key={`${item.itemType}-${item.id}`}
-        ref={dragPreview}
-        className={clsx(
-          "bg-slate-100 rounded-lg my-2 shadow-md py-2",
-          isDragging ? "opacity-50" : "",
-        )}
-      >
-        <div ref={drop} className="flex items-center h-full">
-          <input
-            type="checkbox"
-            className="mx-2 border-r checked:bg-yellow-400"
-            onChange={() => handleCheckItem(item)}
-            checked={checkedItems.map(checked => checked.id).includes(item.id)}
-          />
-          {/* <p className="border-r w-8 text-center select-none">{idx+1}</p> */}
-          <div className="flex justify-between w-full">
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-col justify-between">
-                <label className="text-xs self-start font-medium">Name</label>
-                <p className="min-w-40 max-w-60 truncate shrink select-none">{item.name}</p>
-              </div>
-              <div className="flex flex-wrap max-w-full gap-3">
-                <div className="flex flex-col justify-between">
-                  <label className="text-xs self-start font-medium">Sets</label>
-                  <input
-                    type="number"
-                    className="w-10 text-sm pl-2 h-5"
-                    defaultValue={item.sets ? item.sets : 3}
-                    min={1}
-                    max={10}
-                    onChange={(event) => {
-                      const sets = parseInt(event.target.value)
-                      handleChange(item.id, null, "sets", sets)
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col justify-between">
-                  <label className="text-xs self-start font-medium">Target</label>
-                  <select
-                    className="text-xs h-5 self-end"
-                    defaultValue={item.target ? item.target : "reps"}
-                    onChange={(event) => onChangeTarget(event, item.id, null)}
-                  >
-                    {targetOptions.map((target, target_idx) => <option key={target_idx}>{target}</option>)}
-                  </select>
-                </div>
-                {item.target === "reps" ? (
-                  <div className="flex flex-col justify-between">
-                    <label className="text-xs self-start font-medium">Reps</label>
-                    <input
-                      type="number"
-                      className="w-10 text-sm pl-2 h-5"
-                      defaultValue={item.reps ? item.reps : 10}
-                      onChange={(event) => {
-                        const sets = parseInt(event.target.value)
-                        onChangeReps(sets, item.id, null)
-                      }}
-                    />
-                  </div>
-                ) : item.target === "time" ? (
-                  <div className="flex flex-col justify-between">
-                    <label className="text-xs self-start font-medium">Time</label>
-                    <select
-                      className="text-xs h-5 self-end"
-                      defaultValue={item.time ? item.time : "30 sec"}
-                      onChange={(event) => onChangeTime(event, item.id, null)}
-                    >
-                      {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
-                    </select>
-                  </div>
-                ) : (
-                  <div className="flex flex-col justify-between">
-                    <label className="text-xs self-start font-medium">Reps</label>
-                    <input
-                      type="number"
-                      className="w-10 text-sm pl-2 h-5"
-                      defaultValue={10}
-                      onChange={(event) => {
-                        const sets = parseInt(event.target.value)
-                        onChangeReps(sets, item.id, null)
-                      }}
-                    />
-                  </div>
-                )}
-                <div className="flex flex-col justify-between">
-                  <label className="text-xs self-start font-medium">Notes</label>
-                  <input
-                    type="text"
-                    className="w-36 text-sm px-2 h-5 self-end"
-                    placeholder="reps, tempo, etc."
-                    defaultValue={item.notes ? item.notes : undefined}
-                    onChange={(event) => onChangeNotes(event, item.id, null)}
-                  />
-                </div>
-                <div className="flex flex-col justify-between">
-                  <label className="text-xs self-start font-medium">Rest</label>
-                  <select
-                    className="text-xs h-5 self-end"
-                    defaultValue={item.rest ? item.rest : "60 sec"}
-                    onChange={(event) => onChangeRest(event, item.id, null)}
-                  >
-                    {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div ref={drag} className="self-center">
-              <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing mr-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-}
-
-type PanelItemProps = {
-  addCallbackFn: () => void;
-  removeCallbackFn: (items: Array<WorkoutItem>) => void;
-  handleMoveFn: (dragIndex: number, hoverIndex: number) => void;
-  handleCircuitFn: (items: Array<WorkoutItem>) => void;
-  handleUngroupFn: (item: Circuit) => void;
-  handleChangeFieldFn: (id: string, subId: string | null, field: string, value: string | number) => void;
-  panelText: string;
-  subItems?: Array<WorkoutItem>;
-}
-
-const PanelItem = ({
-  addCallbackFn,
-  removeCallbackFn,
-  handleMoveFn,
-  handleCircuitFn,
-  handleUngroupFn,
-  handleChangeFieldFn,
-  panelText,
-  subItems = [],
-}: PanelItemProps) => {
-  const [checkedSubItems, setCheckedSubItems] = useState<Array<WorkoutItem>>([]);
-
-  const handleCheckSubItem = (exercise: WorkoutItem) => {
-    return checkedSubItems.map(checked => checked.id).includes(exercise.id) ? setCheckedSubItems(checkedSubItems.filter(item => item.id !== exercise.id)) : setCheckedSubItems([...checkedSubItems, exercise]);
-  }
-  const handleRemoveCheckedSubItems = () => {
-    setCheckedSubItems([])
-    return removeCallbackFn(checkedSubItems)
-  }
-
-  const handleCreateCircuit = () => {
-    setCheckedSubItems([])
-    return handleCircuitFn(checkedSubItems.filter(subItem => subItem.itemType !== "circuit"))
-  }
-  // console.log(checkedSubItems.filter(subItem => subItem.itemType !== "circuit"))
-  return (
-    <div className="lg:w-2/3 xl:w-1/2">
-      <div className="flex justify-between">
-        <div className="flex *:px-1 gap-2 *:border *:border-black *:text-sm">
-          <button
-            className="hover:bg-slate-200 disabled:opacity-30"
-            disabled={!subItems.length}
-            onClick={() => subItems.length === checkedSubItems.length ? setCheckedSubItems([]) : setCheckedSubItems(subItems)}
-          >
-            {subItems.length >= 1 && subItems.length === checkedSubItems.length ? "Deselect All" : "Select All"}
-          </button>
-          {/* <button
-            className="hover:bg-slate-200 disabled:opacity-30"
-            disabled={checkedSubItems.length < 2}
-            onClick={handleCreateSuperset}
-          >
-            Superset
-          </button> */}
-          <button
-            className="hover:bg-slate-200 disabled:opacity-30"
-            disabled={checkedSubItems.filter(subItem => subItem.itemType !== "circuit").length < 2}
-            onClick={handleCreateCircuit}
-          >
-            Circuit
-          </button>
-          {/* <button
-            className="hover:bg-slate-200 disabled:opacity-30"
-            // disabled={checkedSubItems.length < 2}
-            // onClick={handleAddRest}
-          >
-            Add Rest
-          </button> */}
-        </div>
-        <button className="disabled:opacity-30" disabled={!checkedSubItems.length} onClick={handleRemoveCheckedSubItems}>
-          <Tooltip label="Delete" className="bottom-5 right-1">
-            <TrashIcon className="size-4 text-red-500" />
-          </Tooltip>
-        </button>
-      </div>
-      <div>
-        {subItems.map((subItem, idx) => (
-          <DraggableExerciseItem
-            key={`${subItem.itemType}-${subItem.id}`}
-            item={subItem}
-            index={idx}
-            handleCheckItem={handleCheckSubItem}
-            checkedItems={checkedSubItems}
-            moveItem={handleMoveFn}
-            ungroupFn={handleUngroupFn}
-            handleChange={handleChangeFieldFn}
-          />
-        ))}
-      </div>
-      <div className="border-2 border-dashed rounded-md px-3 py-2 flex flex-col justify-center items-center my-1">
-        <p className="text-sm text-slate-400">{panelText}</p>
-        <button onClick={addCallbackFn}>
-          <PlusCircleIcon className="size-10 text-accent"/>
-        </button>
-      </div>
-    </div>
-  )
-}
-
-function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undefined, exerciseDetails: Array<ExerciseType>) {
+export function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undefined, exerciseDetails: Array<ExerciseType>, dateId: boolean) {
   if (routineExercises) {
     const detailedExercises = routineExercises.map((item) => {
       const itemId = item.exerciseId
@@ -474,6 +48,7 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
       return {
         ...item,
         ...exerciseDetail,
+        id: dateId ? `${item.exerciseId}-${Date.now()}` : item.exerciseId,
       }
     })
     const nonGrouped = detailedExercises.filter(ex => !ex.circuitId)
@@ -488,16 +63,20 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
                 ...ex_item,
                 exercises: ex_item.exercises.concat(curr)
               }
+            } else {
+              return ex_item
             }
           })
         } else {
           return resultArr.concat({
             circuitId,
+            id: circuitId,
             orderInRoutine: curr.orderInRoutine,
             exercises: [curr]
           })
         }
       }
+      return resultArr
     }, [])
     const detailMappedExercises = [...nonGrouped, ...grouped].sort((a, b) => a.orderInRoutine - b.orderInRoutine)
     return detailMappedExercises
@@ -522,6 +101,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (workout !== null && workout.userId !== user.id) {
     throw redirect("/app", 401)
   }
+  if (!workout) {
+    throw json(
+      { message: "The workout you are attempting to edit does not exist"},
+      { status: 404, statusText: "Workout Not Found" }
+    )
+  }
   const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
   const exercises = await db.exercise.findMany({
     where: {
@@ -530,381 +115,805 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     }
   });
-  const exerciseDetails = exerciseDetailsMap(workout?.exercises, exercises)
+  const exerciseDetails = exerciseDetailsMap(workout?.exercises, exercises, true)
   return json({ workout, exerciseDetails, allExercises })
 }
 
-export default function Edit() {
-  const data = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const submit = useSubmit();
+// Define Zod schema for form validation
+const workoutSchema = z.object({
+  workoutName: z.string().min(1, "Workout name is required"),
+  workoutDescription: z.string().optional(),
+  exercises: z.array(z.object({
+    exerciseId: z.string(),
+    circuitId: z.string().optional(),
+    sets: z.string(),
+    target: z.string(),
+    reps: z.string().optional(),
+    time: z.string().optional(),
+    rest: z.string(),
+    notes: z.string().optional(),
+    orderInRoutine: z.string(),
+  })).min(1, "You must add at least one exercise"),
+});
 
-  const [openExercisesPanel, setOpenExercisesPanel] = useState(false);
-  const [openDescription, setOpenDescription] = useState(false);
-  const [selectedExercises, setSelectedExercises] = useState<Array<any>>(data.exerciseDetails);
-  const [workoutName, setWorkoutName] = useState(data.workout?.name);
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const [workoutDescription, setWorkoutDescription] = useState<string>(data.workout?.description || "");
-
-  const isSearching = navigation.formData?.has("q");
-  const isUpdatingWorkout = navigation.formData?.get("_action") === "updateCustomWorkout";
-
-  const toggleExercisesPanel = () => setOpenExercisesPanel(!openExercisesPanel);
-
-  const handleAddExercise = useCallback((exercise: WorkoutItem) => {
-    const newExercise = {
-      ...exercise,
-      target: "reps",
-      reps: 10,
-      sets: 3,
-      rest: "60 sec",
-      time: "30 sec",
-      itemType: "regular"
+export async function action({ request }: ActionFunctionArgs) {
+  const user = await requireLoggedInUser(request);
+  const url = new URL(request.url);
+  const workoutId = url.searchParams.get("id") as string;
+  const prevWorkout = await db.routine.findUnique({
+    where: { id: workoutId },
+    include: {
+      exercises: true,
     }
-    const currentExercises = selectedExercises
-    const isIncluded = currentExercises.map(sel_ex => sel_ex.id).includes(exercise.id);
-    const updatedExerciseList = isIncluded 
-      ? currentExercises.filter(sel_ex => sel_ex.id !== exercise.id)
-      : [...currentExercises, newExercise];
-    setSelectedExercises(updatedExerciseList)
-    updatedExerciseList.length && setErrors({ ...errors, "exercises": "" })
-  }, [selectedExercises])
-
-  const handleRemoveExercises = useCallback((exercises: Array<WorkoutItem>) => {
-    const currentExercises = selectedExercises
-    const comparisonIds = exercises.map(item => item.id);
-    const updatedExerciseList = currentExercises.filter(item => !comparisonIds.includes(item.id))
-      .concat(exercises.filter(item => !currentExercises.some(currentItem => currentItem.id === item.id)))
-    setSelectedExercises(updatedExerciseList)
-  }, [selectedExercises]);
-
-  const handleMoveExercise = useCallback((dragIndex: number, hoverIndex: number) => {
-    const currentExercises = selectedExercises
-    const draggedItem = currentExercises[dragIndex];
-    const updatedExerciseList = [...currentExercises];
-    updatedExerciseList.splice(dragIndex, 1);
-    updatedExerciseList.splice(hoverIndex, 0, draggedItem);
-    setSelectedExercises(updatedExerciseList)
-  }, [selectedExercises]);
-
-  const handleCircuit = useCallback((items: Array<WorkoutItem>) => {
-    const currentExercises = selectedExercises
-
-    // remove items 
-    const comparisonIds = items.map(item => item.id);
-    const updatedExerciseList = currentExercises.filter(item => !comparisonIds.includes(item.id))
-      .concat(items.filter(item => !currentExercises.some(currentItem => currentItem.id === item.id)))
-    
-    const circuitId = updatedExerciseList.filter(item => item.itemType === "circuit").length ? `circuit-${updatedExerciseList.filter(item => item.itemType === "circuit").length + 1}` : "circuit-1"
-    // add items as circuit
-    const listWithCircuit = [...updatedExerciseList, {
-      id: circuitId,
-      exercises: items.map(item => ({
-        ...item,
-        rounds: 3,
-        rest: "60 sec"
-      })),
-    }]
-
-    setSelectedExercises(listWithCircuit)
-  }, [selectedExercises])
-
-  const handleUngroup = useCallback((item: Circuit) => {
-    const currentExercises = selectedExercises
-
-    // remove item
-    const filteredList = currentExercises.filter(curr_ex => curr_ex.id !== item.id)
-    // console.log('filtered b4', filteredList)
-    // add items as individual exercises
-    const updatedExerciseList = [
-      ...filteredList,
-      ...item.exercises.map(subItem => ({
-        ...subItem,
-        circuitId: "",
-        sets: subItem.rounds,
-      })),
-    ]
-    setSelectedExercises(updatedExerciseList)
-  }, [selectedExercises])
-
-  const handleChangeField = useCallback((id: string, subId: string | null, field: string, value: string | number) => {
-    const currentExercises = selectedExercises
-    const updatedExerciseList = currentExercises.map(exercise => {
-      if (exercise.id === id) {
-        if (exercise.exercises) {
-          if (subId) {
-            return {
-              ...exercise,
-              exercises: exercise.exercises.map((item: ExerciseProps) => {
-                if (item.id === subId) {
-                  return {
-                    ...item,
-                    [field]: value,
-                  }
-                } else {
-                  return item
-                }
-              }),
-            }
-          } else {
-            return {
-              ...exercise,
-              exercises: exercise.exercises.map((item: ExerciseProps) => {
-                return {
-                  ...item,
-                  [field]: value,
-                }
-              }),
-            }
-          }
-        } else {
-          return {
+  });
+  const formData = await request.formData();
+  switch (formData.get("_action")) {
+    case "updateUserWorkout": {
+      return validateObject(
+        workoutFormDataToObject(formData),
+        workoutSchema,
+        async (data) => {      
+          const workoutName = data.workoutName;
+          const workoutDescription = data.workoutDescription as string;
+          const mappedExercises = data.exercises.map((exercise: any, idx: number) => ({
             ...exercise,
-            [field]: value,
-          }
+            exerciseId: exercise.exerciseId.split("-")[0],
+            orderInRoutine: parseInt(exercise.orderInRoutine),
+          }))
+          const prevExercises = prevWorkout?.exercises;
+          const newExercises = mappedExercises.reduce((result: any, curr: any) => {
+            let resultArr = result
+            if (curr) {
+              if (prevExercises && !prevExercises.map((prev: any) => prev.exerciseId).includes(curr.exerciseId)) {
+                return resultArr.concat(curr)
+              }
+            }
+            return resultArr
+          }, []);
+          const updatedExercises = mappedExercises.filter((selected: any) => !newExercises.map((ex: any) => ex.exerciseId).includes(selected.exerciseId));
+          const deletedExercises = prevExercises ? prevExercises.filter((prev: any) => !newExercises.map((ex: any) => ex.exerciseId).includes(prev.exerciseId) && !updatedExercises.map((ex: any) => ex.exerciseId).includes(prev.exerciseId)) : [];
+          const deletedExerciseIds = deletedExercises.map((ex_item: any) => ex_item.exerciseId);
+
+          await updateUserWorkoutWithExercises(user.id, workoutId, workoutName, workoutDescription, updatedExercises, newExercises, deletedExerciseIds)
+          return redirect(`/app/workouts/${workoutId}`);
+        },
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+  }
+  
+  return null
+}
+
+interface updateWorkoutFetcherType extends ActionFunctionArgs{
+  errors?: {
+    workoutName?: string;
+    workoutDescription?: string;
+    exercises?: string;
+  }
+}
+
+type Card = {
+  id: string;
+  name: string;
+};
+
+type WorkoutCard = Card & {
+  target: string;
+};
+
+type ComplexCard = {
+  id: string;
+  circuitId: string;
+  exercises: WorkoutCard[];
+}
+
+const StrictModeDroppable = ({ children, ...props }: any) => {
+  const [enabled, setEnabled] = useState(false);
+  useEffect(() => {
+    const animation = requestAnimationFrame(() => setEnabled(true));
+    return () => {
+      cancelAnimationFrame(animation);
+      setEnabled(false);
+    };
+  }, []);
+  if (!enabled) {
+    return null;
+  }
+  return <Droppable {...props}>{children}</Droppable>;
+};
+
+export default function Edit() {
+  const { allExercises, exerciseDetails, workout } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const updateWorkoutFetcher = useFetcher<updateWorkoutFetcherType>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isSearching = navigation.formData?.has("q");
+  const isSavingWorkout = navigation.formData?.get("_action") === "createUserWorkout";
+
+  const [workoutCards, setWorkoutCards] = useState<Array<WorkoutCard | ComplexCard>>(exerciseDetails);
+  const [selectedCards, setSelectedCards] = useState<Set<string>>(new Set());
+  const [openDescription, setOpenDescription] = useState(false);
+  const [openExercisesPanel, setOpenExercisesPanel] = useState(false);
+
+    const toggleExercisesPanel = () => setOpenExercisesPanel(!openExercisesPanel);
+
+  const handleDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+
+    if (!destination) return;
+
+    if (source.droppableId === 'availableCards' && destination.droppableId === 'workoutCards') {
+      const card = allExercises[source.index];
+      // Create a new unique ID for the duplicate card
+      const newId = `${card.id}-${Date.now()}`;
+      const newDeckCard: WorkoutCard = {
+        ...card,
+        id: newId,
+        target: "reps",
+      };
+      
+      setWorkoutCards(prevWorkoutCards => {
+        const newWorkoutCards = Array.from(prevWorkoutCards);
+        newWorkoutCards.splice(destination.index, 0, newDeckCard);
+        return newWorkoutCards;
+      });
+    } else if (source.droppableId === 'workoutCards' && destination.droppableId === 'workoutCards') {
+      setWorkoutCards(prevWorkoutCards => {
+        const newWorkoutCards = Array.from(prevWorkoutCards);
+        const [reorderedItem] = newWorkoutCards.splice(source.index, 1);
+        newWorkoutCards.splice(destination.index, 0, reorderedItem);
+        return newWorkoutCards;
+      });
+    }
+  };
+
+  const handleAddExercise = (exercise: { id: string, name: string }) => {
+    const newId = `${exercise.id}-${Date.now()}`;
+    const newDeckCard: WorkoutCard = {
+      ...exercise,
+      id: newId,
+      target: "reps",
+    };
+    
+    setWorkoutCards(prevWorkoutCards => [...prevWorkoutCards, newDeckCard]);
+  }
+
+  const handleCardSelect = (cardId: string) => {
+    setSelectedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cardId)) {
+        newSet.delete(cardId);
+      } else {
+        newSet.add(cardId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    setSelectedCards(new Set(workoutCards.map(card => card.id)));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedCards(new Set());
+  };
+
+  const handleDeleteSelected = () => {
+    setWorkoutCards(prev => prev.filter(card => !selectedCards.has(card.id)));
+    setSelectedCards(new Set());
+  };
+
+  const handleCircuit = useCallback(() => {
+    setWorkoutCards((prev: any) => {
+      const circuitCards = prev.filter((card: WorkoutCard) => selectedCards.has(card.id))
+      const filteredDeck = prev.filter((card: WorkoutCard) => !selectedCards.has(card.id))
+      return [...filteredDeck, {
+        id: circuitCards.map((card: WorkoutCard) => card.id).join("-"),
+        circuitId: `circuit-${Date.now()}`,
+        exercises: circuitCards,
+      }]
+    })
+    setSelectedCards(new Set());
+  }, [[workoutCards, setWorkoutCards, selectedCards, setSelectedCards]])
+
+  const handleChange = useCallback((id: string, field: string, value: string | number) => {
+    setWorkoutCards(prev => prev.map(card => {
+      if (card.id === id) {
+        return {
+          ...card,
+          [field]: value
         }
       } else {
-        return exercise
+        return card
       }
+    }))
+  }, [workoutCards, setWorkoutCards])
+
+  const handleUngroup = useCallback((circuitId: string) => {
+    setWorkoutCards((prev: Array<WorkoutCard | ComplexCard>) => {
+      const filteredDeck = prev.filter(card => card.id !== circuitId)
+      const circuitExercises = prev.find(card => card.id === circuitId)?.exercises
+      return [...filteredDeck, ...circuitExercises]
     })
-    setSelectedExercises(updatedExerciseList)
-  }, [selectedExercises])
+  }, [workoutCards, setWorkoutCards])
 
-  const handleUpdateWorkout = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!workoutName) {
-      return setErrors({ ...errors, "workoutName": "Name cannot be blank", })
-    } else if (isEmptyObject(selectedExercises)) {
-      return setErrors({ ...errors, "exercises": "You must add at least one exercise" })
-    }
-    if (isEmptyObject(errors)) {
-      const formData = new FormData();
-      const workoutId = data.workout?.id as string;
-      const orderMappedExercises = selectedExercises.reduce((result, curr) => {
-        let resultArr = result
-        if (curr) {
-          if (curr.exercises) {
-            const mappedGroup = curr.exercises.map((ex: any) => ({
-              ...ex,
-              circuitId: curr.id,
-            }))
-            return resultArr.concat(mappedGroup)
-          } else {
-            return resultArr.concat(curr)
-          }
+  const onChangeCircuitRounds = useCallback((cardId: string, sets: string) => {
+    setWorkoutCards((prev: Array<WorkoutCard | ComplexCard>) => prev.map((card: any) => {
+      if (card.id === cardId) {
+        return {
+          ...card,
+          exercises: card.exercises.map((exercise: WorkoutCard) => ({
+            ...exercise,
+            sets,
+          }))
         }
-        return resultArr
-      }, []).map((selected: any, idx: number) => ({
-        ...selected,
-        orderInRoutine: idx + 1,
-      }))
-      const prevExercises = data.exerciseDetails.reduce((result: any, curr: any) => {
-        let resultArr = result
-        if (curr) {
-          if (curr.exercises) {
-            return resultArr.concat(curr.exercises)
-          } else {
-            return resultArr.concat(curr)
-          }
-        }
-        return resultArr
-      }, [])
-      const newExercises = orderMappedExercises.reduce((result: any, curr: any) => {
-        let resultArr = result
-        if (curr) {
-          if (curr.exercises) {
-            const newFilter = curr.exercises.filter((ex: any) => !prevExercises.map((prev: any) => prev.exerciseId).includes(ex.exerciseId))
-            return resultArr.concat(newFilter)
-          } else if (!prevExercises.map((prev: any) => prev.exerciseId).includes(curr.exerciseId)) {
-            return resultArr.concat(curr)
-          }
-        }
-        return resultArr
-      }, [])
-      const updatedExercises = orderMappedExercises.filter((selected: any) => !newExercises.map((ex: any) => ex.exerciseId).includes(selected.exerciseId))
-      const deletedExercises = prevExercises.filter((prev: any) => !newExercises.map((ex: any) => ex.exerciseId).includes(prev.exerciseId) && !updatedExercises.map((ex: any) => ex.exerciseId).includes(prev.exerciseId))
-      formData.append("_action", "updateCustomWorkout")
-      formData.append("id", workoutId)
-      formData.append("name", workoutName)
-      formData.append("description", workoutDescription)
-      formData.append("updatedExercises", JSON.stringify(updatedExercises));
-      formData.append("newExercises", JSON.stringify(newExercises));
-      formData.append("deletedExercises", JSON.stringify(deletedExercises));
-      // console.log(updatedExercises, newExercises, deletedExercises)
-  
-      return submit(formData, { method: "post", action: "/app/workouts" });
-    }
-  }, [selectedExercises, workoutName, workoutDescription, errors, setErrors, data.workout, data.exerciseDetails])
+      } else {
+        return card
+      }
+    }))
+  }, [workoutCards, setWorkoutCards])
 
-  console.log(data)
+  const onChangeCircuitRest = useCallback((cardId: string, rest: string) => {
+    setWorkoutCards((prev: Array<WorkoutCard | ComplexCard>) => prev.map((card: any) => {
+      if (card.id === cardId) {
+        return {
+          ...card,
+          exercises: card.exercises.map((exercise: WorkoutCard) => ({
+            ...exercise,
+            rest,
+          }))
+        }
+      } else {
+        return card
+      }
+    }))
+  }, [workoutCards, setWorkoutCards])
+
+  const onChangeCircuitTarget = useCallback((circuitId: string, circuitExerciseId: string, target: string) => {
+    setWorkoutCards((prev: Array<WorkoutCard | ComplexCard>) => prev.map((card: any) => {
+      if (card.id === circuitId) {
+        return {
+          ...card,
+          exercises: card.exercises.map((exercise: WorkoutCard) => {
+            if (exercise.id === circuitExerciseId) {
+              return {
+                ...exercise,
+                target,
+              }
+            } else {
+              return exercise
+            }
+          })
+        }
+      } else {
+        return card
+      }
+    }))
+  }, [workoutCards, setWorkoutCards])
+
+  const onChangeTarget = (event: BaseSyntheticEvent, id: string) => handleChange(id, "target", event.target.value)
+
+  const flattenedWorkoutCards = useMemo(() => {
+    return workoutCards.reduce((result, curr) => {
+      let resultArr = result
+      if (curr.exercises) {
+        return resultArr.concat(curr.exercises)
+      } else {
+        return resultArr.concat(curr)
+      }
+    }, [])
+  }, [workoutCards])
+
   return (
     <>
-      <DragDropContext onDragEnd={() => {}}>
-        <div className="px-4 md:px-6 py-6 md:py-8 flex flex-col gap-y-2 h-full relative justify-between">
-          <div className="px-2 overflow-y-auto">
-            <Fieldset className="space-y-4 rounded-xl bg-white/5">
-              <Legend className="text-base/7 font-semibold">Edit Workout</Legend>
-              <Field className="flex flex-col">
-                <Label className="text-sm/6 font-medium">Name<span className="text-xs ml-1">*</span></Label>
-                <Input
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="flex h-full">
+          {/* Edit Workout Form */}
+          <updateWorkoutFetcher.Form method="post" className="flex flex-col h-full w-full sm:w-1/2 p-6 sm:p-4">
+            <h2 className="mb-2 text-lg font-semibold">Edit Workout</h2>
+            <fieldset className="space-y-4 rounded-xl bg-white/5">
+              <div className="flex flex-col">
+                <label className="text-sm/6 font-medium">Name<span className="text-xs ml-1">*</span></label>
+                <input
                   type="text"
-                  value={workoutName}
+                  id="workoutName"
+                  name="workoutName"
                   autoComplete="off"
-                  onChange={(e) => {
-                    const inputValue = e.target.value
-                    setWorkoutName(inputValue)
-                    inputValue.length ? setErrors({ ...errors, "workoutName": "" }) : null
-                  }}
+                  defaultValue={workout?.name}
+                  required
                   className={clsx(
-                    "p-2 rounded-md border-2 focus:outline-accent lg:w-2/3 xl:w-1/2 text-sm/6",
-                    errors["workoutName"] ? "border-red-500" : ""
+                    "p-2 rounded-md border-2 focus:outline-accent /*lg:w-2/3 xl:w-1/2*/ text-sm/6",
+                    updateWorkoutFetcher.data?.errors?.workoutName ? "border-red-500" : ""
                   )}
                   placeholder="Name your workout"
                 />
-                {errors["workoutName"] ? <span className="text-red-500 text-xs">{errors["workoutName"]}</span> : null}
-              </Field>
-              <Field className="flex flex-col">
-                <button
-                  className="w-full flex justify-between items-center focus:outline-none lg:w-2/3 xl:w-1/2"
-                  onClick={() => setOpenDescription(!openDescription)}
+                {updateWorkoutFetcher.data?.errors?.workoutName ? <span className="text-red-500 text-xs">{updateWorkoutFetcher.data?.errors?.workoutName}</span> : null}
+              </div>
+              <div className="flex flex-col">
+              <button
+                className="w-full flex justify-between items-center focus:outline-none /*lg:w-2/3 xl:w-1/2*/"
+                onClick={(event) => {
+                  event.preventDefault();
+                  setOpenDescription(!openDescription);
+                }}
+              >
+                <label className="text-sm/6 font-medium">Description</label>
+                <motion.div
+                  animate={{ rotate: openDescription ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <Label className="text-sm/6 font-medium">Description</Label>
+                  <ChevronDownIcon className="w-5 h-5" />
+                </motion.div>
+              </button>
+              <AnimatePresence initial={false}>
+                {openDescription && (
                   <motion.div
-                    animate={{ rotate: openDescription ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial="collapsed"
+                    animate="open"
+                    exit="collapsed"
+                    variants={{
+                      open: { opacity: 1, height: "auto" },
+                      collapsed: { opacity: 0, height: 0 }
+                    }}
+                    transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
                   >
-                    <ChevronDownIcon className="w-5 h-5" />
+                    <textarea
+                      className="p-2 rounded-md border-2 focus:outline-accent /*lg:w-2/3 xl:w-1/2*/ text-sm/6 resize-none w-full"
+                      placeholder="Optional"
+                      name="workoutDescription"
+                      id="workoutDescription"
+                      defaultValue={workout?.description ? workout.description : undefined}
+                      autoFocus
+                      rows={3}
+                    />
                   </motion.div>
-                </button>
-                {/* <Description className="text-xs">
-                  A good way to reference the goals of the workout
-                </Description> */}
-                <AnimatePresence initial={false}>
-                  {openDescription && (
-                    <motion.div
-                      initial="collapsed"
-                      animate="open"
-                      exit="collapsed"
-                      variants={{
-                        open: { opacity: 1, height: "auto" },
-                        collapsed: { opacity: 0, height: 0 }
+                )}
+              </AnimatePresence>
+            </div>
+            </fieldset>
+            <div className="mt-2">
+              <label className="text-sm/6 font-medium">Exercises<span className="text-xs ml-1">*</span></label>
+            </div>
+            <div className="flex gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => workoutCards.length === selectedCards.size ? handleDeselectAll() : handleSelectAll()}
+                className="bg-slate-200 hover:bg-slate-300 disabled:opacity-30 disabled:cursor-not-allowed px-2 py-1 rounded"
+                disabled={!workoutCards.length}
+              >
+                {workoutCards.length >= 1 && workoutCards.length === selectedCards.size ? "Deselect All" : "Select All"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCircuit}
+                disabled={selectedCards.size < 2}
+                className="bg-slate-200 hover:bg-slate-300 disabled:opacity-30 disabled:cursor-not-allowed px-2 py-1 rounded"
+              >
+                Circuit
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                className="px-2 py-1 rounded disabled:opacity-30"
+                disabled={!selectedCards.size}
+              >
+                <Tooltip label="Delete" className="bottom-5 left-0 text-sm">
+                  <TrashIcon className="size-4 text-red-500" />
+                </Tooltip>
+              </button>
+            </div>
+            <StrictModeDroppable droppableId="workoutCards">
+              {(provided: DroppableProvided) => (
+                <motion.div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  initial="closedDescription"
+                  animate={openDescription ? "openDescription" : "closedDescription"}
+                  variants={{
+                    openDescription: { height: "calc(100% - 16rem)" },
+                    closedDescription: { height: "calc(100% - 14rem)" },
+                  }}
+                  transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                  className="overflow-y-auto flex flex-col shadow-inner bg-slate-200 rounded-md p-1 mt-1 mb-2"
+                >
+                  {workoutCards.map((card: any, index: number) => (
+                    <Draggable key={card.id} draggableId={card.id} index={index}>
+                      {(provided: DraggableProvided) => {
+                        if (card.circuitId) {
+                          return (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="flex flex-col mb-2 p-2 bg-gray-100 rounded shadow"
+                            >
+                              <div className="flex justify-between">
+                                <div className="flex gap-2 mb-2">
+                                  <label className="text-xs self-end font-medium">Circuit of</label>
+                                  <input
+                                    type="number"
+                                    className="w-10 text-sm pl-2"
+                                    defaultValue={card.exercises.find((ex_item: any) => ex_item.sets) ? card.exercises.find((ex_item: any) => ex_item.sets).sets : 3}
+                                    min={1}
+                                    max={10}
+                                    onChange={(event) => {
+                                      const rounds = event.target.value
+                                      onChangeCircuitRounds(card.id, rounds)
+                                    }}
+                                  />
+                                  <label className="text-xs self-end font-medium">rounds</label>
+                                </div>
+                                <button className="text-xs font-medium underline" onClick={() => handleUngroup(card.id)}>Ungroup</button>
+                              </div>
+                              <div className="flex h-full w-full justify-between">
+                                <div className="flex">
+                                  <input
+                                    type="checkbox"
+                                    className="mr-2 border-r checked:bg-yellow-400"
+                                    checked={selectedCards.has(card.id)}
+                                    onChange={() => handleCardSelect(card.id)}
+                                  />
+                                  <div className="flex flex-col gap-2 divide-y-4">
+                                    {card.exercises.map((ex_item: any, ex_item_idx: number) => {
+                                      const exerciseIndex = flattenedWorkoutCards.findIndex((workoutCard: any) => workoutCard.id === ex_item.id)
+                                      return (
+                                        <div className="flex flex-col gap-1 last:pt-1" key={`${ex_item.name}-${ex_item_idx}`}>
+                                          <input type="hidden" name={`exercises[${exerciseIndex}].orderInRoutine`} value={exerciseIndex+1} />
+                                          <input type="hidden" name={`exercises[${exerciseIndex}].circuitId`} value={card.circuitId} />
+                                          <input type="hidden" name={`exercises[${exerciseIndex}].sets`} value={ex_item.sets ? ex_item.sets : 3} />
+                                          <input type="hidden" name={`exercises[${exerciseIndex}].rest`} value={ex_item.rest ? ex_item.rest : "60 sec"} />
+                                          <div className="flex flex-col justify-between">
+                                            <label className="text-xs self-start font-medium">Name</label>
+                                            <p className="min-w-40 max-w-60 truncate shrink select-none">{ex_item.name}</p>
+                                          </div>
+                                          <div className="flex gap-3 h-10">
+                                            <div className="flex flex-col justify-between">
+                                              <label className="text-xs self-start font-medium">Target</label>
+                                              <select
+                                                className="text-xs h-5 self-end"
+                                                defaultValue={ex_item.target ? ex_item.target : "reps"}
+                                                name={`exercises[${exerciseIndex}].target`}
+                                                onChange={(event) => onChangeCircuitTarget(card.id, ex_item.id, event.target.value)}
+                                              >
+                                                {targetOptions.map((target, target_idx) => <option key={target_idx}>{target}</option>)}
+                                              </select>
+                                            </div>
+                                            {ex_item.target === "reps" ? (
+                                              <div className="flex flex-col justify-between">
+                                                <label className="text-xs self-start font-medium">Reps</label>
+                                                <input
+                                                  type="number"
+                                                  className="w-10 text-sm pl-2 h-5"
+                                                  defaultValue={ex_item.reps ? ex_item.reps : 10}
+                                                  name={`exercises[${exerciseIndex}].reps`}
+                                                />
+                                              </div>
+                                            ) : ex_item.target === "time" ? (
+                                              <div className="flex flex-col justify-between">
+                                                <label className="text-xs self-start font-medium">Time</label>
+                                                <select
+                                                  className="text-xs h-5 self-end"
+                                                  defaultValue={ex_item.time ? ex_item.time : "30 sec"}
+                                                  name={`exercises[${exerciseIndex}].time`}
+                                                >
+                                                  {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
+                                                </select>
+                                              </div>
+                                            ) : (
+                                              <div className="flex flex-col justify-between">
+                                                <label className="text-xs self-start font-medium">Reps</label>
+                                                <input
+                                                  type="number"
+                                                  className="w-10 text-sm pl-2 h-5"
+                                                  defaultValue={ex_item.reps ? ex_item.reps : 10}
+                                                  name={`exercises[${exerciseIndex}].reps`}
+                                                />
+                                              </div>
+                                            )}
+                                            <div className="flex flex-col justify-between">
+                                              <label className="text-xs self-start font-medium">Notes</label>
+                                              <input
+                                                type="text"
+                                                className="w-36 text-sm px-2 h-5 self-end placeholder:text-xs"
+                                                placeholder="tempo, weight, etc."
+                                                defaultValue={ex_item.notes ? ex_item.notes : undefined}
+                                                name={`exercises[${exerciseIndex}].notes`}
+                                              />
+                                            </div>
+                                          </div>
+                                          <input type="hidden" name={`exercises[${exerciseIndex}].exerciseId`} value={ex_item.id} />
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                                <div className="self-center">
+                                  <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing" />
+                                </div>
+                              </div>
+                              <div className="flex gap-2 mt-2 justify-end">
+                                <label className="text-xs self-end font-medium">Rest</label>
+                                <select
+                                  className="text-xs h-5 self-end"
+                                  defaultValue={card.exercises.find((ex_item: any) => ex_item.rest) ? card.exercises.find((ex_item: any) => ex_item.rest).rest : "60 sec"}
+                                  onChange={(event) => {
+                                    const rest = event.target.value
+                                    onChangeCircuitRest(card.id, rest)
+                                  }}
+                                >
+                                  {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
+                                </select>
+                                <label className="text-xs self-end font-medium">between rounds</label>
+                              </div>
+                            </div>
+                          )
+                        } else {
+                          const exerciseIndex = flattenedWorkoutCards.findIndex((workoutCard: any) => workoutCard.id === card.id)
+                          return (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="flex items-center gap-2 mb-2 p-2 bg-gray-100 rounded shadow"
+                            >
+                              <input type="hidden" name={`exercises[${exerciseIndex}].orderInRoutine`} value={exerciseIndex+1} />
+                              <input type="hidden" name={`exercises[${exerciseIndex}].exerciseId`} value={card.id} />
+                              <input
+                                type="checkbox"
+                                checked={selectedCards.has(card.id)}
+                                onChange={() => handleCardSelect(card.id)}
+                              />
+                              <div className="flex justify-between w-full">
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex flex-col justify-between">
+                                    <label className="text-xs self-start font-medium">Name</label>
+                                    <p className="min-w-40 max-w-60 truncate shrink select-none">{card.name}</p>
+                                  </div>
+                                  <div className="flex flex-wrap max-w-full gap-3">
+                                    <div className="flex flex-col justify-between">
+                                      <label className="text-xs self-start font-medium">Sets</label>
+                                      <input
+                                        type="number"
+                                        className="w-10 text-sm pl-2 h-5"
+                                        defaultValue={card.sets ? card.sets : "3"}
+                                        min={1}
+                                        max={10}
+                                        name={`exercises[${exerciseIndex}].sets`}
+                                      />
+                                    </div>
+                                    <div className="flex flex-col justify-between">
+                                      <label className="text-xs self-start font-medium">Target</label>
+                                      <select
+                                        className="text-xs h-5 self-end"
+                                        defaultValue={card.target ? card.target : "reps"}
+                                        name={`exercises[${exerciseIndex}].target`}
+                                        // value={card.target}
+                                        onChange={(event) => onChangeTarget(event, card.id)}
+                                      >
+                                        {targetOptions.map((target, target_idx) => <option key={target_idx}>{target}</option>)}
+                                      </select>
+                                    </div>
+                                    {card.target === "reps" ? (
+                                      <div className="flex flex-col justify-between">
+                                        <label className="text-xs self-start font-medium">Reps</label>
+                                        <input
+                                          type="number"
+                                          className="w-10 text-sm pl-2 h-5"
+                                          defaultValue={card.reps ? card.reps : "10"}
+                                          name={`exercises[${exerciseIndex}].reps`}
+                                        />
+                                      </div>
+                                    ) : card.target === "time" ? (
+                                      <div className="flex flex-col justify-between">
+                                        <label className="text-xs self-start font-medium">Time</label>
+                                        <select
+                                          className="text-xs h-5 self-end"
+                                          defaultValue={card.time ? card.time : "30 sec"}
+                                          name={`exercises[${exerciseIndex}].time`}
+                                        >
+                                          {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
+                                        </select>
+                                      </div>
+                                    ) : (
+                                      <div className="flex flex-col justify-between">
+                                        <label className="text-xs self-start font-medium">Reps</label>
+                                        <input
+                                          type="number"
+                                          className="w-10 text-sm pl-2 h-5"
+                                          defaultValue={card.reps ? card.reps : "10"}
+                                          name={`exercises[${exerciseIndex}].reps`}
+                                        />
+                                      </div>
+                                    )}
+                                    <div className="flex flex-col justify-between">
+                                      <label className="text-xs self-start font-medium">Notes</label>
+                                      <input
+                                        type="text"
+                                        className="w-36 text-sm px-2 h-5 self-end"
+                                        placeholder="reps, tempo, etc."
+                                        name={`exercises[${exerciseIndex}].notes`}
+                                        defaultValue={card.notes ? card.notes : undefined}
+                                      />
+                                    </div>
+                                    <div className="flex flex-col justify-between">
+                                      <label className="text-xs self-start font-medium">Rest</label>
+                                      <select
+                                        className="text-xs h-5 self-end"
+                                        defaultValue={card.rest ? card.rest : "60 sec"}
+                                        name={`exercises[${exerciseIndex}].rest`}
+                                      >
+                                        {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
+                                      </select>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="self-center">
+                                  <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing mr-2" />
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
                       }}
-                      transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-                    >
-                      <Textarea
-                        className="p-2 rounded-md border-2 focus:outline-accent lg:w-2/3 xl:w-1/2 text-sm/6 resize-none w-full"
-                        placeholder="Optional"
-                        autoFocus
-                        rows={3}
-                        value={workoutDescription}
-                        onChange={(e) => setWorkoutDescription(e.target.value)}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </Field>
-            </Fieldset>
-            <DndProvider backend={HTML5Backend}>
-              <div className="mt-4">
-                <p className="text-sm/6 font-medium">Exercises<span className="text-xs ml-1">*</span></p>
-                <PanelItem
-                  addCallbackFn={toggleExercisesPanel}
-                  removeCallbackFn={handleRemoveExercises}
-                  handleMoveFn={handleMoveExercise}
-                  handleCircuitFn={handleCircuit}
-                  handleUngroupFn={handleUngroup}
-                  handleChangeFieldFn={handleChangeField}
-                  panelText="Add exercise(s)"
-                  subItems={selectedExercises}
-                />
-              </div>
-            </DndProvider>
-            {errors["exercises"] ? <span className="text-red-500 text-xs">{errors["exercises"]}</span> : null}
-          </div>
-          <div className="w-full lg:w-2/3 xl:w-1/2 flex flex-none gap-x-2 items-center px-2">
-            <Link to={`/app/workouts/${data.workout?.id}`} className="flex-1">
-              <Button className="w-full border-2 text-accent border-accent hover:bg-gray-50">
-                Cancel
-              </Button>
-            </Link>
-            <Form onSubmit={handleUpdateWorkout} className="w-1/2">
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                  <p className="hidden sm:flex h-full text-sm text-slate-400 justify-center items-center p-4 border-2 bg-white border-dashed border-gray-300 rounded-md select-none">
+                    Drag 'n' drop exercise(s) here
+                  </p>
+                  <div
+                    className="sm:hidden h-full border-2 border-dashed bg-white rounded-md px-3 py-2 flex flex-col justify-center items-center my-1 cursor-pointer"
+                    onClick={toggleExercisesPanel}
+                  >
+                    <p className="text-sm text-slate-400 select-none">Add exercise (s)</p>
+                    <PlusCircleIcon className="size-10 text-accent"/>
+                  </div>
+                </motion.div>
+              )}
+            </StrictModeDroppable>
+            {updateWorkoutFetcher.data?.errors?.exercises ? <span className="text-red-500 text-xs">{updateWorkoutFetcher.data?.errors?.exercises}</span> : null}
+            <div className="flex-none flex justify-end gap-2">
+              <Link to={`/app/workouts/${workout?.id}`} className="bg-gray-300 px-4 py-2 rounded">Cancel</Link>
               <PrimaryButton
-                className="w-full"
                 type="submit"
-                isLoading={isUpdatingWorkout}
+                name="_action"
+                value="updateUserWorkout"
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                disabled={isSavingWorkout}
+                isLoading={isSavingWorkout}
               >
-                Save
+                {navigation.state === 'submitting' ? 'Saving...' : 'Save'}
               </PrimaryButton>
-            </Form>
-          </div>
-          {/* <div>Edit Page {data.workout?.name}</div> */}
-        </div>
-        <AnimatePresence>
-          {openExercisesPanel && (
-            <motion.div
-              className="absolute bottom-0 left-0 md:left-64 md:max-w-[calc(100vw-16rem)] flex flex-col gap-y-2 h-2/3 bg-slate-400 w-screen rounded-t-lg text-white p-6 md:p-8"
-              initial={{ translateY: "100%" }}
-              animate={{ translateY: "0%" }}
-              exit={{ translateY: "100%" }}
-              transition={{ ease: [0, 0.71, 0.2, 1.01], }}
+            </div>
+            {/* {updateWorkoutFetcher.data?.errors?.cards && (
+              <div className="mt-4 text-red-500">
+                <ul>
+                  {Object.values(updateWorkoutFetcher.data?.errors?.cards).map((error: any) => (
+                    <li key={error}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )} */}
+          </updateWorkoutFetcher.Form>
+          {/* Available Exercises */}
+          <div className="hidden h-full sm:flex flex-col sm:w-1/2 p-4 bg-gray-200">
+            <h2 className="mb-2 text-lg font-semibold">Available Exercises</h2>
+            <Form
+              className={clsx(
+                "flex content-center rounded-md mb-2 focus-within:outline focus-within:outline-2 focus-within:outline-accent /*lg:w-2/3 xl:w-1/2*/ bg-white",
+                isSearching ? "animate-pulse" : ""
+              )}
             >
-              <div className="flex justify-between">
-                <p>Exercises</p>
-                <button onClick={(event) => {
-                  setOpenExercisesPanel(false)
-                  setSearchParams((prev) => {
-                    prev.set("q", "");
-                    return prev;
-                  });
-                }}>
-                  <XMarkIcon className="size-6 hover:text-accent"/>
-                </button>
-              </div>
-              <Form
-                className={`flex content-center border-2 rounded-md focus-within:border-accent lg:w-2/3 xl:w-1/2 bg-white ${
-                  isSearching ? "animate-pulse" : ""
-                }`}
-              >
-                <button type="submit">
-                  <SearchIcon className="size-6 ml-2 text-slate-400" />
-                </button>
-                <input
-                  type="hidden"
-                  name="id"
-                  value={data.workout?.id}
-                />
-                <input
-                  defaultValue={searchParams.get("q") ?? ""}
-                  type="text"
-                  name="q"
-                  placeholder="Search exercises ..."
-                  autoComplete="off"
-                  className="w-full p-2 outline-none rounded-md text-slate-400"
-                />
-              </Form>
-              <div className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto text-slate-900">
-                {data.allExercises.map((ex_item) => (
-                  <Exercise
-                    key={ex_item.id}
-                    exercise={ex_item}
-                    selectable
-                    selectFn={handleAddExercise}
-                    selected={selectedExercises.reduce((result, curr) => {
-                      let resultArr = result
-                      if (curr.exercises) {
-                        return resultArr.concat(curr.exercises)
-                      } else {
-                        return resultArr.concat(curr)
-                      }
-                    }, []).map((sel_ex: ExerciseProps) => sel_ex.id).includes(ex_item.id)}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <button type="submit">
+                <SearchIcon className="size-6 ml-2 text-slate-400" />
+              </button>
+              <input
+                defaultValue={searchParams.get("q") ?? ""}
+                type="text"
+                name="q"
+                placeholder="Search exercises ..."
+                autoComplete="off"
+                className="w-full p-2 outline-none text-sm/6 rounded-md text-slate-400"
+              />
+            </Form>
+            <StrictModeDroppable droppableId="availableCards" isDropDisabled={true}>
+              {(provided: DroppableProvided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="overflow-y-auto"
+                >
+                  {allExercises.map((card, index) => (
+                    <Draggable key={card.id} draggableId={card.id} index={index}>
+                      {(provided: DraggableProvided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="flex items-center gap-2 mb-2 bg-gray-100 rounded shadow *:select-none"
+                          style={{
+                            ...provided.draggableProps.style,
+                            transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'translate(0px, 0px)',
+                          }}
+                        >
+                          <div className="size-16 bg-white flex items-center justify-center rounded">
+                            Image
+                          </div>
+                          <div className="flex flex-col self-center">
+                            <p className="font-bold max-w-56 lg:max-w-64 truncate">{card.name}</p>
+                            <div className="flex divide-x divide-gray-400 text-sm">
+                              {card.body.slice(0,2).map((body, body_idx) => (
+                                <p key={body_idx} className={`${body_idx > 0 ? "px-1" : "pr-1"} text-xs capitalize`}>{`${body} body`}</p>
+                              ))}
+                              <p className="px-1 text-xs capitalize">{card.contraction}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </StrictModeDroppable>
+          </div>
+        </div>
       </DragDropContext>
+      {/* Available Exercises Popup */}
+      <AnimatePresence>
+        {openExercisesPanel && (
+          <motion.div
+            className="sm:hidden absolute bottom-0 left-0 md:left-64 md:max-w-[calc(100vw-16rem)] flex flex-col gap-y-2 h-2/3 bg-gray-200 w-screen rounded-t-lg p-6 md:p-8"
+            initial={{ translateY: "100%" }}
+            animate={{ translateY: "0%" }}
+            exit={{ translateY: "100%" }}
+            transition={{ ease: [0, 0.71, 0.2, 1.01], }}
+          >
+            <div className="flex justify-between">
+              <p className="text-lg font-semibold">Exercises</p>
+              <button onClick={(event) => {
+                setOpenExercisesPanel(false)
+                setSearchParams((prev) => {
+                  prev.set("q", "");
+                  return prev;
+                });
+              }}>
+                <XMarkIcon className="size-6 hover:text-accent"/>
+              </button>
+            </div>
+            <Form
+              className={`flex content-center border-2 rounded-md focus-within:border-accent lg:w-2/3 xl:w-1/2 bg-white ${
+                isSearching ? "animate-pulse" : ""
+              }`}
+            >
+              <button type="submit">
+                <SearchIcon className="size-6 ml-2 text-slate-400" />
+              </button>
+              <input
+                defaultValue={searchParams.get("q") ?? ""}
+                type="text"
+                name="q"
+                placeholder="Search exercises ..."
+                autoComplete="off"
+                className="w-full p-2 outline-none rounded-md text-slate-400"
+              />
+            </Form>
+            <div className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-0.5 pb-1 text-slate-900">
+              {allExercises.map((ex_item) => (
+                <Exercise
+                  key={ex_item.id}
+                  exercise={ex_item}
+                  selectable
+                  selectFn={handleAddExercise}
+                  selectCount={flattenedWorkoutCards.map((sel_ex: ExerciseType) => sel_ex.id.split("-")[0]).filter(id => id === ex_item.id).length}
+                  selected={flattenedWorkoutCards.map((sel_ex: ExerciseType) => sel_ex.id.split("-")[0]).includes(ex_item.id)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
-  )
+  );
 }

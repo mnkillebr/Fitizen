@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
@@ -106,7 +106,7 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
   if (exerciseDetailsArray.length) {
     // console.log(exerciseDetailsArray)
     return (
-      <div className="flex flex-col gap-y-2 content-center snap-y snap-mandatory px-1 pb-1">
+      <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
         {exerciseDetailsArray.map((exercise: any, idx) => {
           if (exercise.circuitId) {
             return (
@@ -304,110 +304,81 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function WorkoutDetail() {
   const data = useLoaderData<typeof loader>();
   const deleteWorkoutFetcher = useFetcher<deleteWorkoutFetcherType>();
-
-  const imageDescriptionScrollContainerRef = useRef<HTMLDivElement>(null);
-  const [imgIndex, setImgIndex] = useState(0);
-
-  const panelScrollContainerRef = useRef<HTMLDivElement>(null);
-  const [panelIndex, setPanelIndex] = useState(0);
-
   // const [startWorkout, setStartWorkout] = useState(false)
   const formatDuration = (duration: number) => {
     const hours = Math.floor(duration / 3600000);
     const minutes = Math.floor((duration % 3600000) / 60000);
     return hours > 0 ? `${hours} hr ${minutes} min` : `${minutes} min`
   }
-  const scrollToImg = (index: number) => {
-    const scrollContainer = imageDescriptionScrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    scrollContainer.scrollTo({
-      left: index * scrollContainer.clientWidth,
-      behavior: 'smooth'
-    });
-  };
-
-  const scrollToPanel = (index: number) => {
-    const scrollContainer = panelScrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    scrollContainer.scrollTo({
-      left: index * scrollContainer.clientWidth,
-      behavior: 'smooth'
-    });
-  };
-  
   return (
-    <div className="px-5 py-6 md:px-7 md:py-8 flex flex-col h-full gap-y-3 select-none">
-      <div className="flex-none">
-        {/* Back and Context Menu */}
-        <div className="flex justify-between">
-          <Link to="/app/workouts">
-            <ChevronLeft className="hover:text-accent" />
-          </Link>
-          {data.workout?.owns ? (
-            <Popover>
-              {({ open }) => (
-                <>
-                  <PopoverButton>
-                    <ContextMenuIcon className="hover:text-accent" />
-                  </PopoverButton>
-                  <AnimatePresence>
-                    {open && (
-                      <PopoverPanel
-                        static
-                        as={motion.div}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        anchor={{ to: 'bottom end', gap: '8px', }}
-                        className="flex flex-col rounded-md bg-white text-sm/6 shadow-md p-0.5 border gap-1"
+    <div className="p-6 md:p-8 flex flex-col h-full gap-y-3 select-none">
+      {/* Back and Context Menu */}
+      <div className="flex justify-between">
+        <Link to="/app/workouts">
+          <ChevronLeft className="hover:text-accent" />
+        </Link>
+        {data.workout?.owns ? (
+          <Popover>
+            {({ open }) => (
+              <>
+                <PopoverButton>
+                  <ContextMenuIcon className="hover:text-accent" />
+                </PopoverButton>
+                <AnimatePresence>
+                  {open && (
+                    <PopoverPanel
+                      static
+                      as={motion.div}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      anchor={{ to: 'bottom end', gap: '8px', }}
+                      className="flex flex-col rounded-md bg-white text-sm/6 shadow-md p-0.5 border gap-1"
+                    >
+                      <Link to={`/app/workouts/edit?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1">
+                        <PencilIcon className="h-4" />
+                        Edit
+                      </Link>
+                      <deleteWorkoutFetcher.Form
+                        method="post"
+                        onSubmit={(event) => {
+                          if(!confirm("Are you sure you want to delete this workout?")) {
+                            event.preventDefault();
+                          }
+                        }}
                       >
-                        <Link to={`/app/workouts/edit?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1">
-                          <PencilIcon className="h-4" />
-                          Edit
-                        </Link>
-                        <deleteWorkoutFetcher.Form
-                          method="post"
-                          onSubmit={(event) => {
-                            if(!confirm("Are you sure you want to delete this workout?")) {
-                              event.preventDefault();
-                            }
-                          }}
+                        <input type="hidden" name="workoutId" value={data.workout?.id} />
+                        <button
+                          name="_action"
+                          value="deleteWorkout"
+                          className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1"
                         >
-                          <input type="hidden" name="workoutId" value={data.workout?.id} />
-                          <button
-                            name="_action"
-                            value="deleteWorkout"
-                            className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1"
-                          >
-                            <TrashIcon className="h-4" />
-                            Delete
-                          </button>
-                          <ErrorMessage>{deleteWorkoutFetcher.data?.errors?.workoutId}</ErrorMessage>
-                        </deleteWorkoutFetcher.Form>
-                        
-                      </PopoverPanel>
-                    )}
-                  </AnimatePresence>
-                </>
-              )}
-            </Popover>
-          ) : null}
-        </div>
-        {/* Title */}
-        <div className="font-semibold text-2xl select-none lg:mb-2 px-1">{data.workout?.name}</div>
-        {/* Workout Image && Description */}
+                          <TrashIcon className="h-4" />
+                          Delete
+                        </button>
+                        <ErrorMessage>{deleteWorkoutFetcher.data?.errors?.workoutId}</ErrorMessage>
+                      </deleteWorkoutFetcher.Form>
+                      
+                    </PopoverPanel>
+                  )}
+                </AnimatePresence>
+              </>
+            )}
+          </Popover>
+        ) : null}
+      </div>
+      {/* Title */}
+      <div className="font-semibold text-2xl select-none">{data.workout?.name}</div>
+      {/* Workout Card */}
+      <>
         <div
-          ref={imageDescriptionScrollContainerRef}
-          className="px-1 flex overflow-x-auto snap-x snap-mandatory lg:snap-none lg:overflow-hidden w-full gap-x-5"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className={clsx(
+            "flex gap-3 h-1/3 xl:h-2/5 *:h-full",
+            "*:flex-1"
+          )}
         >
           <div
-            className={clsx(
-              "flex-shrink-0 w-full snap-center bg-slate-50 bg-cover bg-center h-60 lg:h-72 rounded-md md:rounded-[20px] shadow-md text-center",
-              "content-end sm:bg-center lg:flex-none lg:w-[calc(50%-10px)] lg:rounded-lg mb-3"
-            )}
+            className="bg-slate-50 bg-cover bg-center rounded-[20px] shadow-md text-center content-end sm:bg-center lg:flex-none lg:w-2/3 lg:rounded-lg"
             style={{backgroundImage: `url(${crunchGirl})`}}
           >
             <div className={clsx(
@@ -431,94 +402,103 @@ export default function WorkoutDetail() {
               </div>
             </div>
           </div>
-          <div
-            className={clsx(
-              "flex-shrink-0 w-full snap-center bg-slate-50 h-60 lg:h-72 rounded-md md:rounded-[20px] shadow-md",
-              "lg:flex-none lg:w-[calc(50%-10px)] lg:rounded-lg mb-3"
-            )}
-            
-          >
-            <div className="h-full flex-col py-2 px-4">
+          <div className="hidden lg:flex flex-col h-full gap-3 *:flex-1 *:rounded-lg">
+            {/* Description */}
+            <div className="flex-col py-2 px-4 shadow-md">
               <div className="font-semibold">Description</div>
               <div>{data.workout.description}</div>
             </div>
+            {/* Start Workout */}
+            {/* <Stopwatch /> */}
+            <Link
+              to={`/app/workouts/log?id=${data.workout?.id}`}
+              className="content-center bg-slate-50 rounded-full shadow-md active:scale-95 hover:cursor-pointer"
+              // onClick={() => setStartWorkout(!startWorkout)}
+            >
+              <div className="flex h-12 w-full gap-3 justify-between px-8">
+                <div className="select-none font-semibold self-center text-xl">Start Workout</div>
+                <div className="bg-slate-400 rounded-full p-3"><PlayIcon /></div>
+              </div>
+            </Link>
           </div>
         </div>
-        <div className="mb-3 lg:hidden flex justify-center">
-          {[...Array(2)].map((_, index) => (
-            <button
-              key={index}
-              className={`size-2 rounded-full mx-1 focus:outline-none ${
-                index === imgIndex ? 'bg-accent' : 'bg-gray-300'
-              }`}
-              onClick={() => {
-                scrollToImg(index)
-                setImgIndex(index)
-              }}
-              aria-label={`Go to image ${index + 1}`}
-            />
-          ))}
-        </div>
-        {/* Start Workout */}
-        <Link
-          to={`/app/workouts/log?id=${data.workout?.id}`}
-          className="flex lg:hidden h-12 items-center justify-between bg-slate-50 rounded-full shadow-md active:scale-95 hover:cursor-pointer mx-1"
-          // onClick={() => setStartWorkout(!startWorkout)}
-        >
-          <div className="size-12"></div>
-          <div className="select-none font-semibold self-center">Start Workout</div>
-          <div className="bg-slate-400 rounded-full p-3"><PlayIcon /></div>
-        </Link>
-      </div>
-      {/* Exercises and Logs */}
-      <div
-        ref={panelScrollContainerRef}
-        className="px-1 pb-1 flex-1 flex overflow-x-auto snap-x snap-mandatory lg:snap-none lg:overflow-hidden w-full gap-x-5"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      
+      </>
+      {/* Start Workout */}
+      <Link
+        to={`/app/workouts/log?id=${data.workout?.id}`}
+        className="flex lg:hidden h-12 items-center justify-between bg-slate-50 rounded-full shadow-md active:scale-95 hover:cursor-pointer"
+        // onClick={() => setStartWorkout(!startWorkout)}
       >
-        <div className="flex-shrink-0 w-full lg:w-[calc(50%-10px)] lg:flex-none snap-center bg-slate-50 rounded-md shadow-md overflow-y-hidden">
-          <div className="py-1 px-4 text-sm/6 font-semibold pt-2">Exercises</div>
-          <div className="h-[calc(100%-3.5rem)] flex flex-col mt-2 overflow-y-auto gap-y-2 px-3 pb-1">
-            <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
-            {/* {[...Array(30)].map((item, idx) => <div key={Math.random()} className="bg-slate-500 rounded-md shadow-md text-white px-3 py-2">Item {idx+1} here</div>)} */}
+        <div className="size-12"></div>
+        <div className="select-none font-semibold self-center">Start Workout</div>
+        <div className="bg-slate-400 rounded-full p-3"><PlayIcon /></div>
+      </Link>
+      <div className="h-full flex flex-col xl:flex-row gap-y-3 xl:gap-x-3">
+        {/* Exercises */}
+        <div className="flex-1 flex w-full justify-center bg-slate-50 rounded-lg shadow-md">
+          <div className="w-full h-full pt-2">
+            <div className="h-full">
+              <div className="py-1 px-4 text-sm/6 font-semibold ">Exercises</div>
+              <div className="mt-2 h-full px-3 pb-2">
+                <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
+              </div>
+            </div>
+            {/* <TabGroup className="h-full">
+              <TabList className="flex justify-between sm:justify-normal px-4">
+                {tabOptions.map((option, idx) => (
+                  <Tab
+                    key={`${option}-${idx}`}
+                    className={clsx(
+                      "py-1 px-3 text-sm/6 font-semibold focus:outline-none",
+                      "data-[selected]:border-b-2 data-[selected]:border-accent data-[selected]:text-accent data-[selected]:data-[hover]:border-accent",
+                      "data-[selected]:data-[hover]:rounded-none data-[selected]:data-[hover]:bg-slate-50 data-[hover]:bg-slate-200 data-[hover]:rounded-full"
+                    )}
+                  >
+                    {option}
+                  </Tab>
+                ))}
+              </TabList>
+              <TabPanels className="mt-2 h-full px-3 pb-2">
+                <TabPanel>
+                  <ExercisePanel exerciseDetailsArray={data.exerciseDetailss?.warmup} section="Warmup" />
+                </TabPanel>
+                <TabPanel className="h-full">
+                  <ExercisePanel exerciseDetailsArray={data.exerciseDetailss?.main} section="Main" />
+                </TabPanel>
+                <TabPanel>
+                  <ExercisePanel exerciseDetailsArray={data.exerciseDetailss?.cooldown} section="Cooldown" />
+                </TabPanel>
+              </TabPanels>
+            </TabGroup> */}
           </div>
         </div>
-        <div className="flex-shrink-0 w-full lg:w-[calc(50%-10px)] lg:flex-none snap-center bg-slate-50 rounded-md shadow-md overflow-y-hidden">
-          <div className="py-1 px-4 text-sm/6 font-semibold ">History</div>
-          <div className="mt-2 h-full px-3 pb-2">
-            <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
-              {data.logs.map(log => {
-                return (
-                  <div key={log.id} className="flex flex-col shadow-md rounded-md *:content-center bg-white snap-start">
-                    <div className="bg-slate-400 w-full rounded-t-md flex px-3 py-1 *:text-white">
-                      <label className="text-sm self-start font-medium w-1/2">Date</label>
-                      <label className="text-sm self-start font-medium w-1/2">Duration</label>
-                    </div>
-                    <div className="w-full rounded-b-md flex px-3 py-1">
-                      <p className="text-sm h-5 w-1/2">{new Date(log.date).toLocaleDateString()}</p>
-                      <p className="text-sm h-5 w-1/2">{formatDuration(parseInt(log.duration))}</p>
-                    </div>
-                  </div>
-                )
-              })}
+        {/* History */}
+        <div className="flex-1 flex w-full justify-center bg-slate-50 rounded-lg shadow-md">
+          <div className="w-full h-full pt-2">
+            <div className="h-full">
+              <div className="py-1 px-4 text-sm/6 font-semibold ">History</div>
+              <div className="mt-2 h-full px-3 pb-2">
+                <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
+                  {data.logs.map(log => {
+                    return (
+                      <div key={log.id} className="flex flex-col shadow-md rounded-md *:content-center bg-white snap-start">
+                        <div className="bg-slate-400 w-full rounded-t-md flex px-3 py-1 *:text-white">
+                          <label className="text-sm self-start font-medium w-1/2">Date</label>
+                          <label className="text-sm self-start font-medium w-1/2">Duration</label>
+                        </div>
+                        <div className="w-full rounded-b-md flex px-3 py-1">
+                          <p className="text-sm h-5 w-1/2">{new Date(log.date).toLocaleDateString()}</p>
+                          <p className="text-sm h-5 w-1/2">{formatDuration(parseInt(log.duration))}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="lg:hidden flex justify-center">
-        {[...Array(2)].map((_, index) => (
-          <button
-            key={index}
-            className={`size-2 rounded-full mx-1 focus:outline-none ${
-              index === panelIndex ? 'bg-accent' : 'bg-gray-300'
-            }`}
-            onClick={() => {
-              scrollToPanel(index)
-              setPanelIndex(index)
-            }}
-            aria-label={`Go to image ${index + 1}`}
-          />
-        ))}
       </div>
     </div>
   );

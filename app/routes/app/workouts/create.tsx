@@ -306,13 +306,13 @@ export default function WorkoutBuilderForm() {
       }
     }, [])
   }, [workoutCards])
-  console.log(selectedCards, workoutCards)
+  // console.log(selectedCards, workoutCards)
   return (
     <>
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex h-screen">
+        <div className="flex h-full">
           {/* Create Workout Form */}
-          <createWorkoutFetcher.Form method="post" className="flex flex-col h-[calc(100%-8.125rem)] xs:h-[calc(100%-4.125rem)] sm:h-[calc(100%-5.125rem)] md:h-full w-full sm:w-1/2 p-6 sm:p-4">
+          <createWorkoutFetcher.Form method="post" className="flex flex-col h-full w-full sm:w-1/2 p-6 sm:p-4">
             <h2 className="mb-2 text-lg font-semibold">Create Workout</h2>
             <fieldset className="space-y-4 rounded-xl bg-white/5">
               <div className="flex flex-col">
@@ -695,7 +695,7 @@ export default function WorkoutBuilderForm() {
             )} */}
           </createWorkoutFetcher.Form>
           {/* Available Exercises */}
-          <div className="hidden sm:h-[calc(100%-5.125rem)] md:h-full sm:flex flex-col sm:w-1/2 p-4 bg-gray-200">
+          <div className="hidden h-full sm:flex flex-col sm:w-1/2 p-4 bg-gray-200">
             <h2 className="mb-2 text-lg font-semibold">Available Exercises</h2>
             <Form
               className={clsx(

@@ -300,13 +300,13 @@ export default function App() {
   if (inAppRoute) {
     return (
       <div className="bg-white h-screen overflow-y-hidden">
-        <div className="flex flex-col-reverse xs:flex-col md:flex-row h-full">
-          <div className="flex shadow-[0_-5px_3px_-3px_rgba(0,0,0,0.1)] xs:shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] text-white px-8 py-2 sm:py-4 sm:bg-slate-100 md:bg-slate-100 md:w-48 lg:w-64 md:flex-col md:flex-none md:shadow-[5px_0_3px_-3px_rgba(0,0,0,0.1)] md:px-4 md:py-8">
-            <div className="flex md:flex-col md:gap-y-4 items-center justify-center xs:justify-between w-full">
+        <div className="flex flex-col-reverse sm:flex-col md:flex-row h-full">
+          <div className="flex shadow-[0_-5px_3px_-3px_rgba(0,0,0,0.1)] sm:shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] text-white px-8 py-2 sm:py-4 sm:bg-slate-100 md:bg-slate-100 md:w-48 lg:w-64 md:flex-col md:flex-none md:shadow-[5px_0_3px_-3px_rgba(0,0,0,0.1)] md:px-4 md:py-8">
+            <div className="flex md:flex-col md:gap-y-4 items-center justify-center sm:justify-between w-full">
               <div className="hidden md:flex justify-center">
                 <img className="rounded-full drop-shadow-lg" src="https://i.pravatar.cc/200?img=16"/>
               </div>
-              <img className="hidden xs:max-lg:flex md:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
+              <img className="hidden sm:max-lg:flex md:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
               <div className="hidden md:flex md:flex-col self-start pl-3 text-slate-900">
                 <h1 className="text-base lg:text-xl font-bold">Welcome back 👋</h1>
                 <p className="text-sm lg:text-base">Let's get active 💪</p>
@@ -322,7 +322,7 @@ export default function App() {
                     </AppNavLink>
                   ))}
                 </div>
-                <div className="flex flex-row gap-x-4 sm:hidden">
+                <div className="flex flex-row justify-around w-screen sm:hidden">
                   {dashNavigation.map((item) => (
                     <MobileNavLink
                       key={item.name}
@@ -335,7 +335,7 @@ export default function App() {
                   <button
                     onClick={handleLogout}
                     className={clsx(
-                      "min-w-14 p-1 xs:hidden flex-none rounded-lg text-accent",
+                      "min-w-14 p-1 sm:hidden flex-none rounded-lg text-accent",
                       "hover:text-yellow-500 hover:bg-slate-200 flex flex-col text-xs items-center"
                     )}
                   >
@@ -364,7 +364,7 @@ export default function App() {
               >
                 Log Out
               </button>
-              <button
+              {/* <button
                 onClick={handleLogout}
                 className={clsx(
                   "hidden xs:flex sm:hidden flex-none rounded-lg text-accent",
@@ -373,14 +373,14 @@ export default function App() {
               >
                 <div className="size-6"><ArrowLeftEndOnRectangleIcon /></div>
                 <p>Log Out</p>
-              </button>
+              </button> */}
             </div>
           </div>
-          <div className="flex-1 /*p-6 md:p-8*/ max-h-[calc(100vh-8.125rem)] xs:max-h-[calc(100vh-4.125rem)] sm:max-h-[calc(100vh-5.125rem)] md:max-h-screen"> 
+          <div className="flex-1 /*p-6 md:p-8*/ max-h-[calc(100vh-8.125rem)] sm:max-h-[calc(100vh-5.125rem)] md:max-h-screen"> 
             <Outlet />
           </div>
-          <div className="shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] px-8 py-2 flex gap-4 xs:hidden">
-            <img className="xs:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
+          <div className="shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] px-8 py-2 flex gap-4 sm:hidden">
+            <img className="sm:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
             <div className="flex flex-col self-center">
               <p className="font-bold">Welcome back 👋</p>
               <p className="text-xs">Let's get active 💪</p>

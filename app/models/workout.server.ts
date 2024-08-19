@@ -1,4 +1,4 @@
-import { Prisma, ExerciseTarget, Side } from "@prisma/client";
+import { Prisma, ExerciseTarget, Side, LoadUnit, } from "@prisma/client";
 import db from "~/db.server";
 
 export type ExerciseSchemaType = {
@@ -12,6 +12,27 @@ export type ExerciseSchemaType = {
   rest: string;
   side: Side;
   circuitId: string;
+}
+
+export type ExerciseLogSet = {
+  set: string;
+  actualReps?: string;
+  load?: number;
+  unit: LoadUnit;
+  notes?: string;
+}
+export type ExerciseLogType = {
+  exerciseId: string;
+  circuitId?: string;
+  target: ExerciseTarget;
+  time?: string;
+  targetReps?: string;
+  sets: ExerciseLogSet[];
+  // set: string;
+  // actualReps?: string;
+  // load?: number;
+  // unit: LoadUnit;
+  // notes?: string;
 }
 
 export function getWorkout(workoutId: string) {
@@ -174,7 +195,7 @@ export async function createWorkoutWithExercise() {
         exercises: {
           create: [
             {
-              exerciseId: "cly8yojji0005kyq4pdfm0v5f",
+              exerciseId: "clzuebrd300045brturmk9bcf",
               orderInRoutine: 1,
               target: ExerciseTarget.reps,
               sets: "3",
@@ -226,3 +247,44 @@ export async function deleteWorkout(workoutId: string) {
     throw error
   };
 };
+
+export async function saveUserWorkoutLog(userId: string, routineId: string, duration: string, exerciseLogs: Array<ExerciseLogType>) {
+  try {
+    const createUserWorkoutLog = await db.workoutLog.create({
+      data: {
+        // id: "clzk74lr30003yuzz0acb1sp3",
+        userId,
+        routineId,
+        duration,
+        exerciseLogs: {
+          create: exerciseLogs.map(exercise => ({
+            ...exercise,
+            sets: {
+              create: exercise.sets,
+            }
+          })),
+          // create: exerciseLogs,
+        },
+      },
+      include: {
+        exerciseLogs: true
+      },
+    })
+    return createUserWorkoutLog;
+  } catch (error) {
+    console.error('Error creating WorkoutLog with exercise logs:', error);
+    // if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    //   return error.message
+    // }
+    throw error
+  };
+}
+
+export function getWorkoutLogsById(userId: string, routineId: string) {
+  return db.workoutLog.findMany({
+    where: {
+      userId,
+      routineId,
+    }
+  })
+}

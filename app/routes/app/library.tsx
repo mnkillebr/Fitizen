@@ -209,7 +209,7 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
               <input type="hidden" name="exerciseId" value={exercise.id} />
             </updateExerciseNameFetcher.Form>
           ) : (
-            <p className="font-bold max-w-56 xs:max-w-64 truncate">{exercise.name}</p>
+            <p className="font-bold max-w-40 xs:max-w-64 sm:max-w-full md:max-w-72 truncate">{exercise.name}</p>
           )}
           <div className="flex divide-x divide-gray-400 text-sm">
             {exercise.body.slice(0,2).map((body, body_idx) => (

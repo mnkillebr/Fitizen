@@ -9,7 +9,7 @@ import { createWorkoutWithExercise, getAllUserWorkouts, deleteWorkout, getWorkou
 import { Role as RoleType } from "@prisma/client";
 import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
-import { ArrowRight } from "images/icons";
+import { ArrowRight, ChevronLeft } from "images/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
@@ -129,13 +129,14 @@ export default function Workouts() {
   const isCreatingWorkout = createWorkoutFetcher.formData?.get("_action") === "createWorkout";
   const inCreateSubRoute = matches.map(m => m.id).some(id => createSubRoutes.includes(id));
   const inWorkoutDetailRoute = matches.map(m => m.id).includes("routes/app/workouts/$workoutId");
-  const inEditSubRoute = matches.map(m => m.id).includes("routes/app/workouts/edited");
+  const inEditSubRoute = matches.map(m => m.id).includes("routes/app/workouts/edit");
+  const inLogSubRoute = matches.map(m => m.id).includes("routes/app/workouts/log");
   const isNavigatingSubRoute =
     navigation.state === "loading" &&
     createPathnames.includes(navigation.location.pathname) &&
     navigation.formData === undefined;
 
-  if (inCreateSubRoute || inWorkoutDetailRoute || inEditSubRoute) {
+  if (inCreateSubRoute || inWorkoutDetailRoute || inEditSubRoute || inLogSubRoute) {
     return (
       <div className="flex flex-col h-full">
         <Outlet />
@@ -278,7 +279,8 @@ function Workout({ workout, role }: WorkoutProps) {
         </div>
       </div>
       <div className="px-2 border-l-2 h-full flex flex-col justify-center hover:bg-accent rounded-r-lg">
-        <ArrowRight className=""/>
+        {/* <ArrowRight className=""/> */}
+        <ChevronLeft className="rotate-180" />
       </div>
       {/* {role === "admin" || workout.userId ? (
         <deleteWorkoutFetcher.Form
@@ -311,6 +313,7 @@ export function ErrorBoundary() {
       <div className="p-4 bg-red-500 text-white rounded-md">
         <h1 className="text-2xl pb-2">{error.status} - {error.statusText}</h1>
         <p className="my-2 font-bold">{error.data.message}</p>
+        <Link to="/app/workouts" className="text-white underline">Go back to workouts</Link>
       </div>
     )
   }
