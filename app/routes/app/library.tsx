@@ -11,7 +11,8 @@ import { useIsHydrated } from "~/utils/misc";
 import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { Role as RoleType } from "@prisma/client";
-import { useDrag, useDrop } from "react-dnd";
+// import { useDrag, useDrop } from "react-dnd";
+import { useOpenDialog } from "~/components/Dialog";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -77,6 +78,7 @@ export default function Library() {
   const createExerciseFetcher = useFetcher();
   const [searchParams] = useSearchParams();
   const navigation = useNavigation();
+  const openDialog = useOpenDialog();
 
   const isSearching = navigation.formData?.has("q");
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
@@ -116,7 +118,14 @@ export default function Library() {
       </div>
       <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1">
         {data.exercises.map((ex_item) => (
-          <Exercise key={ex_item.id} exercise={ex_item} role={data.role} />
+          <Exercise key={ex_item.id} exercise={ex_item} role={data.role} onViewExercise={() => {
+            openDialog(
+              <div className="flex gap-x-2 *:w-1/2">
+                <div className="bg-slate-100 text-center content-center rounded">Image</div>
+                <div>{ex_item.cues.map((cue, cue_idx) => <div key={cue_idx}>{cue}</div>)}</div>
+              </div>, ex_item.name
+            )
+          }} />
         ))}
       </div>
     </div>
@@ -136,11 +145,11 @@ type ExerciseProps = {
   selectFn?: (...args: any[]) => void;
   selected?: boolean;
   role?: RoleType;
-  onDragExercise?: (exerciseItem: ExerciseItemProps) => void;
+  onViewExercise?: (exerciseItem: ExerciseItemProps) => void;
   selectCount?: number;
 }
 
-export function Exercise({ exercise, selectable, selectFn, selected, role, selectCount, onDragExercise = () => {}}: ExerciseProps) {
+export function Exercise({ exercise, selectable, selectFn, selected, role, selectCount, onViewExercise = () => {}}: ExerciseProps) {
   const isHydrated = useIsHydrated();
   const deleteExerciseFetcher = useFetcher<deleteExerciseFetcherType>();
   const updateExerciseNameFetcher = useFetcher<updateNameFetcherType>();
@@ -165,7 +174,12 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
       // }}
     >
       <div className="flex gap-2 xs:gap-4">
-        <div className="size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
+        <div
+          className="size-16 md:size-20 bg-white rounded-lg text-center content-center cursor-pointer"
+          onClick={() => onViewExercise(exercise)}
+        >
+          Image
+        </div>
         <div className="flex flex-col self-center">
           {role === "admin" ? (
             <updateExerciseNameFetcher.Form method="post" className="hidden sm:flex">

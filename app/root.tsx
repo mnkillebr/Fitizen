@@ -24,6 +24,7 @@ import { AppNavLink, MobileNavLink, RootNavLink } from "./components/AppNavLink"
 import { getCurrentUser } from "./utils/auth.server";
 import { destroySession, getSession } from "./sessions";
 import clsx from "clsx";
+import { DialogProvider } from "./components/Dialog";
 
 const navigation = [
   { name: "Settings", href: "settings" },
@@ -93,7 +94,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <DialogProvider>
+          {children}
+        </DialogProvider>
         <ScrollRestoration />
         <Scripts />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
