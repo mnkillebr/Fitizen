@@ -14,22 +14,24 @@ datasource db {
 }
 
 model User {
-  id                String             @id @default(cuid())
-  email             String             @unique
-  passwordHash      String?
-  firstName         String
-  lastName          String
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id                    String             @id @default(cuid())
+  email                 String             @unique
+  passwordHash          String?
+  firstName             String
+  lastName              String
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
 
-  socialLogins      SocialLogin[]
-  userSubscriptions UserSubscription[]
-  workoutLogs       WorkoutLog[]
-  userRoutines      Routine[]
-  userPrograms      Program[]
-  leaderboardScores Leaderboard[]
+  socialLogins          SocialLogin[]
+  userSubscriptions     UserSubscription[]
+  workoutLogs           WorkoutLog[]
+  userRoutines          Routine[]
+  userPrograms          Program[]
+  leaderboardScores     Leaderboard[]
+  scheduledWorkouts     WorkoutSession[]
+  scheduledAppointments Appointment[]
 
-  role              Role
+  role                  Role
 }
 
 model SocialLogin {
@@ -91,6 +93,7 @@ model Routine {
   exercises     RoutineExercise[]
   workoutLogs   WorkoutLog[]
   leaderboard   Leaderboard[]
+  sessions      WorkoutSession[]
 
   createdAt     DateTime           @default(now())
   
@@ -208,6 +211,50 @@ model ExerciseLogSet {
   load            Float?
   notes           String?
   unit            LoadUnit      @default(pound)
+}
+
+model WorkoutSession {
+  id         String       @id @default(uuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id])
+  routineId  String
+  routine    Routine      @relation(fields: [routineId], references: [id])
+  startTime  DateTime
+  endTime    DateTime
+  // type       SessionType
+  recurrence Recurrence?
+}
+
+model Coach {
+  id               String          @id @default(uuid())
+  name             String
+  availability     Availability[]
+  appointments     Appointment[]
+}
+
+model Availability {
+  id           String       @id @default(uuid())
+  coachId      String
+  coach        Coach        @relation(fields: [coachId], references: [id])
+  dayOfWeek    Int // 0 = Sunday, 1 = Monday, etc.
+  startTime    DateTime
+  endTime      DateTime
+}
+
+model Appointment {
+  id         String       @id @default(uuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id])
+  coachId    String
+  coach      Coach        @relation(fields: [coachId], references: [id])
+  startTime  DateTime
+  endTime    DateTime
+  type       AppointmentType
+}
+
+enum AppointmentType {
+  GOAL_SETTING
+  FOLLOWUP
 }
 
 model Leaderboard {
@@ -344,4 +391,16 @@ enum Side {
   left
   right
   none
+}
+
+// enum SessionType {
+//   STUDY
+//   NAP
+//   FOCUS
+// }
+
+enum Recurrence {
+  DAILY
+  WEEKLY
+  MONTHLY
 }
