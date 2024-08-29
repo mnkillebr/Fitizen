@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.2.3",
+    "@cloudinary/url-gen": "^1.20.0",
     "@headlessui/react": "^2.0.4",
     "@heroicons/react": "^2.1.4",
     "@prisma/client": "^5.15.1",
@@ -19,8 +20,10 @@
     "@remix-run/react": "^2.9.2",
     "@remix-run/serve": "^2.9.2",
     "@remix-run/v1-route-convention": "^0.1.4",
+    "cloudinary": "^2.4.0",
     "clsx": "^2.1.1",
     "cryptr": "^6.3.0",
+    "date-fns": "^3.6.0",
     "form-data": "^4.0.0",
     "framer-motion": "^11.2.13",
     "isbot": "^4.1.0",
