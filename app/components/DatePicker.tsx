@@ -10,9 +10,10 @@ interface DatePickerProps {
   currentDate: Date;
   view: 'monthly' | 'weekly' | 'daily';
   onDateChange: (date: Date) => void;
+  inForm?: boolean;
 }
 
-const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange }) => {
+const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange, inForm }) => {
   const [pickerDate, setPickerDate] = useState(currentDate);
   const [manualInput, setManualInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -170,10 +171,12 @@ const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange
       {({ open }) => (
         <>
           <PopoverButton
-            className="text-xl font-bold outline-none"
+            className={clsx(
+              inForm ? "" : "text-xl font-bold outline-none"
+            )}
             onClick={() => setIsOpen(!open)}
           >
-            {format(currentDate, "MMMM yyyy")}
+            {inForm ? format(currentDate, "MM/dd/yyyy") : format(currentDate, "MMMM yyyy")}
           </PopoverButton>
           <AnimatePresence>
             {open && (
@@ -183,7 +186,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                anchor="bottom"
+                anchor={inForm ? "bottom start" : "bottom"}
                 className="flex origin-top flex-col w-auto p-2 border bg-white z-10"
               >
                 {view === 'monthly' && renderMonthlyPicker()}

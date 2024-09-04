@@ -214,41 +214,41 @@ model ExerciseLogSet {
 }
 
 model WorkoutSession {
-  id         String       @id @default(uuid())
+  id         String       @id @default(cuid())
   userId     String
   user       User         @relation(fields: [userId], references: [id])
   routineId  String
   routine    Routine      @relation(fields: [routineId], references: [id])
-  startTime  DateTime
-  endTime    DateTime
+  startTime  String
+  endTime    String
   // type       SessionType
   recurrence Recurrence?
 }
 
 model Coach {
-  id               String          @id @default(uuid())
+  id               String          @id @default(cuid())
   name             String
   availability     Availability[]
   appointments     Appointment[]
 }
 
 model Availability {
-  id           String       @id @default(uuid())
+  id           String       @id @default(cuid())
   coachId      String
   coach        Coach        @relation(fields: [coachId], references: [id])
   dayOfWeek    Int // 0 = Sunday, 1 = Monday, etc.
-  startTime    DateTime
-  endTime      DateTime
+  startTime    String
+  endTime      String
 }
 
 model Appointment {
-  id         String       @id @default(uuid())
+  id         String       @id @default(cuid())
   userId     String
   user       User         @relation(fields: [userId], references: [id])
   coachId    String
   coach      Coach        @relation(fields: [coachId], references: [id])
-  startTime  DateTime
-  endTime    DateTime
+  startTime  String
+  endTime    String
   type       AppointmentType
 }
 

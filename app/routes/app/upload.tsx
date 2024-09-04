@@ -13,7 +13,7 @@ import { CloudinaryUploadResult, cldConfig, cldInstance, uploadToCloudinary } fr
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
 import { Cloudinary } from "@cloudinary/url-gen"
-import { AdvancedImage } from "@cloudinary/react";
+// import { AdvancedImage } from "@cloudinary/react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);

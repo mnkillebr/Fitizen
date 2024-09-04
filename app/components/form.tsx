@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, SelectHTMLAttributes } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>{
   isLoading?: boolean
@@ -65,5 +65,23 @@ export function PrimaryInput({className, ...props}: PrimaryInputProps) {
         className
       )}
     />
+  );
+};
+
+interface PrimarySelectProps extends SelectHTMLAttributes<HTMLSelectElement>{
+  options: Array<{ label: string, value: string }>
+}
+
+export function PrimarySelect({className, options, ...props}: PrimarySelectProps) {
+  return (
+    <select
+      {...props}
+      className={clsx(
+        "w-full py-2 px-1 border-2 rounded-md focus:outline-accent",
+        className
+      )}
+    >
+      {options.map(({ label, value }) => <option key={value} value={value}>{label}</option>)}
+    </select>
   );
 };

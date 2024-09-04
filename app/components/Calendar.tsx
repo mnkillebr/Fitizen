@@ -3,31 +3,127 @@ import React, { useState, useEffect } from 'react';
 // import { Button } from '@/components/ui/button';
 // import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { ChevronLeft, ChevronRight, PlusIcon } from 'images/icons';
-import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getHours, getMinutes } from 'date-fns';
+import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getHours, setHours, getMinutes, setMinutes, differenceInMinutes } from 'date-fns';
 import { Button } from './form';
 import clsx from 'clsx';
-import { useOpenDialog } from './Dialog';
+import { useCloseDialog, useOpenDialog } from './Dialog';
 import DatePicker from './DatePicker';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import AppointmentForm from './AppointmentForm';
+import SessionForm from './SessionForm';
+import { Appointment } from '@prisma/client';
 
 type ViewType = 'daily' | 'weekly' | 'monthly';
 
-interface Event {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
+const eventTitle = (title: string) => {
+  switch (title) {
+    case "GOAL_SETTING":
+      return "Goal Setting"
+    case "FOLLOWUP":
+      return "Follow-up"
+  }
+}
+
+interface EventFormProps {
+  selectedDateTime: Date | null;
+  submitEvent: (args: any) => void;
+  formOptions: {
+    [key: string]: any;
+  };
+}
+
+const EventForm = ({ selectedDateTime, submitEvent, formOptions }: EventFormProps) => {
+  const closeDialog = useCloseDialog();
+  const eventTypes = [
+    {
+      name: "Appointment",
+      form: <AppointmentForm
+        selectedDateTime={selectedDateTime}
+        onCancel={() => {
+          closeDialog()
+        }}
+        onSubmit={(args) => {
+          submitEvent(args)
+          closeDialog()
+        }}
+        defaults={formOptions.defaults}
+        coaches={formOptions.coaches}
+      />
+    },
+    {
+      name: "Session",
+      form: <SessionForm
+        selectedDateTime={selectedDateTime}
+        onCancel={() => {
+          closeDialog()
+        }}
+        onSubmit={(args) => {
+          submitEvent(args)
+          closeDialog()
+        }}
+      />
+    }, 
+  ]
+
+  return (
+    <TabGroup className="w-full" defaultIndex={formOptions.defaults?.defaultTab}>
+      <TabList className="flex gap-4">
+        {eventTypes.map(({ name }, index) => {
+          const defaultTab = formOptions.defaults?.defaultTab !== undefined ? formOptions.defaults?.defaultTab : undefined
+          const disabledTab = defaultTab === undefined ? false : defaultTab !== undefined && defaultTab === index ? false : true
+          return (
+            <Tab
+              key={name}
+              disabled={disabledTab}
+              className={clsx(
+                "rounded-full py-1 px-3 text-sm/6 font-semibold",
+                "focus:outline-none data-[selected]:bg-slate-200 data-[hover]:bg-slate-100",
+                "data-[selected]:data-[hover]:bg-slate-200 data-[focus]:outline-1 data-[focus]:outline-slate-100",
+                "disabled:cursor-not-allowed"
+              )}
+            >
+              {name}
+            </Tab>
+          )
+        })}
+      </TabList>
+      <TabPanels className="p-2">
+        {eventTypes.map(({ name, form }) => (
+          <TabPanel key={name} className="w-full">
+            {form}
+          </TabPanel>
+        ))}
+      </TabPanels>
+    </TabGroup>
+  )
+}
+
+interface EventType extends Appointment {
+  coach: string;
 }
 
 interface CalendarProps {
   currentTimeLineColor?: string;
+  submitEvent: (args: any) => void;
+  formOptions: {
+    [key: string]: any;
+  };
+  schedule: {
+    [key: string]: any;
+  };
 }
 
-const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red' }) => {
+const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submitEvent, formOptions, schedule }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<ViewType>('monthly');
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [view, setView] = useState<ViewType>('monthly');
+  // const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  // const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  // const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
+  // const [eventType, setEventType] = useState<string | null>(null);
   const openDialog = useOpenDialog();
+  const { appointments } = schedule
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
@@ -64,13 +160,65 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red' }) => 
     }
   };
 
+  const handleDayClick = (date: Date) => {
+    // setSelectedDate(date);
+    const clickedDay = setMinutes(date, 0)
+    // console.log("clicked day", date, clickedDay)
+    // setIsAddEventOpen(true);
+    setSelectedDateTime(clickedDay);
+    openDialog(
+      <EventForm
+        selectedDateTime={clickedDay}
+        submitEvent={submitEvent}
+        formOptions={formOptions}
+      />,
+      "Add Event"
+    )
+  };
+
+  const handleTimeClick = (date: Date, minutes: number) => {
+    // setSelectedDate(date);
+    // setSelectedTime(time);
+    // console.log("clicked time", date, minutes)
+    const clickedTime = setMinutes(date, minutes)
+    setSelectedDateTime(clickedTime);
+    // setIsAddEventOpen(true);
+    openDialog(
+      <EventForm
+        selectedDateTime={clickedTime}
+        submitEvent={submitEvent}
+        formOptions={formOptions}
+      />,
+      "Add Event"
+    )
+  };
+
+  const handleEventClick = (event: EventType) => {
+    const eventTime = new Date(event.startTime)
+    setSelectedDateTime(eventTime);
+    openDialog(
+      <EventForm
+        selectedDateTime={eventTime}
+        submitEvent={submitEvent}
+        formOptions={{
+          ...formOptions,
+          defaults: {
+            coachId: event.coachId,
+            appointmentId: event.id,
+            appointmentType: event.type.toLowerCase(),
+            defaultTab: 0,
+          }
+        }}
+      />,
+      `${eventTitle(event.type)} with ${event.coach}`
+    )
+  }
 
   const renderMonthlyView = () => {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
     const startDate = startOfWeek(monthStart);
     const endDate = endOfWeek(monthEnd);
-
     const dateFormat = "d";
     const rows = [];
 
@@ -88,7 +236,9 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red' }) => 
             className={clsx(
               "p-2 border rounded-lg",
               !isSameMonth(day, monthStart) ? "text-gray-400" : isSameDay(day, new Date()) ? "bg-blue-500 text-white" : "",
+              "hover:bg-blue-200"
             )}
+            onClick={() => handleDayClick(cloneDay)}
           >
             {formattedDate}
           </div>
@@ -111,11 +261,51 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red' }) => 
     const currentHour = getHours(currentTime);
     const currentMinute = getMinutes(currentTime);
 
+    const dayAppointments = appointments.filter((apt: any) => 
+      isSameDay(apt.startTime, day)
+    );
+
     return (
       <div className="grid grid-cols-1 gap-px">
         {hours.map((hour) => (
-          <div key={hour} className="p-2 first:border-t-none first:rounded-t-lg last:rounded-b-lg border h-16 relative">
-            {format(new Date().setHours(hour), 'ha')}
+          <div
+            key={hour}
+            className="p-2 first:border-t-none first:rounded-t-lg last:rounded-b-lg border h-32 relative"
+            // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
+          >
+            <div className="absolute top-0 left-0 w-full text-xs p-1">
+              {format(new Date().setHours(hour), 'ha')}
+            </div>
+            {[0, 15, 30, 45].map((minute) => {
+              const timeSlot = setMinutes(setHours(day, hour), minute);
+              const slotAppointments = dayAppointments.filter((apt: any) => 
+                timeSlot >= new Date(apt.startTime) && timeSlot < new Date(apt.endTime)
+              );
+              return (
+                <div
+                  key={minute}
+                  className="absolute left-0 w-full h-1/4 hover:bg-blue-100 cursor-pointer"
+                  style={{ top: `${(minute / 60) * 100}%` }}
+                  onClick={() => handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
+                >
+                  {slotAppointments.map((appointment: any) => (
+                    <div
+                      key={appointment.id}
+                      className={clsx(
+                        "h-full text-xs py-1 px-4 ml-12 overflow-hidden bg-amber-300 font-semibold",
+                        differenceInMinutes(appointment.endTime, appointment.startTime) > 15 && getMinutes(timeSlot) === getMinutes(appointment.startTime)
+                          ? "rounded-t-md"
+                          : differenceInMinutes(appointment.endTime, appointment.startTime) > 15
+                            ? "rounded-b-md"
+                            : "rounded-md"
+                      )}
+                    >
+                      {getMinutes(timeSlot) === getMinutes(appointment.startTime) ? `${eventTitle(appointment.type)} with ${appointment.coach}` : ""} 
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
             {isToday && hour === currentHour && (
               <div
                 className="absolute left-0 right-0"
@@ -165,27 +355,67 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red' }) => 
         </div>
         <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-7 gap-px">
-            {days.map((day) => (
-              <div key={day.toString()} className="border-x">
-                {hours.map((hour) => (
-                  <div key={hour} className="p-2 border-b h-16 relative">
-                    <span className="text-xs text-gray-500">
-                      {format(new Date().setHours(hour), 'ha')}
-                    </span>
-                    {isSameDay(day, new Date()) &&
-                      hour === getHours(currentTime) && (
-                        <div
-                          className="absolute left-0 right-0"
-                          style={{
-                            top: `${(getMinutes(currentTime) / 60) * 100}%`,
-                            borderTop: `2px solid ${currentTimeLineColor}`,
-                          }}
-                        />
-                      )}
-                  </div>
-                ))}
-              </div>
-            ))}
+            {days.map((day) => {
+              const dayAppointments = appointments.filter((apt: any) => 
+                isSameDay(apt.startTime, day)
+              );
+              return (
+                <div key={day.toString()} className="border-x">
+                  {hours.map((hour) => (
+                    <div
+                      key={hour}
+                      className="p-2 border-b h-24 relative hover:bg-blue-200"
+                      // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
+                    >
+                      <span className="text-xs text-gray-500">
+                        {format(new Date().setHours(hour), 'ha')}
+                      </span>
+                      {[0, 15, 30, 45].map((minute) => {
+                        const timeSlot = setMinutes(setHours(day, hour), minute);
+                        const slotAppointments = dayAppointments.filter((apt: any) => 
+                          timeSlot >= new Date(apt.startTime) && timeSlot < new Date(apt.endTime)
+                        );
+                        return (
+                          <div
+                            key={minute}
+                            className="absolute left-0 w-full h-1/4 hover:bg-blue-100 cursor-pointer"
+                            style={{ top: `${(minute / 60) * 100}%` }}
+                            onClick={() => !slotAppointments.length && handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
+                          >
+                            {slotAppointments.map((appointment: any) => (
+                              <div
+                                key={appointment.id}
+                                className={clsx(
+                                  "h-full text-xs py-1 px-4 ml-12 overflow-hidden bg-amber-300 font-semibold z-10",
+                                  differenceInMinutes(appointment.endTime, appointment.startTime) > 15 && getMinutes(timeSlot) === getMinutes(appointment.startTime)
+                                    ? "rounded-t-md"
+                                    : differenceInMinutes(appointment.endTime, appointment.startTime) > 15
+                                      ? "rounded-b-md"
+                                      : "rounded-md"
+                                )}
+                                onClick={() => handleEventClick(appointment)}
+                              >
+                                {getMinutes(timeSlot) === getMinutes(appointment.startTime) ? `${eventTitle(appointment.type)} with ${appointment.coach}` : ""} 
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      })}
+                      {isSameDay(day, new Date()) &&
+                        hour === getHours(currentTime) && (
+                          <div
+                            className="absolute left-0 right-0"
+                            style={{
+                              top: `${(getMinutes(currentTime) / 60) * 100}%`,
+                              borderTop: `2px solid ${currentTimeLineColor}`,
+                            }}
+                          />
+                        )}
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -222,9 +452,11 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red' }) => 
           <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-blue-500 text-white" : "hover:bg-blue-100"}>M</Button>
           <Button
             onClick={() => openDialog(
-              <div>
-                Add Event
-              </div>,
+              <EventForm
+                selectedDateTime={selectedDateTime}
+                submitEvent={submitEvent}
+                formOptions={formOptions}
+              />,
               "Add Event"
             )}
             className="items-center"
@@ -239,9 +471,11 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red' }) => 
           <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-blue-500 text-white" : "hover:bg-blue-100"}>Monthly</Button>
           <Button
             onClick={() => openDialog(
-              <div>
-                Add Event
-              </div>,
+              <EventForm
+                selectedDateTime={selectedDateTime}
+                submitEvent={submitEvent}
+                formOptions={formOptions}
+              />,
               "Add Event"
             )}
             className="items-center hover:shadow-md"

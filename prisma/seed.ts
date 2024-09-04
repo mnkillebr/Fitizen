@@ -12,6 +12,17 @@ function createUser() {
   })
 }
 
+function getCoaches() {
+  return [
+    {
+      name: "Mark"
+    },
+    {
+      name: "Rae"
+    }
+  ]
+}
+
 function getKettlebellExercises() {
   return [
     {
@@ -167,9 +178,10 @@ function getKettlebellExercises() {
 
 async function seed() {
   await createUser();
-  await Promise.all(
-    getKettlebellExercises().map((exercise) => db.exercise.create({ data: exercise }))
-  );
+  await Promise.all([
+    ...getKettlebellExercises().map((exercise) => db.exercise.create({ data: exercise })),
+    ...getCoaches().map((coach) => db.coach.create({ data: coach })),
+  ]);
 };
 
 seed();

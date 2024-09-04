@@ -52,6 +52,14 @@ export function useWindowSize(): WindowSize {
   return windowSize;
 }
 
+export function convertObjectToFormData(object: { [key: string]: any}) {
+  const formData = new FormData();
+  for (const key in object ) {
+    formData.append(key, object[key]);
+  }
+  return formData;
+}
+
 export function workoutFormDataToObject(formData: FormData): { [key: string]: any } {
   let formDataObject: { [key: string]: any } = {};
 
