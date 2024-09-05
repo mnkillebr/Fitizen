@@ -6,12 +6,10 @@ import { ChevronLeft, ChevronRight, PlusIcon } from 'images/icons';
 import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getHours, setHours, getMinutes, setMinutes, differenceInMinutes } from 'date-fns';
 import { Button } from './form';
 import clsx from 'clsx';
-import { useCloseDialog, useOpenDialog } from './Dialog';
+import { useOpenDialog } from './Dialog';
 import DatePicker from './DatePicker';
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
-import AppointmentForm from './AppointmentForm';
-import SessionForm from './SessionForm';
 import { Appointment } from '@prisma/client';
+import EventForm from './EventForm';
 
 type ViewType = 'daily' | 'weekly' | 'monthly';
 
@@ -22,80 +20,6 @@ const eventTitle = (title: string) => {
     case "FOLLOWUP":
       return "Follow-up"
   }
-}
-
-interface EventFormProps {
-  selectedDateTime: Date | null;
-  submitEvent: (args: any) => void;
-  formOptions: {
-    [key: string]: any;
-  };
-}
-
-const EventForm = ({ selectedDateTime, submitEvent, formOptions }: EventFormProps) => {
-  const closeDialog = useCloseDialog();
-  const eventTypes = [
-    {
-      name: "Appointment",
-      form: <AppointmentForm
-        selectedDateTime={selectedDateTime}
-        onCancel={() => {
-          closeDialog()
-        }}
-        onSubmit={(args) => {
-          submitEvent(args)
-          closeDialog()
-        }}
-        defaults={formOptions.defaults}
-        coaches={formOptions.coaches}
-      />
-    },
-    {
-      name: "Session",
-      form: <SessionForm
-        selectedDateTime={selectedDateTime}
-        onCancel={() => {
-          closeDialog()
-        }}
-        onSubmit={(args) => {
-          submitEvent(args)
-          closeDialog()
-        }}
-      />
-    }, 
-  ]
-
-  return (
-    <TabGroup className="w-full" defaultIndex={formOptions.defaults?.defaultTab}>
-      <TabList className="flex gap-4">
-        {eventTypes.map(({ name }, index) => {
-          const defaultTab = formOptions.defaults?.defaultTab !== undefined ? formOptions.defaults?.defaultTab : undefined
-          const disabledTab = defaultTab === undefined ? false : defaultTab !== undefined && defaultTab === index ? false : true
-          return (
-            <Tab
-              key={name}
-              disabled={disabledTab}
-              className={clsx(
-                "rounded-full py-1 px-3 text-sm/6 font-semibold",
-                "focus:outline-none data-[selected]:bg-slate-200 data-[hover]:bg-slate-100",
-                "data-[selected]:data-[hover]:bg-slate-200 data-[focus]:outline-1 data-[focus]:outline-slate-100",
-                "disabled:cursor-not-allowed"
-              )}
-            >
-              {name}
-            </Tab>
-          )
-        })}
-      </TabList>
-      <TabPanels className="p-2">
-        {eventTypes.map(({ name, form }) => (
-          <TabPanel key={name} className="w-full">
-            {form}
-          </TabPanel>
-        ))}
-      </TabPanels>
-    </TabGroup>
-  )
 }
 
 interface EventType extends Appointment {
@@ -230,29 +154,44 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
       for (let i = 0; i < 7; i++) {
         formattedDate = format(day, dateFormat);
         const cloneDay = day;
+        const dayAppointments = appointments.filter((apt: any) => 
+          isSameDay(apt.startTime, cloneDay)
+        );
         days.push(
           <div
             key={day.toString()}
             className={clsx(
               "p-2 border rounded-lg",
               !isSameMonth(day, monthStart) ? "text-gray-400" : isSameDay(day, new Date()) ? "bg-blue-500 text-white" : "",
-              "hover:bg-blue-200"
+              "hover:bg-blue-200 transition duration-100"
             )}
-            onClick={() => handleDayClick(cloneDay)}
+            // onClick={() => handleDayClick(cloneDay)}
           >
-            {formattedDate}
+            <div>{formattedDate}</div>
+            <div className="flex flex-col gap-y-1">
+              {/* Overflow behavior needs revisit */}
+              {dayAppointments.map((appointment: any) => (
+                <div
+                  key={appointment.id}
+                  className="text-xs py-1 px-4 overflow-hidden bg-amber-300 font-semibold rounded-md cursor-pointer"
+                  onClick={() => handleEventClick(appointment)}
+                >
+                  {eventTitle(appointment.type)} with {appointment.coach}
+                </div>
+              ))}
+            </div>
           </div>
         );
         day = addDays(day, 1);
       }
       rows.push(
-        <div key={day.toString()} className="grid grid-cols-7">
+        <div key={day.toString()} className="grid grid-cols-7 overflow-hidden">
           {days}
         </div>
       );
       days = [];
     }
-    return <div className="h-[calc(100%-3.5rem)] grid gap-px shadow-md rounded-lg">{rows}</div>;
+    return <div className="h-[calc(100%-3.5rem)] grid grid-rows-5 gap-px shadow-md rounded-lg">{rows}</div>;
   };
 
   const renderHourColumn = (day: Date) => {
@@ -273,9 +212,9 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
             className="p-2 first:border-t-none first:rounded-t-lg last:rounded-b-lg border h-32 relative"
             // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
           >
-            <div className="absolute top-0 left-0 w-full text-xs p-1">
+            <span className="absolute left-2 top-2 z-10 text-xs text-gray-500">
               {format(new Date().setHours(hour), 'ha')}
-            </div>
+            </span>
             {[0, 15, 30, 45].map((minute) => {
               const timeSlot = setMinutes(setHours(day, hour), minute);
               const slotAppointments = dayAppointments.filter((apt: any) => 
@@ -284,21 +223,22 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
               return (
                 <div
                   key={minute}
-                  className="absolute left-0 w-full h-1/4 hover:bg-blue-100 cursor-pointer"
+                  className="absolute left-0 w-full h-1/4 pl-10 pr-2 hover:bg-blue-100 cursor-pointer transition duration-100"
                   style={{ top: `${(minute / 60) * 100}%` }}
-                  onClick={() => handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
+                  onClick={() => !slotAppointments.length && handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
                 >
                   {slotAppointments.map((appointment: any) => (
                     <div
                       key={appointment.id}
                       className={clsx(
-                        "h-full text-xs py-1 px-4 ml-12 overflow-hidden bg-amber-300 font-semibold",
+                        "h-full text-xs py-1 px-4 overflow-hidden bg-amber-300 font-semibold z-10",
                         differenceInMinutes(appointment.endTime, appointment.startTime) > 15 && getMinutes(timeSlot) === getMinutes(appointment.startTime)
                           ? "rounded-t-md"
                           : differenceInMinutes(appointment.endTime, appointment.startTime) > 15
                             ? "rounded-b-md"
                             : "rounded-md"
                       )}
+                      onClick={() => handleEventClick(appointment)}
                     >
                       {getMinutes(timeSlot) === getMinutes(appointment.startTime) ? `${eventTitle(appointment.type)} with ${appointment.coach}` : ""} 
                     </div>
@@ -364,10 +304,10 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                   {hours.map((hour) => (
                     <div
                       key={hour}
-                      className="p-2 border-b h-24 relative hover:bg-blue-200"
+                      className="p-2 border-b h-24 relative hover:bg-blue-200 transition duration-100 overflow-hidden"
                       // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
                     >
-                      <span className="text-xs text-gray-500">
+                      <span className="absolute left-2 top-2 z-10 text-xs text-gray-500">
                         {format(new Date().setHours(hour), 'ha')}
                       </span>
                       {[0, 15, 30, 45].map((minute) => {
@@ -378,7 +318,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                         return (
                           <div
                             key={minute}
-                            className="absolute left-0 w-full h-1/4 hover:bg-blue-100 cursor-pointer"
+                            className="absolute left-0 w-full h-1/4 pl-10 pr-2 hover:bg-blue-100 cursor-pointer transition duration-100"
                             style={{ top: `${(minute / 60) * 100}%` }}
                             onClick={() => !slotAppointments.length && handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
                           >
@@ -386,7 +326,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                               <div
                                 key={appointment.id}
                                 className={clsx(
-                                  "h-full text-xs py-1 px-4 ml-12 overflow-hidden bg-amber-300 font-semibold z-10",
+                                  "h-full text-xs py-1 px-4 overflow-hidden bg-amber-300 font-semibold z-10",
                                   differenceInMinutes(appointment.endTime, appointment.startTime) > 15 && getMinutes(timeSlot) === getMinutes(appointment.startTime)
                                     ? "rounded-t-md"
                                     : differenceInMinutes(appointment.endTime, appointment.startTime) > 15
@@ -426,14 +366,14 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
     <div className="p-6 md:p-8 h-full overflow-hidden">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
-          <Button onClick={navigatePrevious} className="rounded-full hover:shadow-md">
+          <Button onClick={navigatePrevious} className="rounded-full hover:shadow-md transition duration-100">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button onClick={navigateNext} className="rounded-full hover:shadow-md">
+          <Button onClick={navigateNext} className="rounded-full hover:shadow-md transition duration-100">
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button onClick={navigateToToday} className="md:hidden hover:bg-blue-100">T</Button>
-          <Button onClick={navigateToToday} className="hidden md:flex hover:bg-blue-100">Today</Button>
+          <Button onClick={navigateToToday} className="md:hidden hover:bg-blue-100 transition duration-100">T</Button>
+          <Button onClick={navigateToToday} className="hidden md:flex hover:bg-blue-100 transition duration-100">Today</Button>
         </div>
         {/* <h2 className="md:hidden text-xl font-bold">
           {format(currentDate, "MMM yyyy")}
@@ -447,13 +387,13 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           onDateChange={setCurrentDate}
         />
         <div className="flex md:hidden items-center">
-          <Button onClick={() => setView("daily")} className={view === "daily" ? "bg-blue-500 text-white" : "hover:bg-blue-100"}>D</Button>
-          <Button onClick={() => setView("weekly")} className={view === "weekly" ? "bg-blue-500 text-white" : "hover:bg-blue-100"}>W</Button>
-          <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-blue-500 text-white" : "hover:bg-blue-100"}>M</Button>
+          <Button onClick={() => setView("daily")} className={view === "daily" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>D</Button>
+          <Button onClick={() => setView("weekly")} className={view === "weekly" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>W</Button>
+          <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>M</Button>
           <Button
             onClick={() => openDialog(
               <EventForm
-                selectedDateTime={selectedDateTime}
+                selectedDateTime={new Date()}
                 submitEvent={submitEvent}
                 formOptions={formOptions}
               />,
@@ -466,19 +406,19 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           </Button>
         </div>
         <div className="hidden md:flex items-center">
-          <Button onClick={() => setView("daily")} className={view === "daily" ? "bg-blue-500 text-white" : "hover:bg-blue-100"}>Daily</Button>
-          <Button onClick={() => setView("weekly")} className={view === "weekly" ? "bg-blue-500 text-white" : "hover:bg-blue-100"}>Weekly</Button>
-          <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-blue-500 text-white" : "hover:bg-blue-100"}>Monthly</Button>
+          <Button onClick={() => setView("daily")} className={view === "daily" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>Daily</Button>
+          <Button onClick={() => setView("weekly")} className={view === "weekly" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>Weekly</Button>
+          <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>Monthly</Button>
           <Button
             onClick={() => openDialog(
               <EventForm
-                selectedDateTime={selectedDateTime}
+              selectedDateTime={new Date()}
                 submitEvent={submitEvent}
                 formOptions={formOptions}
               />,
               "Add Event"
             )}
-            className="items-center hover:shadow-md"
+            className="items-center hover:shadow-md transition duration-100"
           >
             <PlusIcon className="h-4 w-4" />
             Add Event

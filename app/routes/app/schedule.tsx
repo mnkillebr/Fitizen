@@ -4,6 +4,7 @@ import { useLoaderData, useSubmit } from "@remix-run/react";
 import { z } from "zod";
 import Calendar from "~/components/Calendar";
 import { createUserAppointment, deleteUserAppointment, getAllCoaches, getAllUserAppointments, updateUserAppointment } from "~/models/calendar.server";
+import { getAllUserWorkoutNames } from "~/models/workout.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { convertObjectToFormData } from "~/utils/misc";
 import { validateForm, } from "~/utils/validation";
@@ -12,11 +13,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const coaches = await getAllCoaches();
   const appointments = await getAllUserAppointments(user.id)
+  const userWorkouts = await getAllUserWorkoutNames(user.id)
   const coachMappedAppointments = appointments.map(appointment => ({
     ...appointment,
     coach: coaches.find(coach => coach.id === appointment.coachId)?.name
   }))
-  return json({ coaches, appointments: coachMappedAppointments })
+  return json({ coaches, appointments: coachMappedAppointments, userWorkouts })
 }
 
 const appointmentSchema = z.object({
@@ -96,8 +98,10 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
+    default: {
+      return null;
+    }
   }
-  return null
 }
 
 type submitEventType = {
@@ -110,7 +114,7 @@ type submitEventType = {
 }
 
 export default function Schedule() {
-  const { coaches, appointments } = useLoaderData<typeof loader>();
+  const { coaches, appointments, userWorkouts } = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const handleSubmitEvent = (formObj: submitEventType) => {
     const formData = convertObjectToFormData(formObj)
@@ -121,7 +125,7 @@ export default function Schedule() {
       {/* This is the Schedule page */}
       <Calendar
         submitEvent={handleSubmitEvent}
-        formOptions={{ coaches }}
+        formOptions={{ coaches, userWorkouts }}
         schedule={{ appointments }}
       />
     </div>

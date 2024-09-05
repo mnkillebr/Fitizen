@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { format, setHours, setMinutes } from 'date-fns';
+import { addMinutes, format, setHours, setMinutes, setSeconds } from 'date-fns';
 import DatePicker from './DatePicker';
 import { Button, PrimaryButton } from './form';
 
@@ -7,14 +7,20 @@ interface SessionFormProps {
   selectedDateTime: Date | null;
   onSubmit: (sessionData: any) => void;
   onCancel: () => void;
+  workouts: Array<{ name: string; id: string }>;
+  defaults?: {
+    [key: string]: any;
+  };
 }
 
 const SessionForm: React.FC<SessionFormProps> = ({
   selectedDateTime,
   onSubmit,
   onCancel,
+  workouts,
+  defaults,
 }) => {
-  const [sessionType, setSessionType] = useState('');
+  const [workout, setWorkout] = useState('');
   const [recurrence, setRecurrence] = useState('');
   const [date, setDate] = useState(selectedDateTime || new Date());
   const [hour, setHour] = useState(selectedDateTime ? format(selectedDateTime, 'hh') : '09');
@@ -23,29 +29,43 @@ const SessionForm: React.FC<SessionFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const sessionDateTime = setMinutes(setHours(date, parseInt(hour)), parseInt(minute));
-    onSubmit({
-      sessionType,
+    const selectedHour = parseInt(hour);
+    const hours = selectedHour === 12 && meridiem === "PM" ? selectedHour : selectedHour === 12 && meridiem === "AM" ? 0 : meridiem === "AM" ? selectedHour : selectedHour + 12;
+    const startTime = setHours(setMinutes(setSeconds(date, 0), parseInt(minute)), hours);
+    const duration = 60
+    const endTime = addMinutes(startTime, duration)
+    const submitObj = defaults ? {
+      workoutId: defaults.workoutId,
+      id: defaults.sessionId ? defaults.sessionId : '',
       recurrence,
-      dateTime: sessionDateTime,
-      formType: "session",
-    });
+      startTime,
+      endTime,
+      formType: "workout",
+    } : {
+      workoutId: workout,
+      recurrence,
+      startTime,
+      endTime,
+      formType: "workout",
+    }
+    return onSubmit(submitObj);
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
-        <label className="block mb-2 font-semibold">Session Type</label>
+        <label className="block mb-2 font-semibold" htmlFor="workoutId">Workout</label>
         <select
-          value={sessionType}
-          onChange={(e) => setSessionType(e.target.value)}
+          value={defaults?.workoutId ? defaults.workoutId : workout}
+          onChange={(e) => setWorkout(e.target.value)}
+          name="workoutId"
+          id="workoutId"
           required
+          disabled={defaults?.workoutId === undefined ? false : true}
           className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
         >
-          <option value="">Select session type</option>
-          <option value="study">Study (45 min)</option>
-          <option value="nap">Nap (30 min)</option>
-          <option value="focus">Focus (1 hour)</option>
+          <option value="">Select workout</option>
+          {workouts.map(({ name, id }, workout_idx) => <option key={workout_idx} value={id}>{name}</option>)}
         </select>
       </div>
       <div className="mb-4">

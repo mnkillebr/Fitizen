@@ -1,23 +1,35 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { Link, useFetcher, useLoaderData } from "@remix-run/react";
+import { Link, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 import clsx from "clsx";
-import { ArrowLeft, ClockIcon, FireIcon, PlayIcon, BarsIcon, ContextMenuIcon, TrashIcon, PencilIcon, ChevronLeft } from "images/icons";
+import { ArrowLeft, ClockIcon, FireIcon, PlayIcon, BarsIcon, ContextMenuIcon, TrashIcon, PencilIcon, ChevronLeft, CalendarIcon } from "images/icons";
 import db from "~/db.server";
 import crunchGirl from "images/jonathan-borba-lrQPTQs7nQQ-unsplash copy.jpg";
 import { Popover, PopoverButton, PopoverPanel, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { Exercise as ExerciseType, RoutineExercise as RoutineExerciseType } from "@prisma/client";
+import { Exercise as ExerciseType, Recurrence, RoutineExercise as RoutineExerciseType } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { z } from "zod";
-import { ErrorMessage } from "~/components/form";
+import { Button, ErrorMessage } from "~/components/form";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { validateForm } from "~/utils/validation";
 import { deleteWorkout, getWorkout, getWorkoutLogsById } from "~/models/workout.server";
 import Stopwatch from "~/components/Stopwatch";
+import { createUserWorkoutSession, getAllCoaches } from "~/models/calendar.server";
+import { useOpenDialog } from "~/components/Dialog";
+import EventForm from "~/components/EventForm";
+import { convertObjectToFormData } from "~/utils/misc";
+import { format, setHours, setMinutes } from "date-fns";
 
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
+})
+const scheduleWorkoutSchema = z.object({
+  workoutId: z.string(),
+  id: z.string().optional(),
+  recurrence: z.string().optional(),
+  startTime: z.string(),
+  endTime: z.string(),
 })
 
 interface deleteWorkoutFetcherType extends ActionFunctionArgs{
@@ -295,6 +307,24 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
+    case "schedule_workout": {
+      return validateForm(
+        formData,
+        scheduleWorkoutSchema,
+        async (data) => {
+          const {
+            workoutId,
+            ...rest
+          } = data
+          const sessionObj = {
+            ...rest,
+            recurrence: rest.recurrence === "daily" ? Recurrence.DAILY : rest.recurrence === "weekly" ? Recurrence.WEEKLY : rest.recurrence === "monthly" ? Recurrence.MONTHLY : undefined,
+          }
+          return createUserWorkoutSession(user.id, workoutId, sessionObj)
+        },
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
     default: {
       return null;
     }
@@ -310,6 +340,9 @@ export default function WorkoutDetail() {
 
   const panelScrollContainerRef = useRef<HTMLDivElement>(null);
   const [panelIndex, setPanelIndex] = useState(0);
+
+  const openDialog = useOpenDialog();
+  const submit = useSubmit();
 
   // const [startWorkout, setStartWorkout] = useState(false)
   const formatDuration = (duration: number) => {
@@ -336,6 +369,35 @@ export default function WorkoutDetail() {
       behavior: 'smooth'
     });
   };
+
+  const handleAddToCalendar = (formObj: any) => {
+    const formData = convertObjectToFormData(formObj)
+    formData.append("_action", "schedule_workout")
+    submit(formData, { method: "post" })
+  }
+
+  const addToCalendar = () => {
+    const time = new Date()
+    openDialog(
+      <EventForm
+        selectedDateTime={setHours(setMinutes(time, 0), parseInt(format(time, 'hh')) + 2)}
+        submitEvent={handleAddToCalendar}
+        formOptions={{
+          defaults: {
+            defaultTab: 1,
+            workoutId: data.workout.id,
+          },
+          userWorkouts: [
+            {
+              id: data.workout.id,
+              name: data.workout.name,
+            },
+          ],
+        }}
+      />,
+      "Schedule Workout"
+    )
+  }
 
   useEffect(() => {
     const imgScrollContainer = imageDescriptionScrollContainerRef.current;
@@ -375,55 +437,60 @@ export default function WorkoutDetail() {
           <Link to="/app/workouts">
             <ChevronLeft className="hover:text-accent" />
           </Link>
-          {data.workout?.owns ? (
-            <Popover>
-              {({ open }) => (
-                <>
-                  <PopoverButton>
-                    <ContextMenuIcon className="hover:text-accent" />
-                  </PopoverButton>
-                  <AnimatePresence>
-                    {open && (
-                      <PopoverPanel
-                        static
-                        as={motion.div}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        anchor={{ to: 'bottom end', gap: '8px', }}
-                        className="flex flex-col rounded-md bg-white text-sm/6 shadow-md p-0.5 border gap-1"
-                      >
-                        <Link to={`/app/workouts/edit?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1">
-                          <PencilIcon className="h-4" />
-                          Edit
-                        </Link>
-                        <deleteWorkoutFetcher.Form
-                          method="post"
-                          onSubmit={(event) => {
-                            if(!confirm("Are you sure you want to delete this workout?")) {
-                              event.preventDefault();
-                            }
-                          }}
-                        >
-                          <input type="hidden" name="workoutId" value={data.workout?.id} />
-                          <button
-                            name="_action"
-                            value="deleteWorkout"
-                            className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1"
+          <Popover>
+            {({ open }) => (
+              <>
+                <PopoverButton>
+                  <ContextMenuIcon className="hover:text-accent" />
+                </PopoverButton>
+                <AnimatePresence>
+                  {open && (
+                    <PopoverPanel
+                      static
+                      as={motion.div}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      anchor={{ to: 'bottom end', gap: '8px', }}
+                      className="flex flex-col rounded-md bg-white text-sm/6 shadow-md p-0.5 border gap-1"
+                    >
+                      <button className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1" onClick={addToCalendar}>
+                        <CalendarIcon className="h-4" />
+                        Add to Calendar
+                      </button>
+                      {data.workout?.owns ? (
+                        <>
+                          <Link to={`/app/workouts/edit?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1">
+                            <PencilIcon className="h-4" />
+                            Edit
+                          </Link>
+                          <deleteWorkoutFetcher.Form
+                            method="post"
+                            onSubmit={(event) => {
+                              if(!confirm("Are you sure you want to delete this workout?")) {
+                                event.preventDefault();
+                              }
+                            }}
                           >
-                            <TrashIcon className="h-4" />
-                            Delete
-                          </button>
-                          <ErrorMessage>{deleteWorkoutFetcher.data?.errors?.workoutId}</ErrorMessage>
-                        </deleteWorkoutFetcher.Form>
-                        
-                      </PopoverPanel>
-                    )}
-                  </AnimatePresence>
-                </>
-              )}
-            </Popover>
-          ) : null}
+                            <input type="hidden" name="workoutId" value={data.workout?.id} />
+                            <button
+                              name="_action"
+                              value="deleteWorkout"
+                              className="flex items-center gap-1 w-full hover:bg-slate-200 hover:rounded-md p-1"
+                            >
+                              <TrashIcon className="h-4" />
+                              Delete
+                            </button>
+                            <ErrorMessage>{deleteWorkoutFetcher.data?.errors?.workoutId}</ErrorMessage>
+                          </deleteWorkoutFetcher.Form>
+                        </>
+                      ) : null}
+                    </PopoverPanel>
+                  )}
+                </AnimatePresence>
+              </>
+            )}
+          </Popover>
         </div>
         {/* Title */}
         <div className="font-semibold text-2xl select-none lg:mb-2 px-1">{data.workout?.name}</div>

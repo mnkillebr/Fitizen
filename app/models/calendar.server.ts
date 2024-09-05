@@ -2,6 +2,7 @@ import { AppointmentType, Prisma, Recurrence } from "@prisma/client";
 import db from "~/db.server";
 
 export type WorkoutSessionObject = {
+  id?: string;
   startTime: string;
   endTime: string;
   recurrence?: Recurrence;
@@ -112,6 +113,50 @@ export async function createUserWorkoutSession(userId: string, workoutId: string
       },
     });
     return createWorkoutSession;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2011") {
+        return error.message
+      }
+    }
+    throw error
+  };
+}
+
+export async function updateUserWorkoutSession(userId: string, workoutId: string, sessionObj: WorkoutSessionObject) {
+  try {
+    const updateSession = await db.workoutSession.update({
+      where: {
+        id: sessionObj.id,
+      },
+      data: {
+        userId,
+        routineId: workoutId,
+        startTime: sessionObj.startTime,
+        endTime: sessionObj.endTime,
+        recurrence: sessionObj.recurrence,
+      },
+    });
+    return updateSession;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2011") {
+        return error.message
+      }
+    }
+    throw error
+  };
+}
+
+export async function deleteUserWorkoutSession(userId: string, sessionId: string) {
+  try {
+    const deleteAppointment = await db.workoutSession.delete({
+      where: {
+        id: sessionId,
+        userId,
+      },
+    });
+    return deleteAppointment;
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2011") {

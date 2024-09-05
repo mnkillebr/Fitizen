@@ -99,6 +99,33 @@ export function getAllUserWorkouts(userId: string, query: string | null) {
   });
 };
 
+export function getAllUserWorkoutNames(userId: string) {
+  return db.routine.findMany({
+    where: {
+      OR: [
+        {
+          userId,
+        },
+        {
+          isFree: true,
+        }
+      ],
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+      {
+        name: "desc",
+      }
+    ],
+  });
+};
+
 export async function createUserWorkoutWithExercises(userId: string, workoutName: string, workoutDescription: string, workoutExercises: Array<ExerciseSchemaType>) {
   try {
     const createWorkout = await db.routine.create({
