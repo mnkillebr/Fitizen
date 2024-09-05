@@ -28,6 +28,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
   const [hour, setHour] = useState(selectedDateTime ? format(selectedDateTime, 'hh') : '09');
   const [minute, setMinute] = useState(selectedDateTime ? format(selectedDateTime, 'mm') : '00');
   const [meridiem, setMeridiem] = useState(selectedDateTime ? format(selectedDateTime, 'aa'): 'AM');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (cancel) {
@@ -148,10 +149,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           </>
         ) : (
           <>
-            <Button type="button" onClick={() => defaults ? setCancel(true) : onCancel()} className="mr-2 bg-slate-200 hover:bg-slate-100">
-              {defaults ? "Cancel Appointment" : "Cancel"}
+            <Button type="button" onClick={() => defaults?.appointmentId ? setCancel(true) : onCancel()} className="mr-2 bg-slate-200 hover:bg-slate-100">
+              {defaults?.appointmentId ? "Cancel Appointment" : "Cancel"}
             </Button>
-            <PrimaryButton type="submit">{defaults ? "Update" : "Schedule"}</PrimaryButton>
+            <PrimaryButton type="submit">{defaults?.appointmentId ? "Update" : "Schedule"}</PrimaryButton>
           </>
         )}
       </div>

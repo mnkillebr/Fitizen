@@ -380,7 +380,7 @@ export default function WorkoutDetail() {
     const time = new Date()
     openDialog(
       <EventForm
-        selectedDateTime={setHours(setMinutes(time, 0), parseInt(format(time, 'hh')) + 2)}
+        selectedDateTime={setHours(setMinutes(time, 0), parseInt(format(time, 'HH')) + 2)}
         submitEvent={handleAddToCalendar}
         formOptions={{
           defaults: {

@@ -22,6 +22,7 @@ const SessionForm: React.FC<SessionFormProps> = ({
 }) => {
   const [workout, setWorkout] = useState('');
   const [recurrence, setRecurrence] = useState('');
+  const [cancel, setCancel] = useState(false);
   const [date, setDate] = useState(selectedDateTime || new Date());
   const [hour, setHour] = useState(selectedDateTime ? format(selectedDateTime, 'hh') : '09');
   const [minute, setMinute] = useState(selectedDateTime ? format(selectedDateTime, 'mm') : '00');
@@ -29,26 +30,33 @@ const SessionForm: React.FC<SessionFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedHour = parseInt(hour);
-    const hours = selectedHour === 12 && meridiem === "PM" ? selectedHour : selectedHour === 12 && meridiem === "AM" ? 0 : meridiem === "AM" ? selectedHour : selectedHour + 12;
-    const startTime = setHours(setMinutes(setSeconds(date, 0), parseInt(minute)), hours);
-    const duration = 60
-    const endTime = addMinutes(startTime, duration)
-    const submitObj = defaults ? {
-      workoutId: defaults.workoutId,
-      id: defaults.sessionId ? defaults.sessionId : '',
-      recurrence,
-      startTime,
-      endTime,
-      formType: "workout",
-    } : {
-      workoutId: workout,
-      recurrence,
-      startTime,
-      endTime,
-      formType: "workout",
+    if (cancel) {
+      return onSubmit({
+        id: defaults?.sessionId,
+        formType: "delete_workout_session",
+      })
+    } else {
+      const selectedHour = parseInt(hour);
+      const hours = selectedHour === 12 && meridiem === "PM" ? selectedHour : selectedHour === 12 && meridiem === "AM" ? 0 : meridiem === "AM" ? selectedHour : selectedHour + 12;
+      const startTime = setHours(setMinutes(setSeconds(date, 0), parseInt(minute)), hours);
+      const duration = 60
+      const endTime = addMinutes(startTime, duration)
+      const submitObj = defaults ? {
+        workoutId: defaults.workoutId,
+        id: defaults.sessionId ? defaults.sessionId : '',
+        recurrence,
+        startTime,
+        endTime,
+        formType: "update_workout_session",
+      } : {
+        workoutId: workout,
+        recurrence,
+        startTime,
+        endTime,
+        formType: "workout_session",
+      }
+      return onSubmit(submitObj);
     }
-    return onSubmit(submitObj);
   };
 
   return (
@@ -69,10 +77,12 @@ const SessionForm: React.FC<SessionFormProps> = ({
         </select>
       </div>
       <div className="mb-4">
-        <label className="block mb-2 font-semibold">Recurrence</label>
+        <label className="block mb-2 font-semibold" htmlFor="recurrence">Recurrence</label>
         <select
-          value={recurrence}
+          value={defaults?.recurrence ? defaults.recurrence : recurrence}
           onChange={(e) => setRecurrence(e.target.value)}
+          name="recurrence"
+          id="recurrence"
           className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
         >
           <option value="">No recurrence</option>
@@ -125,11 +135,23 @@ const SessionForm: React.FC<SessionFormProps> = ({
           </select>
         </div>
       </div>
+      {cancel ? <span className="flex font-semibold text-sm justify-end mb-1">Are you sure you wish to cancel this workout session?</span> : null}
       <div className="flex justify-end">
-        <Button type="button" onClick={onCancel} className="mr-2 bg-slate-200 hover:bg-slate-100">
-          Cancel
-        </Button>
-        <PrimaryButton type="submit">Schedule</PrimaryButton>
+        {cancel ? (
+          <>
+            <Button type="button" onClick={() => setCancel(false)} className="mr-2 bg-slate-200 hover:bg-slate-100">
+              No
+            </Button>
+            <PrimaryButton type="submit">Yes</PrimaryButton>
+          </>
+        ) : (
+          <>
+            <Button type="button" onClick={() => defaults?.sessionId ? setCancel(true) : onCancel()} className="mr-2 bg-slate-200 hover:bg-slate-100">
+              {defaults?.sessionId ? "Cancel Session" : "Cancel"}
+            </Button>
+            <PrimaryButton type="submit">{defaults?.sessionId ? "Update" : "Schedule"}</PrimaryButton>
+          </>
+        )}
       </div>
     </form>
   );

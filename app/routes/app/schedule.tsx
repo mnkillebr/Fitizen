@@ -1,9 +1,9 @@
-import { AppointmentType } from "@prisma/client";
+import { AppointmentType, Recurrence } from "@prisma/client";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import { z } from "zod";
 import Calendar from "~/components/Calendar";
-import { createUserAppointment, deleteUserAppointment, getAllCoaches, getAllUserAppointments, updateUserAppointment } from "~/models/calendar.server";
+import { createUserAppointment, createUserWorkoutSession, deleteUserAppointment, deleteUserWorkoutSession, getAllCoaches, getAllUserAppointments, getAllUserWorkoutSessions, updateUserAppointment, updateUserWorkoutSession } from "~/models/calendar.server";
 import { getAllUserWorkoutNames } from "~/models/workout.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { convertObjectToFormData } from "~/utils/misc";
@@ -14,11 +14,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const coaches = await getAllCoaches();
   const appointments = await getAllUserAppointments(user.id)
   const userWorkouts = await getAllUserWorkoutNames(user.id)
+  const userSessions = await getAllUserWorkoutSessions(user.id)
   const coachMappedAppointments = appointments.map(appointment => ({
     ...appointment,
     coach: coaches.find(coach => coach.id === appointment.coachId)?.name
   }))
-  return json({ coaches, appointments: coachMappedAppointments, userWorkouts })
+  const nameMappedSessions = userSessions.map(session => ({
+    ...session,
+    routineName: userWorkouts.find(workout => workout.id === session.routineId)?.name
+  }))
+  return json({ coaches, appointments: coachMappedAppointments, userWorkouts, userSessions: nameMappedSessions })
 }
 
 const appointmentSchema = z.object({
@@ -32,10 +37,14 @@ const deleteAppointmentSchema = z.object({
   id: z.string(),
 })
 const sessionSchema = z.object({
-  routineId: z.string(),
+  id: z.string().optional(),
+  workoutId: z.string(),
+  recurrence: z.string().optional(),
   startTime: z.string(),
   endTime: z.string(),
-  recurrence: z.string(),
+})
+const deleteSessionSchema = z.object({
+  id: z.string(),
 })
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -88,12 +97,48 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
-    case "session": {
+    case "workout_session": {
       return validateForm(
         formData,
         sessionSchema,
         async (data) => {
-          return null
+          const {
+            workoutId,
+            ...rest
+          } = data
+          const sessionObj = {
+            ...rest,
+            recurrence: rest.recurrence === "daily" ? Recurrence.DAILY : rest.recurrence === "weekly" ? Recurrence.WEEKLY : rest.recurrence === "monthly" ? Recurrence.MONTHLY : undefined,
+          }
+          return createUserWorkoutSession(user.id, workoutId, sessionObj)
+        },
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    case "update_workout_session": {
+      return validateForm(
+        formData,
+        sessionSchema,
+        async (data) => {
+          const {
+            workoutId,
+            ...rest
+          } = data
+          const sessionObj = {
+            ...rest,
+            recurrence: rest.recurrence === "daily" ? Recurrence.DAILY : rest.recurrence === "weekly" ? Recurrence.WEEKLY : rest.recurrence === "monthly" ? Recurrence.MONTHLY : undefined,
+          }
+          return updateUserWorkoutSession(user.id, workoutId, sessionObj)
+        },
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    case "delete_workout_session": {
+      return validateForm(
+        formData,
+        deleteSessionSchema,
+        async ({ id }) => {
+          return deleteUserWorkoutSession(user.id, id)
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -114,7 +159,7 @@ type submitEventType = {
 }
 
 export default function Schedule() {
-  const { coaches, appointments, userWorkouts } = useLoaderData<typeof loader>();
+  const { coaches, appointments, userWorkouts, userSessions } = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const handleSubmitEvent = (formObj: submitEventType) => {
     const formData = convertObjectToFormData(formObj)
@@ -126,7 +171,7 @@ export default function Schedule() {
       <Calendar
         submitEvent={handleSubmitEvent}
         formOptions={{ coaches, userWorkouts }}
-        schedule={{ appointments }}
+        schedule={{ appointments, userSessions }}
       />
     </div>
   )

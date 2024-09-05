@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronDoubleLeft, ChevronRight, ChevronDoubleRight } from "images/icons";
 import { Button } from "./form";
 import clsx from "clsx";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 interface DatePickerProps {
   currentDate: Date;
@@ -172,11 +173,13 @@ const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange
         <>
           <PopoverButton
             className={clsx(
-              inForm ? "" : "text-xl font-bold outline-none"
+              "flex items-center gap-1 hover:shadow-md transition duration-100",
+              inForm ? "" : "text-base md:text-xl font-bold outline-none"
             )}
             onClick={() => setIsOpen(!open)}
           >
             {inForm ? format(currentDate, "MM/dd/yyyy") : format(currentDate, "MMMM yyyy")}
+            <ChevronDownIcon className="size-4" />
           </PopoverButton>
           <AnimatePresence>
             {open && (
