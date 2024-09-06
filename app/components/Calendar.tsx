@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // import { Button } from '@/components/ui/button';
 // import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { ChevronLeft, ChevronRight, PlusIcon } from 'images/icons';
-import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getHours, setHours, getMinutes, setMinutes, differenceInMinutes } from 'date-fns';
+import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getHours, setHours, getMinutes, setMinutes, differenceInMinutes, differenceInDays } from 'date-fns';
 import { Button } from './form';
 import clsx from 'clsx';
 import { useOpenDialog } from './Dialog';
@@ -177,24 +177,28 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
         const dayEvents = [...appointments, ...userSessions].filter((evt: any) => 
           isSameDay(evt.startTime, cloneDay)
         );
+        const dayDiff = differenceInDays(cloneDay, startDate)
         days.push(
           <div
             key={day.toString()}
             className={clsx(
-              "p-2 border rounded-lg",
-              !isSameMonth(day, monthStart) ? "text-gray-400" : isSameDay(day, new Date()) ? "bg-blue-500 text-white" : "",
-              "hover:bg-blue-200 transition duration-100"
+              "p-2 border rounded-lg overflow-hidden h-full",
+              !isSameMonth(day, monthStart) ? "text-gray-400" : "",
+              "hover:bg-blue-50 transition duration-100"
             )}
             // onClick={() => handleDayClick(cloneDay)}
           >
-            <div>{format(day, "EEE")}</div>
-            <div>{formattedDate}</div>
+            {dayDiff < 7 ? <div className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-t-md pt-1 px-1" : "")}>{format(day, "EEE")}</div> : null}
+            <div className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-b-md pb-1 px-1" : "")}>{formattedDate}</div>
             <div className="flex flex-col gap-y-1">
               {/* Overflow behavior needs revisit */}
               {dayEvents.map((evt: any) => (
                 <div
                   key={evt.id}
-                  className="text-xs py-1 px-4 overflow-hidden bg-amber-300 font-semibold rounded-md cursor-pointer"
+                  className={clsx(
+                    "text-xs py-1 px-4 font-semibold rounded-md cursor-pointer truncate",
+                    evt.type ? "bg-amber-300" : "bg-teal-300"
+                  )}
                   onClick={() => handleEventClick(evt)}
                 >
                   {evt.type ? `${eventTitle(evt.type)} with ${evt.coach}` : `${evt.routineName} Session`}
@@ -206,7 +210,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
         day = addDays(day, 1);
       }
       rows.push(
-        <div key={day.toString()} className="grid grid-cols-7 overflow-hidden">
+        <div key={day.toString()} className="grid grid-cols-7">
           {days}
         </div>
       );
@@ -226,58 +230,79 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
     );
 
     return (
-      <div className="grid grid-cols-1 gap-px">
-        {hours.map((hour) => (
-          <div
-            key={hour}
-            className="p-2 first:border-t-none first:rounded-t-lg last:rounded-b-lg border h-32 relative"
-            // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
-          >
-            <span className="absolute left-2 top-2 z-10 text-xs text-gray-500">
-              {format(new Date().setHours(hour), 'ha')}
-            </span>
-            {[0, 15, 30, 45].map((minute) => {
-              const timeSlot = setMinutes(setHours(day, hour), minute);
-              const slotEvents = dayEvents.filter((evt: any) => 
-                timeSlot >= new Date(evt.startTime) && timeSlot < new Date(evt.endTime)
-              );
-              return (
+      <div className="grid grid-cols-1 gap-px relative">
+        <div className="absolute w-full">
+          {hours.map((hour) => (
+            <div
+              key={hour}
+              className="p-2 first:border-t-none first:rounded-t-lg last:rounded-b-lg border h-32 relative"
+              // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
+            >
+              <span className="absolute left-2 top-2 z-20 text-xs text-gray-500">
+                {format(new Date().setHours(hour), 'ha')}
+              </span>
+              {isToday && hour === currentHour && (
                 <div
-                  key={minute}
-                  className="absolute left-0 w-full h-1/4 pl-10 pr-2 hover:bg-blue-100 cursor-pointer transition duration-100"
-                  style={{ top: `${(minute / 60) * 100}%` }}
-                  onClick={() => !slotEvents.length && handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
-                >
-                  {slotEvents.map((evt: any) => (
-                    <div
-                      key={evt.id}
-                      className={clsx(
-                        "h-full text-xs py-1 px-4 overflow-hidden bg-amber-300 font-semibold z-10",
-                        differenceInMinutes(evt.endTime, evt.startTime) > 15 && getMinutes(timeSlot) === getMinutes(evt.startTime)
-                          ? "rounded-t-md"
-                          : differenceInMinutes(evt.endTime, evt.startTime) > 15
-                              ? "rounded-b-md"
-                              : "rounded-md"
-                      )}
-                      onClick={() => handleEventClick(evt)}
-                    >
-                      {getMinutes(timeSlot) === getMinutes(evt.startTime) && evt.type ? `${eventTitle(evt.type)} with ${evt.coach}` : getMinutes(timeSlot) === getMinutes(evt.startTime) ? `${evt.routineName} Session` : ""}
-                    </div>
-                  ))}
-                </div>
-              )
-            })}
-            {isToday && hour === currentHour && (
-              <div
-                className="absolute left-0 right-0"
-                style={{
-                  top: `${(currentMinute / 60) * 100}%`,
-                  borderTop: `2px solid ${currentTimeLineColor}`,
-                }}
-              />
-            )}
-          </div>
-        ))}
+                  className="absolute left-0 right-0 z-20"
+                  style={{
+                    top: `${(currentMinute / 60) * 100}%`,
+                    borderTop: `2px solid ${currentTimeLineColor}`,
+                  }}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="absolute w-full z-10">
+          {hours.map((hour) => (
+            <div
+              key={hour}
+              className="p-2 h-32 relative"
+              // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
+            >
+              {[0, 15, 30, 45].map((minute) => {
+                const timeSlot = setMinutes(setHours(day, hour), minute);
+                const slotEvents = dayEvents.filter((evt: any) => 
+                  timeSlot >= new Date(evt.startTime) && timeSlot < new Date(evt.endTime)
+                );
+                return (
+                  <div
+                    key={minute}
+                    className={clsx(
+                      "absolute left-0 w-full h-1/4 pl-10 pr-2 transition duration-100",
+                      !slotEvents.length ? "hover:bg-blue-50" : ""
+                    )}
+                    style={{ top: `${(minute / 60) * 100}%` }}
+                    onClick={() => !slotEvents.length && handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
+                  >
+                    {slotEvents.map((evt: any) => {
+                      if (getMinutes(evt.startTime) === minute) {
+                        const slotHeight = (differenceInMinutes(evt.endTime, evt.startTime) / 15) * 100
+                        return (
+                          <div
+                            key={evt.id}
+                            className={clsx(
+                              `h-[calc(${slotHeight}%)] z-10 rounded-md cursor-pointer`,
+                              "text-xs py-1 px-4 overflow-hidden font-semibold z-10",
+                              evt.type ? "bg-amber-300" : "bg-teal-300"
+                            )}
+                            onClick={() => handleEventClick(evt)}
+                          >
+                            {getMinutes(timeSlot) === getMinutes(evt.startTime) && evt.type ? `${eventTitle(evt.type)} with ${evt.coach}` : getMinutes(timeSlot) === getMinutes(evt.startTime) ? `${evt.routineName} Session` : ""}
+                          </div>
+                        )
+                      } else {
+                        return (
+                          <div key={evt.id} className="h-full cursor-pointer" onClick={() => handleEventClick(evt)} />
+                        )
+                      }
+                    })}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -314,23 +339,49 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
             </div>
           ))}
         </div>
-        <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-7 gap-px">
+        <div className="flex-1 overflow-y-auto relative">
+          <div className="grid grid-cols-7 gap-px absolute w-full">
             {days.map((day) => {
-              const dayEvents = [...appointments, ...userSessions].filter((evt: any) => 
-                isSameDay(evt.startTime, day)
-              );
               return (
                 <div key={day.toString()} className="border-x">
                   {hours.map((hour) => (
                     <div
                       key={hour}
-                      className="p-2 border-b h-24 relative hover:bg-blue-200 transition duration-100 overflow-hidden"
+                      className="p-2 border-b h-24 relative"
                       // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
                     >
                       <span className="absolute left-2 top-2 z-10 text-xs text-gray-500">
                         {format(new Date().setHours(hour), 'ha')}
                       </span>
+                      {isSameDay(day, new Date()) &&
+                        hour === getHours(currentTime) && (
+                          <div
+                            className="absolute left-0 right-0 z-20"
+                            style={{
+                              top: `${(getMinutes(currentTime) / 60) * 100}%`,
+                              borderTop: `2px solid ${currentTimeLineColor}`,
+                            }}
+                          />
+                        )}
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
+          </div>
+          <div className="grid grid-cols-7 gap-px absolute w-full">
+            {days.map((day) => {
+              const dayEvents = [...appointments, ...userSessions].filter((evt: any) => 
+                isSameDay(evt.startTime, day)
+              );
+              return (
+                <div key={day.toString()}>
+                  {hours.map((hour) => (
+                    <div
+                      key={hour}
+                      className="p-2 h-24 relative"
+                      // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
+                    >
                       {[0, 15, 30, 45].map((minute) => {
                         const timeSlot = setMinutes(setHours(day, hour), minute);
                         const slotEvents = dayEvents.filter((evt: any) => 
@@ -339,39 +390,38 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                         return (
                           <div
                             key={minute}
-                            className="absolute left-0 w-full h-1/4 pl-10 pr-2 hover:bg-blue-100 cursor-pointer transition duration-100"
+                            className={clsx(
+                              "absolute left-0 w-full h-1/4 pl-2 md:pl-10 pr-2",
+                              slotEvents.length ? "cursor-pointer" : "hover:bg-blue-50 transition duration-100"
+                            )}
                             style={{ top: `${(minute / 60) * 100}%` }}
                             onClick={() => !slotEvents.length && handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
                           >
-                            {slotEvents.map((evt: any) => (
-                              <div
-                                key={evt.id}
-                                className={clsx(
-                                  "h-full text-xs py-1 px-4 overflow-hidden bg-amber-300 font-semibold z-10",
-                                  differenceInMinutes(evt.endTime, evt.startTime) > 15 && getMinutes(timeSlot) === getMinutes(evt.startTime)
-                                    ? "rounded-t-md"
-                                    : differenceInMinutes(evt.endTime, evt.startTime) > 15
-                                        ? "rounded-b-md"
-                                        : "rounded-md"
-                                )}
-                                onClick={() => handleEventClick(evt)}
-                              >
-                                {getMinutes(timeSlot) === getMinutes(evt.startTime) && evt.type ? `${eventTitle(evt.type)} with ${evt.coach}` : getMinutes(timeSlot) === getMinutes(evt.startTime) ? `${evt.routineName} Session` : ""}
-                              </div>
-                            ))}
+                            {slotEvents.map((evt: any) => {
+                              if (getMinutes(evt.startTime) === minute) {
+                                const slotHeight = (differenceInMinutes(evt.endTime, evt.startTime) / 15) * 100
+                                return (
+                                  <div
+                                    key={evt.id}
+                                    className={clsx(
+                                      `h-[calc(${slotHeight}%)] z-10 rounded-md`,
+                                      "text-xs py-1 px-4 overflow-hidden font-semibold z-10",
+                                      evt.type ? "bg-amber-300" : "bg-teal-300"
+                                    )}
+                                    onClick={() => handleEventClick(evt)}
+                                  >
+                                    {getMinutes(timeSlot) === getMinutes(evt.startTime) && evt.type ? `${eventTitle(evt.type)} with ${evt.coach}` : getMinutes(timeSlot) === getMinutes(evt.startTime) ? `${evt.routineName} Session` : ""}
+                                  </div>
+                                )
+                              } else {
+                                return (
+                                  <div key={evt.id} className="h-full" onClick={() => handleEventClick(evt)} />
+                                )
+                              }
+                            })}
                           </div>
                         )
                       })}
-                      {isSameDay(day, new Date()) &&
-                        hour === getHours(currentTime) && (
-                          <div
-                            className="absolute left-0 right-0"
-                            style={{
-                              top: `${(getMinutes(currentTime) / 60) * 100}%`,
-                              borderTop: `2px solid ${currentTimeLineColor}`,
-                            }}
-                          />
-                        )}
                     </div>
                   ))}
                 </div>
