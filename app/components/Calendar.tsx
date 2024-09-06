@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react';
 // import { Button } from '@/components/ui/button';
 // import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { ChevronLeft, ChevronRight, PlusIcon } from 'images/icons';
-import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getHours, setHours, getMinutes, setMinutes, differenceInMinutes, differenceInDays } from 'date-fns';
+import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getHours, setHours, getMinutes, setMinutes, differenceInMinutes, differenceInDays, getDay, getTime, getDate, setMonth, getMonth, setDay, setDate, setYear, getYear } from 'date-fns';
 import { Button } from './form';
 import clsx from 'clsx';
 import { useOpenDialog } from './Dialog';
 import DatePicker from './DatePicker';
-import { Appointment, WorkoutSession } from '@prisma/client';
+import { Appointment, Recurrence, WorkoutSession } from '@prisma/client';
 import EventForm from './EventForm';
 
 type ViewType = 'daily' | 'weekly' | 'monthly';
@@ -25,6 +25,26 @@ const eventTitle = (title: string) => {
 interface EventType extends Appointment, WorkoutSession {
   coach: string;
   routineName: string;
+}
+
+interface EventChipProps {
+  event: any;
+  handleClick: (event: any) => void;
+}
+
+const EventChip = ({ event, handleClick }: EventChipProps) => {
+  return (
+    <div
+      key={event.id}
+      className={clsx(
+        "text-xs py-1 px-4 font-semibold rounded-md cursor-pointer truncate",
+        event.type ? "bg-amber-300" : "bg-teal-300"
+      )}
+      onClick={() => handleClick(event)}
+    >
+      {event.type ? `${eventTitle(event.type)} with ${event.coach}` : `${event.routineName} Session`}
+    </div>
+  )
 }
 
 interface CalendarProps {
@@ -49,7 +69,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
   // const [eventType, setEventType] = useState<string | null>(null);
   const openDialog = useOpenDialog();
   const { appointments, userSessions } = schedule
-  // console.log("user sessions", userSessions)
+  // console.log("user sessions", userSessions, appointments)
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
     return () => clearInterval(timer);
@@ -130,9 +150,26 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
     )
   };
 
-  const handleEventClick = (event: EventType) => {
-    const eventTime = new Date(event.startTime);
-    setSelectedDateTime(eventTime);
+  const handleEventClick = (event: EventType, incomingTime: Date) => {
+    const eventTime = () => {
+      const eventTime = new Date(event.startTime);
+      const eventRecurrence = event.recurrence ? event.recurrence.toLowerCase() : undefined
+      switch (eventRecurrence) {
+        case "daily": {
+          return setYear(setMonth(setDate(eventTime, getDate(incomingTime)), getMonth(incomingTime)), getYear(incomingTime))
+        }
+        case "weekly": {
+          return setYear(setMonth(setDate(eventTime, getDate(incomingTime)), getMonth(incomingTime)), getYear(incomingTime))
+        }
+        case "monthly": {
+          return setYear(setMonth(eventTime, getMonth(incomingTime)), getYear(incomingTime))
+        }
+        default: {
+          return eventTime
+        }
+      }
+    }
+    setSelectedDateTime(eventTime());
     const eventDefaults = event.type ? {
       coachId: event.coachId,
       appointmentId: event.id,
@@ -141,13 +178,13 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
     } : {
       workoutId: event.routineId,
       sessionId: event.id,
-      recurrence: event.recurrence,
+      recurrence: event.recurrence ? event.recurrence.toLowerCase() : undefined,
       defaultTab: 1,
     }
     const dialogTitle = event.type ? `${eventTitle(event.type)} with ${event.coach}` : `${event.routineName} Session`
     openDialog(
       <EventForm
-        selectedDateTime={eventTime}
+        selectedDateTime={eventTime()}
         submitEvent={submitEvent}
         formOptions={{
           ...formOptions,
@@ -174,9 +211,18 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
       for (let i = 0; i < 7; i++) {
         formattedDate = format(day, dateFormat);
         const cloneDay = day;
-        const dayEvents = [...appointments, ...userSessions].filter((evt: any) => 
-          isSameDay(evt.startTime, cloneDay)
+        const nonRecurringDayEvents = [...appointments, ...userSessions].filter((evt: any) => 
+          isSameDay(evt.startTime, cloneDay) && !evt.recurrence
         );
+        const dailyRecurringSessions = userSessions.filter((evt: any) =>
+          evt.recurrence && evt.recurrence.toLowerCase() === "daily" && getTime(setHours(cloneDay, 23)) >= getTime(evt.startTime)
+        )
+        const weeklyRecurringSessions = userSessions.filter((evt: any) =>
+          evt.recurrence && evt.recurrence.toLowerCase() === "weekly" && getDay(cloneDay) === getDay(evt.startTime) && getTime(setHours(cloneDay, 23)) >= getTime(evt.startTime)
+        )
+        const monthlyRecurringSessions = userSessions.filter((evt: any) =>
+          evt.recurrence && evt.recurrence.toLowerCase() === "monthly" && getDate(cloneDay) === getDate(evt.startTime) && getTime(setHours(cloneDay, 23)) >= getTime(evt.startTime)
+        )
         const dayDiff = differenceInDays(cloneDay, startDate)
         days.push(
           <div
@@ -186,25 +232,17 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
               !isSameMonth(day, monthStart) ? "text-gray-400" : "",
               "hover:bg-blue-50 transition duration-100"
             )}
-            // onClick={() => handleDayClick(cloneDay)}
           >
-            {dayDiff < 7 ? <div className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-t-md pt-1 px-1" : "")}>{format(day, "EEE")}</div> : null}
-            <div className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-b-md pb-1 px-1" : "")}>{formattedDate}</div>
+            {dayDiff < 7 ? <div className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-t-md pt-1 px-1" : "")} onClick={() => handleDayClick(cloneDay)}>{format(day, "EEE")}</div> : null}
+            <div className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-b-md pb-1 px-1" : "")} onClick={() => handleDayClick(cloneDay)}>{formattedDate}</div>
             <div className="flex flex-col gap-y-1">
               {/* Overflow behavior needs revisit */}
-              {dayEvents.map((evt: any) => (
-                <div
-                  key={evt.id}
-                  className={clsx(
-                    "text-xs py-1 px-4 font-semibold rounded-md cursor-pointer truncate",
-                    evt.type ? "bg-amber-300" : "bg-teal-300"
-                  )}
-                  onClick={() => handleEventClick(evt)}
-                >
-                  {evt.type ? `${eventTitle(evt.type)} with ${evt.coach}` : `${evt.routineName} Session`}
-                </div>
-              ))}
+              {nonRecurringDayEvents.map((evt: any) => <EventChip event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
+              {dailyRecurringSessions.map((evt: any) => <EventChip event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
+              {weeklyRecurringSessions.map((evt: any) => <EventChip event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
+              {monthlyRecurringSessions.map((evt: any) => <EventChip event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
             </div>
+            <div className="h-full" onClick={() => handleDayClick(cloneDay)}></div>
           </div>
         );
         day = addDays(day, 1);
@@ -286,14 +324,14 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                               "text-xs py-1 px-4 overflow-hidden font-semibold z-10",
                               evt.type ? "bg-amber-300" : "bg-teal-300"
                             )}
-                            onClick={() => handleEventClick(evt)}
+                            onClick={() => handleEventClick(evt, day)}
                           >
                             {getMinutes(timeSlot) === getMinutes(evt.startTime) && evt.type ? `${eventTitle(evt.type)} with ${evt.coach}` : getMinutes(timeSlot) === getMinutes(evt.startTime) ? `${evt.routineName} Session` : ""}
                           </div>
                         )
                       } else {
                         return (
-                          <div key={evt.id} className="h-full cursor-pointer" onClick={() => handleEventClick(evt)} />
+                          <div key={evt.id} className="h-full cursor-pointer" onClick={() => handleEventClick(evt, day)} />
                         )
                       }
                     })}
@@ -408,14 +446,14 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                                       "text-xs py-1 px-4 overflow-hidden font-semibold z-10",
                                       evt.type ? "bg-amber-300" : "bg-teal-300"
                                     )}
-                                    onClick={() => handleEventClick(evt)}
+                                    onClick={() => handleEventClick(evt, day)}
                                   >
                                     {getMinutes(timeSlot) === getMinutes(evt.startTime) && evt.type ? `${eventTitle(evt.type)} with ${evt.coach}` : getMinutes(timeSlot) === getMinutes(evt.startTime) ? `${evt.routineName} Session` : ""}
                                   </div>
                                 )
                               } else {
                                 return (
-                                  <div key={evt.id} className="h-full" onClick={() => handleEventClick(evt)} />
+                                  <div key={evt.id} className="h-full" onClick={() => handleEventClick(evt, day)} />
                                 )
                               }
                             })}
