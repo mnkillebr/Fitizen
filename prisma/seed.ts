@@ -129,13 +129,13 @@ function getKettlebellExercises() {
       description: "A full body stability and strength exercise that combines the plank and row",
       tags: ["functional", "stability", "renegade"],
       cues: [
-        "1. Hold the kettlebell in one hand and stand with a staggered stance",
-        "2. Lower the kettlebell and hinge your hips",
-        "3. Drive through the floor to return to starting position"
+        "1. Get in push up position with each hand on a kettlebell",
+        "2. Push down on one kettlebell as you row the other by pulling the elbow to your side",
+        "3. Lower the kettlebell with control and alternate each side"
       ],
       tips: [
-        "Maintain a lengthened spine",
-        "Breathe in as you lower and exhale as you stand",
+        "Maintain a lengthened spine and keep your legs straight",
+        "Widen the stance of your feet to reduce the stability demand"
       ],
       balance: BalanceType.unilateral,
       balanceLevel: BalanceLevel.dynamic,
@@ -150,16 +150,16 @@ function getKettlebellExercises() {
     },
     {
       name: "Kettlebell Swing",
-      description: "A full body power exercise ",
+      description: "A full body power exercise that emulates jumping",
       tags: ["functional", "power", "jump", "athletic", "speed", "booty"],
       cues: [
-        "1. Hold the kettlebell in one hand and stand with a staggered stance",
-        "2. Lower the kettlebell and hinge your hips",
-        "3. Drive through the floor to return to starting position"
+        "1. Postion the kettlebell in front of you and stand with the feet shoulder width apart",
+        "2. Push your hips back, like you are closing a door with your butt, and extend your arms forward to grab the kettlebell with both hands",
+        "3. Throw the kettlebell back between your legs, like a football snap, then thrust your hips forward quickly to initiate the swing"
       ],
       tips: [
         "A progression of the kettlebell sumo deadlift",
-        "The kettlebell drive mimics jumping",
+        "Emulates jumping or other adult activities",
         "Keep arms and shoulders relaxed throughout the motion",
       ],
       balance: BalanceType.bilateral,

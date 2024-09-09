@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { addMinutes, format, setHours, setMinutes, setSeconds } from 'date-fns';
+import { addSeconds, format, setHours, setMinutes, setSeconds } from 'date-fns';
 import DatePicker from './DatePicker';
 import { Button, PrimaryButton } from './form';
+import { DEFAULT_WORKOUT_DURATION } from '~/utils/magicNumbers';
 
 interface SessionFormProps {
   selectedDateTime: Date | null;
@@ -38,9 +39,9 @@ const SessionForm: React.FC<SessionFormProps> = ({
     } else {
       const selectedHour = parseInt(hour);
       const hours = selectedHour === 12 && meridiem === "PM" ? selectedHour : selectedHour === 12 && meridiem === "AM" ? 0 : meridiem === "AM" ? selectedHour : selectedHour + 12;
-      const startTime = setHours(setMinutes(setSeconds(date, 0), parseInt(minute)), hours);
-      const duration = 60
-      const endTime = addMinutes(startTime, duration)
+      const startTime = setHours(setMinutes(setSeconds(date, 0), parseInt(minute)), hours).toISOString();
+      const duration = DEFAULT_WORKOUT_DURATION;
+      const endTime = addSeconds(startTime, duration).toISOString();
       const submitObj = defaults ? {
         workoutId: defaults.workoutId,
         id: defaults.sessionId ? defaults.sessionId : '',

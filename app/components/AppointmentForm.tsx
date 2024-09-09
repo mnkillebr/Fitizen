@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { format, setHours, setMinutes, addMinutes, setSeconds } from 'date-fns';
+import { format, setHours, setMinutes, addSeconds, setSeconds } from 'date-fns';
 import DatePicker from './DatePicker';
 import { Button, PrimaryButton } from './form';
+import { FOLLOW_UP_DURATION, GOAL_SETTING_DURATION } from '~/utils/magicNumbers';
 
 interface AppointmentFormProps {
   selectedDateTime: Date | null;
@@ -39,9 +40,9 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     } else {
       const selectedHour = parseInt(hour);
       const hours = selectedHour === 12 && meridiem === "PM" ? selectedHour : selectedHour === 12 && meridiem === "AM" ? 0 : meridiem === "AM" ? selectedHour : selectedHour + 12;
-      const startTime = setHours(setMinutes(setSeconds(date, 0), parseInt(minute)), hours);
-      const duration = appointmentType === "goal_setting" ? 15 : 30
-      const endTime = addMinutes(startTime, duration)
+      const startTime = setHours(setMinutes(setSeconds(date, 0), parseInt(minute)), hours).toISOString();
+      const duration = appointmentType === "goal_setting" ? GOAL_SETTING_DURATION : FOLLOW_UP_DURATION
+      const endTime = addSeconds(startTime, duration).toISOString();
       const submitObj = defaults ? {
         coachId: defaults.coachId,
         id: defaults.appointmentId,

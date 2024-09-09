@@ -233,14 +233,30 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
               "hover:bg-blue-50 transition duration-100"
             )}
           >
-            {dayDiff < 7 ? <div className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-t-md pt-1 px-1" : "")} onClick={() => handleDayClick(cloneDay)}>{format(day, "EEE")}</div> : null}
-            <div className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-b-md pb-1 px-1" : "")} onClick={() => handleDayClick(cloneDay)}>{formattedDate}</div>
+            {dayDiff < 7
+              ? (
+                <div
+                  className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-t-md pt-1 px-1" : "")}
+                  onClick={() => handleDayClick(cloneDay)}
+                >
+                  {format(day, "EEE")}
+                </div>
+              ) : null}
+            <div
+              className={clsx(
+                isSameDay(day, new Date()) ? "bg-blue-500 text-white px-1" : "",
+                dayDiff >= 7 ? "w-fit rounded-md mb-1" : "w-8 pb-1 rounded-b-md"
+              )}
+              onClick={() => handleDayClick(cloneDay)}
+            >
+              {formattedDate}
+            </div>
             <div className="flex flex-col gap-y-1">
               {/* Overflow behavior needs revisit */}
-              {nonRecurringDayEvents.map((evt: any) => <EventChip event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
-              {dailyRecurringSessions.map((evt: any) => <EventChip event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
-              {weeklyRecurringSessions.map((evt: any) => <EventChip event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
-              {monthlyRecurringSessions.map((evt: any) => <EventChip event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
+              {nonRecurringDayEvents.map((evt: any) => <EventChip key={evt.id} event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
+              {dailyRecurringSessions.map((evt: any) => <EventChip key={evt.id} event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
+              {weeklyRecurringSessions.map((evt: any) => <EventChip key={evt.id} event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
+              {monthlyRecurringSessions.map((evt: any) => <EventChip key={evt.id} event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
             </div>
             <div className="h-full" onClick={() => handleDayClick(cloneDay)}></div>
           </div>
@@ -315,13 +331,13 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                   >
                     {slotEvents.map((evt: any) => {
                       if (getMinutes(evt.startTime) === minute) {
-                        const slotHeight = (differenceInMinutes(evt.endTime, evt.startTime) / 15) * 100
+                        const slotHeight = (differenceInMinutes(evt.endTime, evt.startTime) + 1) / 15
                         return (
                           <div
                             key={evt.id}
                             className={clsx(
-                              `h-[calc(${slotHeight}%)] z-10 rounded-md cursor-pointer`,
-                              "text-xs py-1 px-4 overflow-hidden font-semibold z-10",
+                              `h-${slotHeight*8} z-10 rounded-md cursor-pointer`,
+                              "text-xs py-1 border px-4 overflow-hidden font-semibold z-10",
                               evt.type ? "bg-amber-300" : "bg-teal-300"
                             )}
                             onClick={() => handleEventClick(evt, day)}
@@ -437,13 +453,13 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                           >
                             {slotEvents.map((evt: any) => {
                               if (getMinutes(evt.startTime) === minute) {
-                                const slotHeight = (differenceInMinutes(evt.endTime, evt.startTime) / 15) * 100
+                                const slotHeight = (differenceInMinutes(evt.endTime, evt.startTime) + 1) / 15
                                 return (
                                   <div
                                     key={evt.id}
                                     className={clsx(
-                                      `h-[calc(${slotHeight}%)] z-10 rounded-md`,
-                                      "text-xs py-1 px-4 overflow-hidden font-semibold z-10",
+                                      `h-${slotHeight*6} z-10 rounded-md`,
+                                      "text-xs py-1 border px-4 overflow-hidden font-semibold z-10",
                                       evt.type ? "bg-amber-300" : "bg-teal-300"
                                     )}
                                     onClick={() => handleEventClick(evt, day)}

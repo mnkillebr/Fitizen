@@ -49,6 +49,28 @@ export async function createUserAppointment(userId: string, coachId: string, app
   };
 }
 
+export async function isAppointmentConflict(newStartTime: string, newEndTime: string, appointmentId?: string): Promise<boolean> {
+  const conflictingAppointments = await db.appointment.findMany({
+    where: {
+      id: {
+        not: appointmentId,
+      },
+      OR: [
+        {
+          startTime: {
+            lte: newEndTime,
+          },
+          endTime: {
+            gte: newStartTime,
+          },
+        }
+      ]
+    }
+  });
+
+  return conflictingAppointments.length > 0;
+}
+
 export async function updateUserAppointment(userId: string, coachId: string, appointmentObj: AppointmentObject) {
   try {
     const updateAppointment = await db.appointment.update({
@@ -123,6 +145,28 @@ export async function createUserWorkoutSession(userId: string, workoutId: string
   };
 }
 
+export async function isWorkoutSessionConflict(newStartTime: string, newEndTime: string, sessionId?: string): Promise<boolean> {
+  const conflictingWorkouts = await db.workoutSession.findMany({
+    where: {
+      id: {
+        not: sessionId,
+      },
+      OR: [
+        {
+          startTime: {
+            lte: newEndTime,
+          },
+          endTime: {
+            gte: newStartTime,
+          },
+        }
+      ]
+    }
+  });
+
+  return conflictingWorkouts.length > 0;
+}
+
 export async function updateUserWorkoutSession(userId: string, workoutId: string, sessionObj: WorkoutSessionObject) {
   try {
     const updateSession = await db.workoutSession.update({
@@ -150,13 +194,13 @@ export async function updateUserWorkoutSession(userId: string, workoutId: string
 
 export async function deleteUserWorkoutSession(userId: string, sessionId: string) {
   try {
-    const deleteAppointment = await db.workoutSession.delete({
+    const deleteSession = await db.workoutSession.delete({
       where: {
         id: sessionId,
         userId,
       },
     });
-    return deleteAppointment;
+    return deleteSession;
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2011") {

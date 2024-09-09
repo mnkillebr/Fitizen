@@ -25,6 +25,7 @@ import { getCurrentUser } from "./utils/auth.server";
 import { destroySession, getSession } from "./sessions";
 import clsx from "clsx";
 import { DialogProvider } from "./components/Dialog";
+import { Toaster } from "~/components/ui/sonner"
 
 const navigation = [
   { name: "Settings", href: "settings" },
@@ -99,6 +100,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </DialogProvider>
         <ScrollRestoration />
         <Scripts />
+        <Toaster />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
       </body>
     </html>

@@ -219,8 +219,8 @@ model WorkoutSession {
   user       User         @relation(fields: [userId], references: [id])
   routineId  String
   routine    Routine      @relation(fields: [routineId], references: [id])
-  startTime  String
-  endTime    String
+  startTime  DateTime
+  endTime    DateTime
   // type       SessionType
   recurrence Recurrence?
 }
@@ -237,8 +237,8 @@ model Availability {
   coachId      String
   coach        Coach        @relation(fields: [coachId], references: [id])
   dayOfWeek    Int // 0 = Sunday, 1 = Monday, etc.
-  startTime    String
-  endTime      String
+  startTime    DateTime
+  endTime      DateTime
 }
 
 model Appointment {
@@ -247,8 +247,8 @@ model Appointment {
   user       User         @relation(fields: [userId], references: [id])
   coachId    String
   coach      Coach        @relation(fields: [coachId], references: [id])
-  startTime  String
-  endTime    String
+  startTime  DateTime
+  endTime    DateTime
   type       AppointmentType
 }
 

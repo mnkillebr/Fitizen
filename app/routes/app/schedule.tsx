@@ -1,13 +1,15 @@
 import { AppointmentType, Recurrence } from "@prisma/client";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { useLoaderData, useSubmit } from "@remix-run/react";
+import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
 import { z } from "zod";
 import Calendar from "~/components/Calendar";
-import { createUserAppointment, createUserWorkoutSession, deleteUserAppointment, deleteUserWorkoutSession, getAllCoaches, getAllUserAppointments, getAllUserWorkoutSessions, updateUserAppointment, updateUserWorkoutSession } from "~/models/calendar.server";
+import { createUserAppointment, createUserWorkoutSession, deleteUserAppointment, deleteUserWorkoutSession, getAllCoaches, getAllUserAppointments, getAllUserWorkoutSessions, isAppointmentConflict, isWorkoutSessionConflict, updateUserAppointment, updateUserWorkoutSession } from "~/models/calendar.server";
 import { getAllUserWorkoutNames } from "~/models/workout.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { convertObjectToFormData } from "~/utils/misc";
 import { validateForm, } from "~/utils/validation";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
@@ -64,7 +66,13 @@ export async function action({ request }: ActionFunctionArgs) {
             ...rest,
             type: rest.type === "goal_setting" ? AppointmentType.GOAL_SETTING : AppointmentType.FOLLOWUP,
           }
-          return createUserAppointment(user.id, coachId, appointmentObj)
+          const conflictAppointment = await isAppointmentConflict(data.startTime, data.endTime)
+          const conflictSession = await isWorkoutSessionConflict(data.startTime, data.endTime)
+          if (conflictAppointment || conflictSession) {
+            return { warning: "This appointment conflicts with another scheduled event" }
+          }
+          createUserAppointment(user.id, coachId, appointmentObj)
+          return { message: "Appointment has been scheduled" }
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -82,7 +90,13 @@ export async function action({ request }: ActionFunctionArgs) {
             ...rest,
             type: rest.type === "goal_setting" ? AppointmentType.GOAL_SETTING : AppointmentType.FOLLOWUP,
           }
-          return updateUserAppointment(user.id, coachId, appointmentObj)
+          const conflictAppointment = await isAppointmentConflict(data.startTime, data.endTime, data?.id)
+          const conflictSession = await isWorkoutSessionConflict(data.startTime, data.endTime)
+          if (conflictAppointment || conflictSession) {
+            return { warning: "This appointment conflicts with another scheduled event" }
+          }
+          updateUserAppointment(user.id, coachId, appointmentObj)
+          return { message: "Appointment has been updated" }
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -92,7 +106,8 @@ export async function action({ request }: ActionFunctionArgs) {
         formData,
         deleteAppointmentSchema,
         async ({ id }) => {
-          return deleteUserAppointment(user.id, id)
+          deleteUserAppointment(user.id, id)
+          return { message: "Appointment has been deleted" }
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -110,7 +125,13 @@ export async function action({ request }: ActionFunctionArgs) {
             ...rest,
             recurrence: rest.recurrence === "daily" ? Recurrence.DAILY : rest.recurrence === "weekly" ? Recurrence.WEEKLY : rest.recurrence === "monthly" ? Recurrence.MONTHLY : undefined,
           }
-          return createUserWorkoutSession(user.id, workoutId, sessionObj)
+          const conflictAppointment = await isAppointmentConflict(data.startTime, data.endTime)
+          const conflictSession = await isWorkoutSessionConflict(data.startTime, data.endTime)
+          if (conflictAppointment || conflictSession) {
+            return { warning: "This workout conflicts with another scheduled event" }
+          }
+          createUserWorkoutSession(user.id, workoutId, sessionObj)
+          return { message: "Workout has been scheduled" }
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -128,7 +149,13 @@ export async function action({ request }: ActionFunctionArgs) {
             ...rest,
             recurrence: rest.recurrence === "daily" ? Recurrence.DAILY : rest.recurrence === "weekly" ? Recurrence.WEEKLY : rest.recurrence === "monthly" ? Recurrence.MONTHLY : undefined,
           }
-          return updateUserWorkoutSession(user.id, workoutId, sessionObj)
+          const conflictAppointment = await isAppointmentConflict(data.startTime, data.endTime)
+          const conflictSession = await isWorkoutSessionConflict(data.startTime, data.endTime, data?.id)
+          if (conflictAppointment || conflictSession) {
+            return { warning: "This workout conflicts with another scheduled event" }
+          }
+          updateUserWorkoutSession(user.id, workoutId, sessionObj)
+          return { message: "Workout has been updated" }
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -138,7 +165,8 @@ export async function action({ request }: ActionFunctionArgs) {
         formData,
         deleteSessionSchema,
         async ({ id }) => {
-          return deleteUserWorkoutSession(user.id, id)
+          deleteUserWorkoutSession(user.id, id)
+          return { message: "Workout has been deleted" }
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -160,6 +188,19 @@ type submitEventType = {
 
 export default function Schedule() {
   const { coaches, appointments, userWorkouts, userSessions } = useLoaderData<typeof loader>();
+  const actionData = useActionData<{ [key: string]: any }>();
+
+  useEffect(() => {
+    if (actionData) {
+      if (actionData.errors) {
+        toast.error("Uh oh. The request failed")
+      } else if (actionData.message) {
+        toast.success(actionData.message)
+      } else if (actionData.warning) {
+        toast.warning(actionData.warning)
+      }
+    }
+  }, [actionData])
   const submit = useSubmit();
   const handleSubmitEvent = (formObj: submitEventType) => {
     const formData = convertObjectToFormData(formObj)
