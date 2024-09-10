@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function isEmptyObject<T extends object>(obj: T): boolean {
   // Check for null or undefined (technically not empty objects)
@@ -173,4 +173,16 @@ export function workoutLogFormDataToObject(formData: FormData): { [key: string]:
   }
 
   return formDataObject;
+}
+
+export function useDebouncedFunction<T extends Array<any>>(
+  fn: (...args: T) => unknown,
+  time: number,
+) {
+  const timeoutId = useRef<number>();
+  const debouncedFn = (...args: T) => {
+    window.clearTimeout(timeoutId.current);
+    timeoutId.current = window.setTimeout(() => fn(...args), time);
+  };
+  return debouncedFn;
 }
