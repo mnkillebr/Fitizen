@@ -14,7 +14,7 @@ import { PrimaryButton } from '~/components/form';
 import Tooltip from '~/components/Tooltip';
 import { requireLoggedInUser } from '~/utils/auth.server';
 import { createUserWorkoutWithExercises } from '~/models/workout.server';
-import { Exercise } from '../library';
+import { Exercise } from '../exercises';
 
 const targetOptions = ["reps", "time"]
 

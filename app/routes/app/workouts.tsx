@@ -157,7 +157,7 @@ export default function Workouts() {
   return (
     <div className="px-4 md:px-6 py-6 md:py-8 flex flex-col h-full gap-y-4">
       <div className="flex flex-col gap-y-4 px-2">
-        <Form
+        {/* <Form
           className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-1/2 ${
             isSearching ? "animate-pulse" : ""
           }`}
@@ -173,7 +173,8 @@ export default function Workouts() {
             autoComplete="off"
             className="w-full p-2 outline-none rounded-md"
           />
-        </Form>
+        </Form> */}
+        <h1 className="text-lg font-semibold md:text-2xl">Workouts</h1>
         {data.role === "admin" ? (
           <createWorkoutFetcher.Form method="post">
             <PrimaryButton
@@ -272,7 +273,7 @@ type WorkoutProps = {
 function Workout({ workout, role }: WorkoutProps) {
   const deleteWorkoutFetcher = useFetcher<deleteWorkoutFetcherType>();
   return (
-    <Link to={workout.id} className="bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-accent hover:cursor-pointer snap-start shadow-md">
+    <Link to={workout.id} className="bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-primary hover:cursor-pointer snap-start shadow-md">
       <div className="flex gap-4">
         <div className="size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
         <div className="flex flex-col self-center">

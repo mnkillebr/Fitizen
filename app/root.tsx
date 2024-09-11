@@ -1,7 +1,6 @@
 import {
   Links,
   Link,
-  NavLink,
   Meta,
   Outlet,
   Scripts,
@@ -13,11 +12,11 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import "./tailwind.css";
-import { useEffect, useState, } from "react";
+import { useState, } from "react";
 import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-// import globalStyles from "~/tailwind.css?url";
+import globalStyles from "~/tailwind.css?url";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { /*ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, TableCellsIcon,*/ XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, FireIcon, TableCellsIcon } from "@heroicons/react/24/solid";
 import logo from "images/Sample Fitizen.png?url";
 import { AppNavLink, MobileNavLink, RootNavLink } from "./components/AppNavLink";
@@ -26,12 +25,11 @@ import { destroySession, getSession } from "./sessions";
 import clsx from "clsx";
 import { DialogProvider } from "./components/Dialog";
 import { Toaster } from "~/components/ui/sonner"
+import { DashboardLayout } from "./components/layout";
 
 const navigation = [
   { name: "Settings", href: "settings" },
   { name: "About", href: "about" },
-  // { name: "Marketplace", href: "#" },
-  // { name: "Company", href: "#" },
 ]
 
 const dashNavigation = [
@@ -48,29 +46,18 @@ const dashNavigation = [
     label: "Workouts"
   },
   {
-    name: "Schedule",
-    href: "app/schedule",
-    icon: <CalendarIcon />,
-    label: "Schedule",
-  },
-  {
     name: "Exercise Library",
-    href: "app/library",
+    href: "app/exercises",
     icon: <BookOpenIcon />,
     label: "Library",
   },
+  {
+    name: "Calendar",
+    href: "app/calendar",
+    icon: <CalendarIcon />,
+    label: "Calendar",
+  },
 ]
-
-interface Exercise {
-  name: string;
-  image: string;
-}
-
-interface WorkoutItem {
-  title: string;
-  isPro: boolean;
-  image: string;
-}
 
 export const meta: MetaFunction = () => {
   return [
@@ -79,11 +66,11 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// export const links: LinksFunction = () => {
-//   return [
-//     { rel: "stylesheet", href: globalStyles, }
-//   ];
-// };
+export const links: LinksFunction = () => {
+  return [
+    { rel: "stylesheet", href: globalStyles }
+  ];
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -100,7 +87,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </DialogProvider>
         <ScrollRestoration />
         <Scripts />
-        <Toaster />
+        <Toaster richColors />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
       </body>
     </html>
@@ -132,25 +119,8 @@ export default function App() {
     return submit("logging out", { method: "post" })
   }
 
-  // const bodyParts: Exercise[] = [
-  //   { name: "Leg", image: "/images/leg.jpg" },
-  //   { name: "Shoulders", image: "/images/shoulders.jpg" },
-  //   { name: "Biceps", image: "/images/biceps.jpg" },
-  //   { name: "Abs", image: "/images/abs.jpg" },
-  // ];
-
-  // const equipmentExercises: Exercise[] = [
-  //   { name: "Dumbbells", image: "/images/dumbbells.jpg" },
-  //   { name: "Jump Rope", image: "/images/jump-rope.jpg" },
-  //   { name: "Kettlebell", image: "/images/kettlebell.jpg" },
-  // ];
-
-  // const workouts: WorkoutItem[] = [
-  //   { title: "Core Workout", isPro: true, image: "/images/core-workout.jpg" },
-  //   { title: "Full Body Workout", isPro: false, image: "/images/full-body-workout.jpg" },
-  // ];
-
   if (inAppRoute) {
+    return <DashboardLayout navLinks={dashNavigation} />
     return (
       <div className="bg-white h-screen overflow-y-hidden">
         <div className="flex flex-col-reverse sm:flex-col md:flex-row h-full">
@@ -188,7 +158,7 @@ export default function App() {
                   <button
                     onClick={handleLogout}
                     className={clsx(
-                      "min-w-14 p-1 sm:hidden flex-none rounded-lg text-accent",
+                      "min-w-14 p-1 sm:hidden flex-none rounded-lg text-primary",
                       "hover:text-yellow-500 hover:bg-slate-200 flex flex-col text-xs items-center"
                     )}
                   >
@@ -201,7 +171,7 @@ export default function App() {
                     onClick={handleLogout}
                     className={clsx(
                       "hidden sm:block md:w-full rounded-lg px-3 py-2 text-base font-semibold leading-7",
-                      "text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100 text-start"
+                      "text-gray-900 hover:bg-gray-50 hover:text-primary transition duration-100 text-start"
                     )}
                   >
                     Log Out
@@ -212,7 +182,7 @@ export default function App() {
                 onClick={handleLogout}
                 className={clsx(
                   "hidden sm:max-md:flex md:hidden sm:block rounded-lg px-3 py-2 text-base font-semibold leading-7",
-                  "text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100"
+                  "text-gray-900 hover:bg-gray-50 hover:text-primary transition duration-100"
                 )}
               >
                 Log Out
@@ -230,7 +200,7 @@ export default function App() {
             </div>
           </div>
           <div className="flex-1 /*p-6 md:p-8*/ max-h-[calc(100vh-8.125rem)] sm:max-h-[calc(100vh-5.125rem)] md:max-h-screen"> 
-            <Outlet />
+            {/* <Outlet /> */}
           </div>
           <div className="shadow-[0_5px_3px_-3px_rgba(0,0,0,0.1)] px-8 py-2 flex gap-4 sm:hidden">
             <img className="sm:hidden rounded-full drop-shadow-lg flex-none" src="https://i.pravatar.cc/50?img=16"/>
@@ -282,12 +252,12 @@ export default function App() {
             {inAppRoute ? (
               <button
                 onClick={handleLogout}
-                className="text-gray-900 hover:text-accent h-6 w-6"
+                className="text-gray-900 hover:text-primary h-6 w-6"
               >
                 <ArrowLeftEndOnRectangleIcon />
               </button>
             ) : (
-              <Link to="login" className="text-md font-semibold leading-6 text-gray-900 hover:text-accent">
+              <Link to="login" className="text-md font-semibold leading-6 text-gray-900 hover:text-primary">
                 Log In <span aria-hidden="true">&rarr;</span>
               </Link>
             )}
@@ -321,21 +291,21 @@ export default function App() {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-primary transition duration-100"
                     >
                       {item.name}
                     </Link>
                   ))}
                 </div>
                 {inAppRoute ? (
-                  <button className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100">
+                  <button className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-primary transition duration-100">
                     Log Out
                   </button>
                 ) : (
                   <div className="py-6">
                     <a
                       href="login"
-                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-accent transition duration-100"
+                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-primary transition duration-100"
                     >
                       Log In
                     </a>

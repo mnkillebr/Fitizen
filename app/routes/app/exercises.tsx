@@ -73,7 +73,7 @@ interface deleteExerciseFetcherType extends ActionFunctionArgs{
   }
 }
 
-export default function Library() {
+export default function ExerciseLibrary() {
   const data = useLoaderData<typeof loader>();
   const createExerciseFetcher = useFetcher();
   const [searchParams] = useSearchParams();
@@ -85,7 +85,7 @@ export default function Library() {
   return (
     <div className="py-6 px-5 md:py-8 md:px-7 flex flex-col h-full gap-y-4">
       <div className="flex flex-col gap-y-4 px-1">
-        <Form
+        {/* <Form
           className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-2/3 lg:w-1/2 xl:w-1/3 ${
             isSearching ? "animate-pulse" : ""
           }`}
@@ -95,13 +95,14 @@ export default function Library() {
           </button>
           <input
             defaultValue={searchParams.get("q") ?? ""}
-            type="text"
+            type="search"
             name="q"
             placeholder="Search exercises ..."
             autoComplete="off"
             className="w-full p-2 outline-none rounded-md"
           />
-        </Form>
+        </Form> */}
+        <h1 className="text-lg font-semibold md:text-2xl">Exercises</h1>
         {data.role === "admin" ? (
           <createExerciseFetcher.Form method="post">
             <PrimaryButton
@@ -166,7 +167,7 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
     <div
       className={clsx(
         "bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md snap-start shadow-md",
-        selectable ? "" : "hover:shadow-accent"
+        selectable ? "" : "hover:shadow-primary"
       )}
       // draggable
       // onDragStart={(e) => {

@@ -7,7 +7,7 @@
     "config": "tailwind.config.ts",
     "css": "app/tailwind.css",
     "baseColor": "stone",
-    "cssVariables": false,
+    "cssVariables": true,
     "prefix": ""
   },
   "aliases": {

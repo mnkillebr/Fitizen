@@ -14,7 +14,7 @@ import { PrimaryButton } from '~/components/form';
 import Tooltip from '~/components/Tooltip';
 import { requireLoggedInUser } from '~/utils/auth.server';
 import { updateUserWorkoutWithExercises } from '~/models/workout.server';
-import { Exercise } from '../library';
+import { Exercise } from '../exercises';
 import { Exercise as ExerciseType, RoutineExercise as RoutineExerciseType } from "@prisma/client";
 import db from '~/db.server';
 

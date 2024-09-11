@@ -7,7 +7,7 @@ import { Button, PrimaryButton } from "~/components/form";
 import { useCallback, useState } from "react";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { getAllExercises } from "~/models/exercise.server";
-import { Exercise } from "../library";
+import { Exercise } from "../exercises";
 import clsx from "clsx";
 import { FieldErrors } from "~/utils/validation";
 import { isEmptyObject } from "~/utils/misc";
