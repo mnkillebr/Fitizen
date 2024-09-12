@@ -435,13 +435,13 @@ export default function WorkoutDetail() {
         {/* Back and Context Menu */}
         <div className="flex justify-between">
           <Link to="/app/workouts">
-            <ChevronLeft className="hover:text-accent" />
+            <ChevronLeft className="hover:text-primary" />
           </Link>
           <Popover>
             {({ open }) => (
               <>
                 <PopoverButton>
-                  <ContextMenuIcon className="hover:text-accent" />
+                  <ContextMenuIcon className="hover:text-primary" />
                 </PopoverButton>
                 <AnimatePresence>
                   {open && (
@@ -555,7 +555,7 @@ export default function WorkoutDetail() {
             <button
               key={index}
               className={`size-2 rounded-full mx-1 focus:outline-none ${
-                index === imgIndex ? 'bg-accent' : 'bg-gray-300'
+                index === imgIndex ? 'bg-primary' : 'bg-gray-300'
               }`}
               onClick={() => {
                 scrollToImg(index)
@@ -606,7 +606,7 @@ export default function WorkoutDetail() {
                       <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
                       <Link
                         to={`/app/workouts/logview?id=${log.id}`}
-                        className="text-sm h-5 underline text-accent hover:text-yellow-500"
+                        className="text-sm h-5 underline text-primary hover:text-yellow-500"
                       >
                         View
                       </Link>
@@ -623,7 +623,7 @@ export default function WorkoutDetail() {
           <button
             key={index}
             className={`size-2 rounded-full mx-1 focus:outline-none ${
-              index === panelIndex ? 'bg-accent' : 'bg-gray-300'
+              index === panelIndex ? 'bg-primary' : 'bg-gray-300'
             }`}
             onClick={() => {
               scrollToPanel(index)

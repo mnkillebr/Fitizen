@@ -1,6 +1,6 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
-import boxDude from "images/metin-ozer-S1kp1toFK0A-unsplash.jpg"
-import squatGirl from "images/sven-mieke-jO6vBWX9h9Y-unsplash.jpg"
+import boxDude from "images/boxer_dude.jpeg"
+import squatGirl from "images/squat_lady.jpeg"
 import { requireLoggedInUser } from "~/utils/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {

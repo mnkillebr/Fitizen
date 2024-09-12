@@ -47,12 +47,12 @@ export default function Settings() {
 			<p>The Message from the loader is: {data.message}</p>
 			<p>Your cookie from the loader is: {data.cookie}</p>
 			<div className="flex gap-4 transition duration-150">
-				<Link to="app" className="hover:text-accent">{isLoadingApp ? "Loading ..." : "App"}</Link>
-				<Link to="discover" className="hover:text-accent">{isLoadingDiscover ? "Loading ..." : "Discover"}</Link>
+				<Link to="app" className="hover:text-primary">{isLoadingApp ? "Loading ..." : "App"}</Link>
+				<Link to="discover" className="hover:text-primary">{isLoadingDiscover ? "Loading ..." : "Discover"}</Link>
 				<Form method="post">
 					<button
 						type="submit"
-						className="p-2 text-white bg-accent hover:bg-yellow-400 rounded-md active:scale-95"
+						className="p-2 text-white bg-primary hover:bg-yellow-300 rounded-md active:scale-95"
 					>
 						Submit Cookie
 					</button>

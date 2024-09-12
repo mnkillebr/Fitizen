@@ -32,6 +32,7 @@
 
   .dark {
     --background: 20 14.3% 4.1%;
+    --background-muted: 240 3.7% 15.9%;
     --foreground: 60 9.1% 97.8%;
     --card: 20 14.3% 4.1%;
     --card-foreground: 60 9.1% 97.8%;
@@ -48,6 +49,7 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 12 6.5% 15.1%;
+    --border-muted: 240 3.8% 31.4%;
     --input: 12 6.5% 15.1%;
     --ring: 35.5 91.7% 32.9%;
     --chart-1: 220 70% 50%;

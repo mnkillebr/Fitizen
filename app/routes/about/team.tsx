@@ -4,7 +4,7 @@ export default function Team() {
   return (
     <div>
       <p>Everything to know about our team</p>
-      <Link to="/about" className="hover:text-accent">Back</Link>
+      <Link to="/about" className="hover:text-primary">Back</Link>
     </div>
   )
 }

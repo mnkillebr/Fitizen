@@ -13,7 +13,7 @@ export default function History() {
     <div>
       <p>Everything to know about the rich history at corpo</p>
       <p>{historyData.message}</p>
-      <Link to="/about" className="hover:text-accent">Back</Link>
+      <Link to="/about" className="hover:text-primary">Back</Link>
     </div>
   );
 };

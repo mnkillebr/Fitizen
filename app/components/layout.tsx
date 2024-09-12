@@ -33,6 +33,7 @@ import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet"
 import { AppNavLink, MobileNavLink } from "./AppNavLink"
 import logo from "images/Sample Fitizen.png?url";
 import { useEffect, useState } from "react"
+import clsx from "clsx"
 
 export const description =
   "A products dashboard with a sidebar navigation and a main content area. The dashboard has a header with a search input and a user menu. The sidebar has a logo, navigation links, and a card with a call to action. The main content area shows an empty state with a call to action."
@@ -68,10 +69,10 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r bg-muted/40 md:block">
+      <div className="hidden border-r border-border dark:border-border-muted bg-muted/40 dark:bg-background-muted md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
-          <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link to="/" className="flex items-center gap-2 font-semibold">
+          <div className="flex h-14 items-center border-b border-border dark:border-border-muted px-4 lg:h-[60px] lg:px-6">
+            <Link to="/" className="flex items-center gap-2 font-semibold dark:text-foreground">
               <img
                 className="size-12 w-auto rounded-full -ml-3"
                 src={logo}
@@ -125,8 +126,12 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
                   key={item.name}
                   to={item.href}
                 >
-                  <div className="size-4">{item.icon}</div>
-                  {item.name}
+                  {({ isActive }) => (
+                    <>
+                      <div className={clsx("size-4", isActive ? "text-primary" : "")}>{item.icon}</div>
+                      {item.name}
+                    </>
+                  )}
                 </AppNavLink>
               ))}
             </nav>
@@ -134,9 +139,9 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
         </div>
       </div>
       <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+        <header className="flex h-14 items-center gap-4 border-b border-border dark:border-border-muted bg-muted/40 dark:bg-background-muted px-4 lg:h-[60px] lg:px-6">
           <Sheet>
-            <SheetTrigger asChild>
+            <SheetTrigger asChild className="dark:text-foreground dark:border-border-muted">
               <Button
                 variant="outline"
                 size="icon"
@@ -146,7 +151,7 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
+            <SheetContent side="left" className="flex flex-col border-r-border-muted">
               <nav className="grid gap-2 text-lg font-medium">
                 {/* <Link
                   to="#"
@@ -168,8 +173,12 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
                     key={item.name}
                     to={item.href}
                   >
-                    <div className="size-4">{item.icon}</div>
-                    {item.name}
+                    {({ isActive }) => (
+                      <>
+                        <div className={clsx("size-4", isActive ? "text-primary" : "")}>{item.icon}</div>
+                        {item.name}
+                      </>
+                    )}
                   </MobileNavLink>
                 ))}
                 {/* <Link
@@ -216,23 +225,27 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
           <div className="w-full flex-1">
             {showSearch ? (
               <Form action={location?.pathname}>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  // defaultValue={searchParams.get("q") ?? ""}
-                  value={headerSearch}
-                  placeholder={`Search ${location?.pathname.split(`/`).pop()} ...`}
-                  name="q"
-                  autoComplete="off"
-                  onChange={(e) => {
-                    !e.target.value && submit({}, { action: location?.pathname })
-                    setHeaderSearch(e.target.value)
-                  }}
-                  className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                />
-              </div>
-            </Form>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground dark:text-muted-foreground peer-focus:text-foreground" />
+                  <Input
+                    type="search"
+                    // defaultValue={searchParams.get("q") ?? ""}
+                    value={headerSearch}
+                    placeholder={`Search ${location?.pathname.split(`/`).pop()} ...`}
+                    name="q"
+                    autoComplete="off"
+                    onChange={(e) => {
+                      !e.target.value && submit({}, { action: location?.pathname })
+                      setHeaderSearch(e.target.value)
+                    }}
+                    className={clsx(
+                      "w-full appearance-none border bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3",
+                      "dark:bg-background dark:text-muted-foreground dark:focus:text-foreground",
+                      "dark:border-border-muted dark:focus:border-ring"
+                    )}
+                  />
+                </div>
+              </Form>
             ) : null}
           </div>
           <DropdownMenu>
@@ -243,7 +256,7 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="dark:border-border-muted">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Settings</DropdownMenuItem>

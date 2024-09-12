@@ -19,17 +19,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const role = user.role;
   // console.log("role", role, cldConfig, cldInstance)
-  // const testImage = cldInstance.utils.private_download_url("1724426838355-npsxq79i62", "jpg", {
-  //   resource_type: "image",
-  //   expires_at: 1724430900,
-  // })
-  // console.log("test image url", testImage)
+  const testImage = cldInstance.utils.private_download_url("1724426838355-npsxq79i62", "jpg", {
+    resource_type: "image",
+    expires_at: 1726071663,
+  })
+  console.log("test image url", testImage)
   // if (role !== "admin") {
   //   return redirect("/app")
   // }
-  // return json({ image: testImage, })
-  return json({ cldName: cldConfig.cloud_name })
+  return json({ image: testImage, })
+  // return json({ cldName: cldConfig.cloud_name })
   return null
+}
+
+type uploadActionType = {
+  success?: boolean;
+  url?: string;
+  filename?: string;
+  error?: string;
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -62,16 +69,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function Upload() {
   const data = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
+  const actionData = useActionData<uploadActionType>();
   const navigation = useNavigation();
   const formRef = useRef<HTMLFormElement>(null);
 
-  const cldInstance = new Cloudinary({
-    cloud: {
-      cloudName: data?.cldName,
-    }
-  })
-  const testImage = cldInstance.image("1724347368316-e5aqe24t6j")
+  // const cldInstance = new Cloudinary({
+  //   cloud: {
+  //     cloudName: data?.cldName,
+  //   }
+  // })
+  // const testImage = cldInstance.image("1724347368316-e5aqe24t6j")
 
   useEffect(() => {
     if (actionData?.success && formRef.current) {
@@ -111,6 +118,7 @@ export default function Upload() {
           {navigation.state === "submitting" ? "Uploading ..." : "Upload"}
         </button>
       </Form>
+      <img src={data?.image} />
       {/* <AdvancedImage cldImg={testImage} /> */}
       {actionData?.success && (
         <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">

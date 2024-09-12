@@ -15,6 +15,7 @@ import Tooltip from '~/components/Tooltip';
 import { requireLoggedInUser } from '~/utils/auth.server';
 import { createUserWorkoutWithExercises } from '~/models/workout.server';
 import { Exercise } from '../exercises';
+import { Exercise as ExerciseType } from "@prisma/client";
 
 const targetOptions = ["reps", "time"]
 
@@ -102,6 +103,7 @@ type Card = {
 
 type WorkoutCard = Card & {
   target: string;
+  exercises?: any;
 };
 
 type ComplexCard = {
@@ -297,7 +299,7 @@ export default function WorkoutBuilderForm() {
   const onChangeTarget = (event: BaseSyntheticEvent, id: string) => handleChange(id, "target", event.target.value)
 
   const flattenedWorkoutCards = useMemo(() => {
-    return workoutCards.reduce((result, curr) => {
+    return workoutCards.reduce((result: any, curr: any) => {
       let resultArr = result
       if (curr.exercises) {
         return resultArr.concat(curr.exercises)
@@ -324,7 +326,7 @@ export default function WorkoutBuilderForm() {
                   autoComplete="off"
                   required
                   className={clsx(
-                    "p-2 rounded-md border-2 focus:outline-accent /*lg:w-2/3 xl:w-1/2*/ text-sm/6",
+                    "p-2 rounded-md border-2 focus:outline-primary /*lg:w-2/3 xl:w-1/2*/ text-sm/6",
                     createWorkoutFetcher.data?.errors?.workoutName ? "border-red-500" : ""
                   )}
                   placeholder="Name your workout"
@@ -360,7 +362,7 @@ export default function WorkoutBuilderForm() {
                     transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
                   >
                     <textarea
-                      className="p-2 rounded-md border-2 focus:outline-accent /*lg:w-2/3 xl:w-1/2*/ text-sm/6 resize-none w-full"
+                      className="p-2 rounded-md border-2 focus:outline-primary /*lg:w-2/3 xl:w-1/2*/ text-sm/6 resize-none w-full"
                       placeholder="Optional"
                       name="workoutDescription"
                       id="workoutDescription"
@@ -665,7 +667,7 @@ export default function WorkoutBuilderForm() {
                     onClick={toggleExercisesPanel}
                   >
                     <p className="text-sm text-slate-400 select-none">Add exercise (s)</p>
-                    <PlusCircleIcon className="size-10 text-accent"/>
+                    <PlusCircleIcon className="size-10 text-primary"/>
                   </div>
                 </motion.div>
               )}
@@ -699,7 +701,7 @@ export default function WorkoutBuilderForm() {
             <h2 className="mb-2 text-lg font-semibold">Available Exercises</h2>
             <Form
               className={clsx(
-                "flex content-center rounded-md mb-2 focus-within:outline focus-within:outline-2 focus-within:outline-accent /*lg:w-2/3 xl:w-1/2*/ bg-white",
+                "flex content-center rounded-md mb-2 focus-within:outline focus-within:outline-2 focus-within:outline-primary /*lg:w-2/3 xl:w-1/2*/ bg-white",
                 isSearching ? "animate-pulse" : ""
               )}
             >
@@ -777,11 +779,11 @@ export default function WorkoutBuilderForm() {
                   return prev;
                 });
               }}>
-                <XMarkIcon className="size-6 hover:text-accent"/>
+                <XMarkIcon className="size-6 hover:text-primary"/>
               </button>
             </div>
             <Form
-              className={`flex content-center border-2 rounded-md focus-within:border-accent lg:w-2/3 xl:w-1/2 bg-white ${
+              className={`flex content-center border-2 rounded-md focus-within:border-primary lg:w-2/3 xl:w-1/2 bg-white ${
                 isSearching ? "animate-pulse" : ""
               }`}
             >
@@ -804,8 +806,8 @@ export default function WorkoutBuilderForm() {
                   exercise={ex_item}
                   selectable
                   selectFn={handleAddExercise}
-                  selectCount={flattenedWorkoutCards.map(sel_ex => sel_ex.id.split("-")[0]).filter(id => id === ex_item.id).length}
-                  selected={flattenedWorkoutCards.map(sel_ex => sel_ex.id.split("-")[0]).includes(ex_item.id)}
+                  selectCount={flattenedWorkoutCards.map((sel_ex: ExerciseType) => sel_ex.id.split("-")[0]).filter((id: any) => id === ex_item.id).length}
+                  selected={flattenedWorkoutCards.map((sel_ex: ExerciseType) => sel_ex.id.split("-")[0]).includes(ex_item.id)}
                 />
               ))}
             </div>

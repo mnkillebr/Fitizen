@@ -60,7 +60,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       } else {
         return log
       }
-    }).reduce((result: any, curr) => {
+    }).reduce((result: any, curr: any) => {
       let resultArr = result
       if (resultArr.length && resultArr.find((item: any) => item.circuitId === curr.circuitId && curr.circuitId !== null)) {
         resultArr = resultArr.map((item: any) => {
@@ -68,7 +68,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             return {
               ...item,
               sets: [
-                ...item.sets.map(set => ({
+                ...item.sets.map((set: any) => ({
                   ...set,
                   target: item.target,
                   targetReps: item.targetReps,
@@ -76,7 +76,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
                   notes: item.notes,
                   name: item.exerciseName
                 })),
-                ...curr.sets.map(set => ({
+                ...curr.sets.map((set: any) => ({
                   ...set,
                   target: curr.target,
                   targetReps: curr.targetReps,
@@ -105,7 +105,7 @@ export default function LogView() {
     <div className="p-6 md:p-8 flex flex-col h-full gap-y-3 select-none lg:w-3/4 xl:w-2/3">
       <div className="flex">
         <Link to={`/app/workouts/${data.userLog?.routineId}`}>
-          <ChevronLeft className="hover:text-accent" />
+          <ChevronLeft className="hover:text-primary" />
         </Link>
       </div>
       <div className="flex justify-between items-center">

@@ -215,9 +215,9 @@ export default function App() {
   }
 
   return (
-    <div className="bg-white">
+    <div className="bg-background dark:bg-background">
       {/* Header */}
-      <header className="absolute inset-x-0 top-0 z-50">
+      <header className="absolute inset-x-0 top-0 z-50 dark:bg-background">
         <nav className="flex items-center justify-between p-6 md:px-8" aria-label="Global">
           <div className="flex md:flex-1">
             <a href="/" className="-m-1.5 p-1.5">
@@ -232,7 +232,7 @@ export default function App() {
           <div className="flex md:hidden">
             <button
               type="button"
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-muted-foreground"
               onClick={() => setMobileMenuOpen(true)}
             >
               <span className="sr-only">Open main menu</span>
@@ -257,7 +257,7 @@ export default function App() {
                 <ArrowLeftEndOnRectangleIcon />
               </button>
             ) : (
-              <Link to="login" className="text-md font-semibold leading-6 text-gray-900 hover:text-primary">
+              <Link to="login" className="text-md font-semibold leading-6 text-gray-900 hover:text-primary dark:text-foreground dark:hover:text-muted-foreground">
                 Log In <span aria-hidden="true">&rarr;</span>
               </Link>
             )}
@@ -265,7 +265,7 @@ export default function App() {
         </nav>
         <Dialog className="md:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
           <div className="fixed inset-0 z-50" />
-          <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+          <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-background border-l dark:border-l-border-muted px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
             <div className="flex items-center justify-between">
               <a href="/" className="-m-1.5 p-1.5">
                 <span className="sr-only">Fitizen</span>
@@ -281,7 +281,7 @@ export default function App() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="sr-only">Close menu</span>
-                <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                <XMarkIcon className="h-6 w-6 dark:text-foreground" aria-hidden="true" />
               </button>
             </div>
             <div className="mt-6 flow-root">
@@ -291,21 +291,21 @@ export default function App() {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-primary transition duration-100"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-foreground hover:bg-gray-50 dark:hover:bg-background-muted dark:hover:text-muted-foreground hover:text-primary transition duration-100"
                     >
                       {item.name}
                     </Link>
                   ))}
                 </div>
                 {inAppRoute ? (
-                  <button className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-primary transition duration-100">
+                  <button className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-foreground hover:bg-gray-50 dark:hover:bg-background-muted dark:hover:text-muted-foreground hover:text-primary transition duration-100">
                     Log Out
                   </button>
                 ) : (
                   <div className="py-6">
                     <a
                       href="login"
-                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50 hover:text-primary transition duration-100"
+                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-foreground hover:bg-gray-50 dark:hover:bg-background-muted dark:hover:text-muted-foreground hover:text-primary transition duration-100"
                     >
                       Log In
                     </a>

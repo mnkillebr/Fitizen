@@ -71,7 +71,7 @@ const SessionForm: React.FC<SessionFormProps> = ({
           id="workoutId"
           required
           disabled={defaults?.workoutId === undefined ? false : true}
-          className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+          className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
         >
           <option value="">Select workout</option>
           {workouts.map(({ name, id }, workout_idx) => <option key={workout_idx} value={id}>{name}</option>)}
@@ -84,7 +84,7 @@ const SessionForm: React.FC<SessionFormProps> = ({
           onChange={(e) => setRecurrence(e.target.value)}
           name="recurrence"
           id="recurrence"
-          className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+          className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
         >
           <option value="">No recurrence</option>
           <option value="daily">Daily</option>
@@ -107,7 +107,7 @@ const SessionForm: React.FC<SessionFormProps> = ({
           <select
             value={hour}
             onChange={(e) => setHour(e.target.value)}
-            className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
           >
             {Array.from({ length: 12 }, (_, i) => i).map((h) => (
               <option key={h+1} value={(h+1).toString().padStart(2, '0')}>
@@ -118,7 +118,7 @@ const SessionForm: React.FC<SessionFormProps> = ({
           <select
             value={minute}
             onChange={(e) => setMinute(e.target.value)}
-            className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
           >
             {['00', '15', '30', '45'].map((m) => (
               <option key={m} value={m}>
@@ -129,7 +129,7 @@ const SessionForm: React.FC<SessionFormProps> = ({
           <select
             value={meridiem}
             onChange={(e) => setMeridiem(e.target.value)}
-            className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
           >
             <option key="am" value="AM">AM</option>
             <option key="pm" value="PM">PM</option>

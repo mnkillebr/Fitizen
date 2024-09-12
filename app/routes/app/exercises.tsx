@@ -86,7 +86,7 @@ export default function ExerciseLibrary() {
     <div className="py-6 px-5 md:py-8 md:px-7 flex flex-col h-full gap-y-4">
       <div className="flex flex-col gap-y-4 px-1">
         {/* <Form
-          className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-2/3 lg:w-1/2 xl:w-1/3 ${
+          className={`flex content-center border-2 rounded-md focus-within:border-primary md:w-2/3 lg:w-1/2 xl:w-1/3 ${
             isSearching ? "animate-pulse" : ""
           }`}
         >
@@ -121,9 +121,9 @@ export default function ExerciseLibrary() {
         {data.exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={data.role} onViewExercise={() => {
             openDialog(
-              <div className="flex gap-x-2 *:w-1/2">
-                <div className="bg-slate-100 text-center content-center rounded">Image</div>
-                <div>{ex_item.cues.map((cue, cue_idx) => <div key={cue_idx}>{cue}</div>)}</div>
+              <div className="flex gap-x-4">
+                <div className="flex-none size-96 bg-slate-100 text-center content-center rounded">Image</div>
+                <div className="flex-1">{ex_item.cues.map((cue, cue_idx) => <div key={cue_idx}>{cue}</div>)}</div>
               </div>, ex_item.name
             )
           }} />
@@ -239,7 +239,7 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
       </div> */}
       {selectable ? (
         <div
-          className="border-l-2 h-full group relative content-center hover:bg-secondary hover:text-white hover:rounded-r-lg cursor-pointer"
+          className="border-l-2 h-full group relative content-center hover:bg-secondary-original hover:text-white hover:rounded-r-lg cursor-pointer"
           onClick={() => selectFn ? selectFn(exercise) : null}
         >
           <button

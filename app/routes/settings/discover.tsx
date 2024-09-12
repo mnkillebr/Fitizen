@@ -9,7 +9,7 @@ export default function Discover() {
       <p>
         This is the Discover Settings Sub Component
       </p>
-      <Link to="/settings" className="hover:text-accent">Back</Link>
+      <Link to="/settings" className="hover:text-primary">Back</Link>
     </div>
   )
 }

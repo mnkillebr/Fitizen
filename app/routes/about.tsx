@@ -32,8 +32,8 @@ export default function About() {
         ))}
       </ul>
       <div className="flex gap-4 transition duration-150">
-        <Link to="team" className="hover:text-accent">Team</Link>
-        <Link to="history" className="hover:text-accent">History</Link>
+        <Link to="team" className="hover:text-primary">Team</Link>
+        <Link to="history" className="hover:text-primary">History</Link>
       </div>
       <Outlet />
     </div>

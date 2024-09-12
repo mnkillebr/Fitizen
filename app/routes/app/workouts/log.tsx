@@ -183,7 +183,7 @@ export default function Log() {
     <Form method="post" className="p-6 md:p-8 flex flex-col h-full gap-y-3 select-none">
       <div className="flex">
         <Link to={`/app/workouts/${workout?.id}`}>
-          <ChevronLeft className="hover:text-accent" />
+          <ChevronLeft className="hover:text-primary" />
         </Link>
       </div>
       {/* Title */}

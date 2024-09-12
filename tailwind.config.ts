@@ -17,13 +17,18 @@ export default {
   			secondary: {
   				light: '#00a3a3',
   				dark: '#005454',
-  				DEFAULT: '#008080'
+					original: '#008080',
+  				DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))',
   			},
   			accent: {
   				DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))',
   			},
-  			background: 'hsl(var(--background))',
+  			background: {
+					DEFAULT: 'hsl(var(--background))',
+					muted: 'hsl(var(--background-muted))',
+				},
 				foreground: 'hsl(var(--foreground))',
 				card: {
 					DEFAULT: 'hsl(var(--card))',
@@ -41,7 +46,10 @@ export default {
 					DEFAULT: 'hsl(var(--destructive))',
 					foreground: 'hsl(var(--destructive-foreground))',
 				},
-				border: 'hsl(var(--border))',
+				border: {
+					DEFAULT: 'hsl(var(--border))',
+					muted: 'hsl(var(--border-muted))',
+				},
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				radius: 'hsl(var(--radius))',

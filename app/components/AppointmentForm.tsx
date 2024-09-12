@@ -71,7 +71,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           name="coachId"
           id="coachId"
           required
-          className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+          className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
         >
           <option value="">Select a coach</option>
           {coaches.map(({ name, id }, coach_idx) => <option key={coach_idx} value={id}>{name}</option>)}
@@ -85,7 +85,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           name="type"
           id="type"
           required
-          className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+          className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
         >
           <option value="">Select appointment type</option>
           <option value="goal_setting">Goal Setting (15 min)</option>
@@ -108,7 +108,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             value={hour}
             onChange={(e) => setHour(e.target.value)}
             name="hour"
-            className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
           >
             {Array.from({ length: 12 }, (_, i) => i).map((h) => (
               <option key={h+1} value={(h+1).toString().padStart(2, '0')}>
@@ -120,7 +120,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             value={minute}
             onChange={(e) => setMinute(e.target.value)}
             name="minute"
-            className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
           >
             {['00', '15', '30', '45'].map((m) => (
               <option key={m} value={m}>
@@ -132,7 +132,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             value={meridiem}
             onChange={(e) => setMeridiem(e.target.value)}
             name="meridiem"
-            className="w-full py-2 px-1 border-2 rounded focus:outline-accent bg-white"
+            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
           >
             <option key="am" value="AM">AM</option>
             <option key="pm" value="PM">PM</option>

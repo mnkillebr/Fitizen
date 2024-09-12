@@ -158,7 +158,7 @@ export default function Workouts() {
     <div className="px-4 md:px-6 py-6 md:py-8 flex flex-col h-full gap-y-4">
       <div className="flex flex-col gap-y-4 px-2">
         {/* <Form
-          className={`flex content-center border-2 rounded-md focus-within:border-accent md:w-1/2 ${
+          className={`flex content-center border-2 rounded-md focus-within:border-primary md:w-1/2 ${
             isSearching ? "animate-pulse" : ""
           }`}
         >
@@ -192,7 +192,7 @@ export default function Workouts() {
           to="create"
           className={clsx(
             "w-full sm:w-1/2 xl:w-1/3 md:active:scale-95 md:px-3",
-            "bg-secondary hover:bg-secondary-light rounded-md text-center text-white py-2",
+            "bg-secondary-original hover:bg-secondary-light rounded-md text-center text-white py-2",
             isNavigatingSubRoute ? "animate-pulse" : ""
           )}
           // onClick={() => setOpenPanel(!openPanel)}
@@ -217,7 +217,7 @@ export default function Workouts() {
             <div className="flex justify-between *:text-white">
               <p className="font-medium">Exercises</p>
               <button onClick={(event) => setOpenPanel(false)}>
-                <XMarkIcon className="size-6 hover:text-accent"/>
+                <XMarkIcon className="size-6 hover:text-primary"/>
               </button>
             </div>
             <Link
@@ -281,7 +281,7 @@ function Workout({ workout, role }: WorkoutProps) {
           <p className="text-sm max-w-40 xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden lg:overflow-visible">{workout.description}</p>
         </div>
       </div>
-      <div className="px-2 border-l-2 h-full flex flex-col justify-center hover:bg-accent rounded-r-lg">
+      <div className="px-2 border-l-2 h-full flex flex-col justify-center hover:bg-primary rounded-r-lg">
         {/* <ArrowRight className=""/> */}
         <ChevronLeft className="rotate-180" />
       </div>

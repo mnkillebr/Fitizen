@@ -25,7 +25,7 @@ export function PrimaryButton({ className, isLoading, ...props }: ButtonProps) {
     <Button
       {...props}
       className={clsx(
-        "text-white bg-secondary hover:bg-secondary-light",
+        "text-white bg-secondary-original hover:bg-secondary-light",
         isLoading ? "animate-pulse" : "",
         className
       )}
@@ -61,7 +61,7 @@ export function PrimaryInput({className, ...props}: PrimaryInputProps) {
     <input
       {...props}
       className={clsx(
-        "w-full border-2 rounded-md p-2 focus:outline-accent",
+        "w-full border-2 rounded-md p-2 focus:outline-primary",
         className
       )}
     />
@@ -77,7 +77,7 @@ export function PrimarySelect({className, options, ...props}: PrimarySelectProps
     <select
       {...props}
       className={clsx(
-        "w-full py-2 px-1 border-2 rounded-md focus:outline-accent",
+        "w-full py-2 px-1 border-2 rounded-md focus:outline-primary",
         className
       )}
     >
