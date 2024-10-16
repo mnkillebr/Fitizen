@@ -9,6 +9,8 @@ import { commitSession, getSession } from "~/sessions";
 import { validateForm } from "~/utils/validation";
 import { v4 as uuid } from "uuid";
 import { requireLoggedOutUser } from "~/utils/auth.server";
+import { Input } from "~/components/ui/input"
+import clsx from "clsx";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -67,7 +69,7 @@ export default function Login() {
   const actionData = useActionData<loginActionType>();
 
 	return (
-		<div className="text-center mt-32">
+		<div className="text-center mt-32 text-foreground flex justify-center">
       {actionData === "ok" ?
         (
           <div>
@@ -76,22 +78,27 @@ export default function Login() {
           </div>
         ) :
         (
-          <div>
+          <div className="border dark:border-border-muted rounded-md p-6 w-full sm:w-2/3 md:w-[450px]">
             <h1 className="font-bold text-3xl mb-8">Log In</h1>
-            <Form className="mx-auto sm:w-1/2 lg:w-1/3" method="post">
+            <Form className="mx-auto" method="post">
               <div className="pb-4 text-left">
                 {/* <label className="text-start pl-2">Email</label> */}
-                <PrimaryInput
+                <Input
                   type="email"
                   name="email"
                   required
                   defaultValue={actionData?.email}
                   autoComplete="off"
                   placeholder="Enter email address"
+                  className={clsx(
+                    "w-full appearance-none border bg-background shadow-none",
+                    "dark:bg-background dark:text-muted-foreground dark:focus:text-foreground",
+                    "dark:border-border-muted dark:focus:border-ring"
+                  )}
                 />
                 <ErrorMessage>{actionData?.errors?.email}</ErrorMessage>
               </div>
-              <PrimaryButton className="mx-auto w-1/2">Log In</PrimaryButton>
+              <PrimaryButton className="mx-auto w-full text-foreground">Log In</PrimaryButton>
             </Form>
           </div>
         )

@@ -16,27 +16,35 @@ import { requireLoggedInUser } from '~/utils/auth.server';
 import { createUserWorkoutWithExercises } from '~/models/workout.server';
 import { Exercise } from '../exercises';
 import { Exercise as ExerciseType } from "@prisma/client";
+import { Input } from '~/components/ui/input';
+import { Textarea } from '~/components/ui/textarea';
+import { Search } from 'lucide-react';
+import { Checkbox } from '~/components/ui/checkbox';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
 
-const targetOptions = ["reps", "time"]
+const targetOptions = [
+  {value: "reps", label: "Repetitions"},
+  {value: "time", label: "Time"}
+]
 
 const restOptions = [
-  "None",
-  "10 sec",
-  "15 sec",
-  "20 sec",
-  "25 sec",
-  "30 sec",
-  "35 sec",
-  "40 sec",
-  "45 sec",
-  "50 sec",
-  "55 sec",
-  "60 sec",
-  "90 sec",
-  "2 min",
-  "3 min",
-  "4 min",
-  "5 min",
+  {value: "None", label: "None"},
+  {value: "10 sec", label: "10 sec"},
+  {value: "15 sec", label: "15 sec"},
+  {value: "20 sec", label: "20 sec"},
+  {value: "25 sec", label: "25 sec"},
+  {value: "30 sec", label: "30 sec"},
+  {value: "35 sec", label: "35 sec"},
+  {value: "40 sec", label: "40 sec"},
+  {value: "45 sec", label: "45 sec"},
+  {value: "50 sec", label: "50 sec"},
+  {value: "55 sec", label: "55 sec"},
+  {value: "60 sec", label: "60 sec"},
+  {value: "90 sec", label: "90 sec"},
+  {value: "2 min", label: "2 min"},
+  {value: "3 min", label: "3 min"},
+  {value: "4 min", label: "4 min"},
+  {value: "5 min", label: "5 min"},
 ]
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -296,7 +304,7 @@ export default function WorkoutBuilderForm() {
     }))
   }, [workoutCards, setWorkoutCards])
 
-  const onChangeTarget = (event: BaseSyntheticEvent, id: string) => handleChange(id, "target", event.target.value)
+  const onChangeTarget = (value: string, id: string) => handleChange(id, "target", value)
 
   const flattenedWorkoutCards = useMemo(() => {
     return workoutCards.reduce((result: any, curr: any) => {
@@ -312,22 +320,23 @@ export default function WorkoutBuilderForm() {
   return (
     <>
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex h-full">
+        <div className="flex h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
           {/* Create Workout Form */}
-          <createWorkoutFetcher.Form method="post" className="flex flex-col h-full w-full sm:w-1/2 p-6 sm:p-4">
+          <createWorkoutFetcher.Form method="post" className="flex flex-col h-full w-full lg:w-1/2 p-8 sm:p-6 bg-background-muted text-foreground">
             <h2 className="mb-2 text-lg font-semibold">Create Workout</h2>
-            <fieldset className="space-y-4 rounded-xl bg-white/5">
+            <fieldset className="space-y-4 rounded-xl">
               <div className="flex flex-col">
                 <label className="text-sm/6 font-medium">Name<span className="text-xs ml-1">*</span></label>
-                <input
+                <Input
                   type="text"
                   id="workoutName"
                   name="workoutName"
                   autoComplete="off"
                   required
                   className={clsx(
-                    "p-2 rounded-md border-2 focus:outline-primary /*lg:w-2/3 xl:w-1/2*/ text-sm/6",
-                    createWorkoutFetcher.data?.errors?.workoutName ? "border-red-500" : ""
+                    "p-2 rounded-md border /*lg:w-2/3 xl:w-1/2*/ text-sm/6",
+                    createWorkoutFetcher.data?.errors?.workoutName ? "border-red-500" : "",
+                    "bg-background placeholder:text-muted-foreground dark:border-border-muted dark:focus:border-ring"
                   )}
                   placeholder="Name your workout"
                 />
@@ -361,8 +370,11 @@ export default function WorkoutBuilderForm() {
                     }}
                     transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
                   >
-                    <textarea
-                      className="p-2 rounded-md border-2 focus:outline-primary /*lg:w-2/3 xl:w-1/2*/ text-sm/6 resize-none w-full"
+                    <Textarea
+                      className={clsx(
+                        "p-2 rounded-md border text-sm/6 resize-none w-full bg-background",
+                        "placeholder:text-muted-foreground dark:border-border-muted dark:focus:border-ring"
+                      )}
                       placeholder="Optional"
                       name="workoutDescription"
                       id="workoutDescription"
@@ -381,7 +393,7 @@ export default function WorkoutBuilderForm() {
               <button
                 type="button"
                 onClick={() => workoutCards.length === selectedCards.size ? handleDeselectAll() : handleSelectAll()}
-                className="bg-slate-200 hover:bg-slate-300 disabled:opacity-30 disabled:cursor-not-allowed px-2 py-1 rounded"
+                className="bg-slate-200 hover:bg-slate-300 dark:bg-accent dark:hover:bg-border-muted dark:border dark:border-border-muted disabled:opacity-30 disabled:cursor-not-allowed px-2 py-1 rounded"
                 disabled={!workoutCards.length}
               >
                 {workoutCards.length >= 1 && workoutCards.length === selectedCards.size ? "Deselect All" : "Select All"}
@@ -390,7 +402,7 @@ export default function WorkoutBuilderForm() {
                 type="button"
                 onClick={handleCircuit}
                 disabled={selectedCards.size < 2}
-                className="bg-slate-200 hover:bg-slate-300 disabled:opacity-30 disabled:cursor-not-allowed px-2 py-1 rounded"
+                className="bg-slate-200 hover:bg-slate-300 dark:bg-accent dark:hover:bg-border-muted dark:border dark:border-border-muted disabled:opacity-30 disabled:cursor-not-allowed px-2 py-1 rounded"
               >
                 Circuit
               </button>
@@ -417,7 +429,7 @@ export default function WorkoutBuilderForm() {
                     closedDescription: { height: "calc(100% - 14rem)" },
                   }}
                   transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-                  className="overflow-y-auto flex flex-col shadow-inner bg-slate-200 rounded-md p-1 mt-1 mb-2"
+                  className="overflow-y-auto flex flex-col shadow-inner bg-slate-200 dark:bg-background rounded-md p-3 mt-1 mb-2"
                 >
                   {workoutCards.map((card: any, index: number) => (
                     <Draggable key={card.id} draggableId={card.id} index={index}>
@@ -428,14 +440,14 @@ export default function WorkoutBuilderForm() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className="flex flex-col mb-2 p-2 bg-gray-100 rounded shadow"
+                              className="flex flex-col mb-2 p-2 bg-gray-100 dark:bg-background-muted dark:border dark:border-border-muted rounded shadow"
                             >
                               <div className="flex justify-between">
                                 <div className="flex gap-2 mb-2">
-                                  <label className="text-xs self-end font-medium">Circuit of</label>
-                                  <input
+                                  <label className="text-xs self-end font-medium text-muted-foreground">Circuit of</label>
+                                  <Input
                                     type="number"
-                                    className="w-10 text-sm pl-2"
+                                    className="w-12 text-sm h-5 pr-1 bg-background dark:border-border-muted"
                                     defaultValue={3}
                                     min={1}
                                     max={10}
@@ -444,17 +456,16 @@ export default function WorkoutBuilderForm() {
                                       onChangeCircuitRounds(card.id, rounds)
                                     }}
                                   />
-                                  <label className="text-xs self-end font-medium">rounds</label>
+                                  <label className="text-xs self-end font-medium text-muted-foreground">rounds</label>
                                 </div>
                                 <button className="text-xs font-medium underline" onClick={() => handleUngroup(card.id)}>Ungroup</button>
                               </div>
                               <div className="flex h-full w-full justify-between">
-                                <div className="flex">
-                                  <input
-                                    type="checkbox"
-                                    className="mr-2 border-r checked:bg-yellow-400"
+                                <div className="flex items-center">
+                                  <Checkbox
+                                    className="mr-2"
                                     checked={selectedCards.has(card.id)}
-                                    onChange={() => handleCardSelect(card.id)}
+                                    onCheckedChange={() => handleCardSelect(card.id)}
                                   />
                                   <div className="flex flex-col gap-2 divide-y-4">
                                     {card.exercises.map((ex_item: any, ex_item_idx: number) => {
@@ -466,59 +477,99 @@ export default function WorkoutBuilderForm() {
                                           <input type="hidden" name={`exercises[${exerciseIndex}].sets`} value={ex_item.rounds ? ex_item.rounds : 3} />
                                           <input type="hidden" name={`exercises[${exerciseIndex}].rest`} value={ex_item.rest ? ex_item.rest : "60 sec"} />
                                           <div className="flex flex-col justify-between">
-                                            <label className="text-xs self-start font-medium">Name</label>
+                                            <label className="text-xs self-start font-medium text-muted-foreground">Name</label>
                                             <p className="min-w-40 max-w-60 truncate shrink select-none">{ex_item.name}</p>
                                           </div>
-                                          <div className="flex gap-3 h-10">
+                                          <div className="flex gap-3 h-full w-full flex-wrap">
                                             <div className="flex flex-col justify-between">
-                                              <label className="text-xs self-start font-medium">Target</label>
-                                              <select
+                                              <label className="text-xs self-start font-medium text-muted-foreground">Target</label>
+                                              {/* <select
                                                 className="text-xs h-5 self-end"
                                                 defaultValue={ex_item.target ? ex_item.target : "reps"}
                                                 name={`exercises[${exerciseIndex}].target`}
                                                 onChange={(event) => onChangeCircuitTarget(card.id, ex_item.id, event.target.value)}
                                               >
-                                                {targetOptions.map((target, target_idx) => <option key={target_idx}>{target}</option>)}
-                                              </select>
+                                                {targetOptions.map((target, target_idx) => <option key={target_idx}>{target.value}</option>)}
+                                              </select> */}
+                                              <Select
+                                                defaultValue={ex_item.target ? ex_item.target : "reps"}
+                                                name={`exercises[${exerciseIndex}].target`}
+                                                value={card.target}
+                                                onValueChange={(val) => onChangeCircuitTarget(card.id, ex_item.id, val)}
+                                              >
+                                                <SelectTrigger className="text-xs h-5 bg-background dark:border-border-muted">
+                                                  <SelectValue placeholder="Select Target" />
+                                                </SelectTrigger>
+                                                <SelectContent className="dark:border-border-muted">
+                                                  <SelectGroup>
+                                                    <SelectLabel>Target</SelectLabel>
+                                                    {targetOptions.map((target, target_idx) => <SelectItem key={target_idx} value={target.value}>{target.label}</SelectItem>)}
+                                                  </SelectGroup>
+                                                </SelectContent>
+                                              </Select>
                                             </div>
                                             {ex_item.target === "reps" ? (
                                               <div className="flex flex-col justify-between">
-                                                <label className="text-xs self-start font-medium">Reps</label>
-                                                <input
+                                                <label className="text-xs self-start font-medium text-muted-foreground">Reps</label>
+                                                {/* <Input
                                                   type="number"
                                                   className="w-10 text-sm pl-2 h-5"
                                                   defaultValue="10"
+                                                  name={`exercises[${exerciseIndex}].reps`}
+                                                /> */}
+                                                <Input
+                                                  type="number"
+                                                  className="w-13 text-sm h-5 pr-1 bg-background dark:border-border-muted"
+                                                  defaultValue="10"
+                                                  min={1}
+                                                  max={20}
                                                   name={`exercises[${exerciseIndex}].reps`}
                                                 />
                                               </div>
                                             ) : ex_item.target === "time" ? (
                                               <div className="flex flex-col justify-between">
-                                                <label className="text-xs self-start font-medium">Time</label>
-                                                <select
+                                                <label className="text-xs self-start font-medium text-muted-foreground">Time</label>
+                                                {/* <select
                                                   className="text-xs h-5 self-end"
                                                   defaultValue="30 sec"
                                                   name={`exercises[${exerciseIndex}].time`}
                                                 >
-                                                  {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
-                                                </select>
+                                                  {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest.value}</option>)}
+                                                </select> */}
+                                                <Select
+                                                  defaultValue="30 sec"
+                                                  name={`exercises[${exerciseIndex}].time`}
+                                                >
+                                                  <SelectTrigger className="text-xs h-5 bg-background dark:border-border-muted">
+                                                    <SelectValue placeholder="Select Time" />
+                                                  </SelectTrigger>
+                                                  <SelectContent className="dark:border-border-muted">
+                                                    <SelectGroup>
+                                                      <SelectLabel>Time</SelectLabel>
+                                                      {restOptions.map((rest, rest_idx) => <SelectItem key={rest_idx} value={rest.value}>{rest.label}</SelectItem>)}
+                                                    </SelectGroup>
+                                                  </SelectContent>
+                                                </Select>
                                               </div>
                                             ) : (
                                               <div className="flex flex-col justify-between">
-                                                <label className="text-xs self-start font-medium">Reps</label>
-                                                <input
+                                                <label className="text-xs self-start font-medium text-muted-foreground">Reps</label>
+                                                <Input
                                                   type="number"
-                                                  className="w-10 text-sm pl-2 h-5"
+                                                  className="w-13 text-sm h-5 pr-1 bg-background dark:border-border-muted"
                                                   defaultValue="10"
+                                                  min={1}
+                                                  max={20}
                                                   name={`exercises[${exerciseIndex}].reps`}
                                                 />
                                               </div>
                                             )}
                                             <div className="flex flex-col justify-between">
-                                              <label className="text-xs self-start font-medium">Notes</label>
-                                              <input
+                                              <label className="text-xs self-start font-medium text-muted-foreground">Notes</label>
+                                              <Input
                                                 type="text"
-                                                className="w-36 text-sm px-2 h-5 self-end placeholder:text-xs"
-                                                placeholder="tempo, weight, etc."
+                                                className="w-36 text-sm px-2 h-5 self-end bg-background dark:border-border-muted"
+                                                placeholder="reps, tempo, etc."
                                                 name={`exercises[${exerciseIndex}].notes`}
                                               />
                                             </div>
@@ -533,9 +584,9 @@ export default function WorkoutBuilderForm() {
                                   <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing" />
                                 </div>
                               </div>
-                              <div className="flex gap-2 mt-2 justify-end">
-                                <label className="text-xs self-end font-medium">Rest</label>
-                                <select
+                              <div className="flex gap-2 mt-2 justify-end w-full">
+                                <label className="text-xs self-end font-medium text-muted-foreground">Rest</label>
+                                {/* <select
                                   className="text-xs h-5 self-end"
                                   defaultValue="60 sec"
                                   onChange={(event) => {
@@ -543,9 +594,23 @@ export default function WorkoutBuilderForm() {
                                     onChangeCircuitRest(card.id, rest)
                                   }}
                                 >
-                                  {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
-                                </select>
-                                <label className="text-xs self-end font-medium">between rounds</label>
+                                  {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest.value}</option>)}
+                                </select> */}
+                                <Select
+                                  defaultValue="60 sec"
+                                  onValueChange={(val) => onChangeCircuitRest(card.id, val)}
+                                >
+                                  <SelectTrigger className="text-xs h-5 bg-background dark:border-border-muted self-center w-fit">
+                                    <SelectValue placeholder="Select Rest" />
+                                  </SelectTrigger>
+                                  <SelectContent className="dark:border-border-muted">
+                                    <SelectGroup>
+                                      <SelectLabel>Rest</SelectLabel>
+                                      {restOptions.map((rest, rest_idx) => <SelectItem key={rest_idx} value={rest.value}>{rest.label}</SelectItem>)}
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                                <label className="text-xs self-end font-medium text-muted-foreground text-nowrap">between rounds</label>
                               </div>
                             </div>
                           )
@@ -556,27 +621,26 @@ export default function WorkoutBuilderForm() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className="flex items-center gap-2 mb-2 p-2 bg-gray-100 rounded shadow"
+                              className="flex items-center gap-2 mb-2 p-2 bg-gray-100 dark:bg-background-muted dark:border dark:border-border-muted rounded shadow"
                             >
                               <input type="hidden" name={`exercises[${exerciseIndex}].orderInRoutine`} value={exerciseIndex+1} />
                               <input type="hidden" name={`exercises[${exerciseIndex}].exerciseId`} value={card.id} />
-                              <input
-                                type="checkbox"
+                              <Checkbox
                                 checked={selectedCards.has(card.id)}
-                                onChange={() => handleCardSelect(card.id)}
+                                onCheckedChange={() => handleCardSelect(card.id)}
                               />
                               <div className="flex justify-between w-full">
                                 <div className="flex flex-col gap-1">
                                   <div className="flex flex-col justify-between">
-                                    <label className="text-xs self-start font-medium">Name</label>
+                                    <label className="text-xs self-start font-medium text-muted-foreground">Name</label>
                                     <p className="min-w-40 max-w-60 truncate shrink select-none">{card.name}</p>
                                   </div>
                                   <div className="flex flex-wrap max-w-full gap-3">
                                     <div className="flex flex-col justify-between">
-                                      <label className="text-xs self-start font-medium">Sets</label>
-                                      <input
+                                      <label className="text-xs self-start font-medium text-muted-foreground">Sets</label>
+                                      <Input
                                         type="number"
-                                        className="w-10 text-sm pl-2 h-5"
+                                        className="w-12 text-sm h-5 pr-1 bg-background dark:border-border-muted"
                                         defaultValue="3"
                                         min={1}
                                         max={10}
@@ -584,8 +648,8 @@ export default function WorkoutBuilderForm() {
                                       />
                                     </div>
                                     <div className="flex flex-col justify-between">
-                                      <label className="text-xs self-start font-medium">Target</label>
-                                      <select
+                                      <label className="text-xs self-start font-medium text-muted-foreground">Target</label>
+                                      {/* <select
                                         className="text-xs h-5 self-end"
                                         defaultValue="reps"
                                         name={`exercises[${exerciseIndex}].target`}
@@ -593,58 +657,106 @@ export default function WorkoutBuilderForm() {
                                         onChange={(event) => onChangeTarget(event, card.id)}
                                       >
                                         {targetOptions.map((target, target_idx) => <option key={target_idx}>{target}</option>)}
-                                      </select>
+                                      </select> */}
+                                      <Select
+                                        defaultValue="reps"
+                                        name={`exercises[${exerciseIndex}].target`}
+                                        value={card.target}
+                                        onValueChange={(val) => onChangeTarget(val, card.id)}
+                                      >
+                                        <SelectTrigger className="text-xs h-5 bg-background dark:border-border-muted">
+                                          <SelectValue placeholder="Select Target" />
+                                        </SelectTrigger>
+                                        <SelectContent className="dark:border-border-muted">
+                                          <SelectGroup>
+                                            <SelectLabel>Target</SelectLabel>
+                                            {targetOptions.map((target, target_idx) => <SelectItem key={target_idx} value={target.value}>{target.label}</SelectItem>)}
+                                          </SelectGroup>
+                                        </SelectContent>
+                                      </Select>
                                     </div>
                                     {card.target === "reps" ? (
                                       <div className="flex flex-col justify-between">
-                                        <label className="text-xs self-start font-medium">Reps</label>
-                                        <input
+                                        <label className="text-xs self-start font-medium text-muted-foreground">Reps</label>
+                                        <Input
                                           type="number"
-                                          className="w-10 text-sm pl-2 h-5"
+                                          className="w-13 text-sm h-5 pr-1 bg-background dark:border-border-muted"
                                           defaultValue="10"
+                                          min={1}
+                                          max={20}
                                           name={`exercises[${exerciseIndex}].reps`}
                                         />
                                       </div>
                                     ) : card.target === "time" ? (
                                       <div className="flex flex-col justify-between">
-                                        <label className="text-xs self-start font-medium">Time</label>
-                                        <select
+                                        <label className="text-xs self-start font-medium text-muted-foreground">Time</label>
+                                        {/* <select
                                           className="text-xs h-5 self-end"
                                           defaultValue="30 sec"
                                           name={`exercises[${exerciseIndex}].time`}
                                         >
-                                          {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
-                                        </select>
+                                          {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest.value}</option>)}
+                                        </select> */}
+                                        <Select
+                                          defaultValue="30 sec"
+                                          name={`exercises[${exerciseIndex}].time`}
+                                        >
+                                          <SelectTrigger className="text-xs h-5 bg-background dark:border-border-muted">
+                                            <SelectValue placeholder="Select Time" />
+                                          </SelectTrigger>
+                                          <SelectContent className="dark:border-border-muted">
+                                            <SelectGroup>
+                                              <SelectLabel>Time</SelectLabel>
+                                              {restOptions.map((rest, rest_idx) => <SelectItem key={rest_idx} value={rest.value}>{rest.label}</SelectItem>)}
+                                            </SelectGroup>
+                                          </SelectContent>
+                                        </Select>
                                       </div>
                                     ) : (
                                       <div className="flex flex-col justify-between">
-                                        <label className="text-xs self-start font-medium">Reps</label>
-                                        <input
+                                        <label className="text-xs self-start font-medium text-muted-foreground">Reps</label>
+                                        <Input
                                           type="number"
-                                          className="w-10 text-sm pl-2 h-5"
+                                          className="w-13 text-sm h-5 pr-1 bg-background dark:border-border-muted"
                                           defaultValue="10"
+                                          min={1}
+                                          max={20}
                                           name={`exercises[${exerciseIndex}].reps`}
                                         />
                                       </div>
                                     )}
                                     <div className="flex flex-col justify-between">
-                                      <label className="text-xs self-start font-medium">Notes</label>
-                                      <input
+                                      <label className="text-xs self-start font-medium text-muted-foreground">Notes</label>
+                                      <Input
                                         type="text"
-                                        className="w-36 text-sm px-2 h-5 self-end"
+                                        className="w-36 text-sm px-2 h-5 self-end bg-background dark:border-border-muted"
                                         placeholder="reps, tempo, etc."
                                         name={`exercises[${exerciseIndex}].notes`}
                                       />
                                     </div>
                                     <div className="flex flex-col justify-between">
-                                      <label className="text-xs self-start font-medium">Rest</label>
-                                      <select
+                                      <label className="text-xs self-start font-medium text-muted-foreground">Rest</label>
+                                      {/* <select
                                         className="text-xs h-5 self-end"
                                         defaultValue="60 sec"
                                         name={`exercises[${exerciseIndex}].rest`}
                                       >
-                                        {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
-                                      </select>
+                                        {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest.value}</option>)}
+                                      </select> */}
+                                      <Select
+                                        defaultValue="60 sec"
+                                        name={`exercises[${exerciseIndex}].rest`}
+                                      >
+                                        <SelectTrigger className="text-xs h-5 bg-background dark:border-border-muted">
+                                          <SelectValue placeholder="Select Rest" />
+                                        </SelectTrigger>
+                                        <SelectContent className="dark:border-border-muted">
+                                          <SelectGroup>
+                                            <SelectLabel>Rest</SelectLabel>
+                                            {restOptions.map((rest, rest_idx) => <SelectItem key={rest_idx} value={rest.value}>{rest.label}</SelectItem>)}
+                                          </SelectGroup>
+                                        </SelectContent>
+                                      </Select>
                                     </div>
                                   </div>
                                 </div>
@@ -659,14 +771,14 @@ export default function WorkoutBuilderForm() {
                     </Draggable>
                   ))}
                   {provided.placeholder}
-                  <p className="hidden sm:flex h-full text-sm text-slate-400 justify-center items-center p-4 border-2 bg-white border-dashed border-gray-300 rounded-md select-none">
+                  <p className="hidden lg:flex h-full text-sm text-slate-400 dark:text-muted-foreground justify-center items-center p-4 border-2 bg-white dark:bg-background-muted border-dashed border-gray-300 rounded-md select-none">
                     Drag 'n' drop exercise(s) here
                   </p>
                   <div
-                    className="sm:hidden h-full border-2 border-dashed bg-white rounded-md px-3 py-2 flex flex-col justify-center items-center my-1 cursor-pointer"
+                    className="lg:hidden h-full border-2 border-dashed bg-white dark:bg-background-muted rounded-md px-3 py-2 flex flex-col justify-center items-center my-1 cursor-pointer"
                     onClick={toggleExercisesPanel}
                   >
-                    <p className="text-sm text-slate-400 select-none">Add exercise (s)</p>
+                    <p className="text-sm text-slate-400 dark:text-muted-foreground select-none">Add exercise (s)</p>
                     <PlusCircleIcon className="size-10 text-primary"/>
                   </div>
                 </motion.div>
@@ -674,12 +786,12 @@ export default function WorkoutBuilderForm() {
             </StrictModeDroppable>
             {createWorkoutFetcher.data?.errors?.exercises ? <span className="text-red-500 text-xs">{createWorkoutFetcher.data?.errors?.exercises}</span> : null}
             <div className="flex-none flex justify-end gap-2">
-              <Link to="/app/workouts" className="bg-gray-300 px-4 py-2 rounded">Cancel</Link>
+              <Link to="/app/workouts" className="bg-gray-300 hover:bg-gray-200 dark:border dark:border-border-muted dark:bg-accent dark:hover:bg-border-muted px-4 py-2 rounded">Cancel</Link>
               <PrimaryButton
                 type="submit"
                 name="_action"
                 value="createUserWorkout"
-                className="bg-blue-500 text-white px-4 py-2 rounded"
+                className="px-4 py-2 rounded"
                 disabled={isSavingWorkout}
                 isLoading={isSavingWorkout}
               >
@@ -697,32 +809,36 @@ export default function WorkoutBuilderForm() {
             )} */}
           </createWorkoutFetcher.Form>
           {/* Available Exercises */}
-          <div className="hidden h-full sm:flex flex-col sm:w-1/2 p-4 bg-gray-200">
+          <div className="hidden h-full lg:flex flex-col lg:w-1/2 p-8 sm:p-6 bg-gray-200 dark:bg-background text-foreground dark:border-l dark:border-border-muted">
             <h2 className="mb-2 text-lg font-semibold">Available Exercises</h2>
             <Form
-              className={clsx(
-                "flex content-center rounded-md mb-2 focus-within:outline focus-within:outline-2 focus-within:outline-primary /*lg:w-2/3 xl:w-1/2*/ bg-white",
-                isSearching ? "animate-pulse" : ""
+              className={clsx("mb-2", isSearching ? "animate-pulse" : "",
+                // "flex content-center rounded-md mb-2 focus-within:border focus-within:outline-border-ring /*lg:w-2/3 xl:w-1/2*/",
+                // "bg-background placeholder:text-muted-foreground"
               )}
             >
-              <button type="submit">
-                <SearchIcon className="size-6 ml-2 text-slate-400" />
-              </button>
-              <input
-                defaultValue={searchParams.get("q") ?? ""}
-                type="text"
-                name="q"
-                placeholder="Search exercises ..."
-                autoComplete="off"
-                className="w-full p-2 outline-none text-sm/6 rounded-md text-slate-400"
-              />
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground dark:text-muted-foreground peer-focus:text-foreground" />
+                <Input
+                  type="text"
+                  defaultValue={searchParams.get("q") ?? ""}
+                  name="q"
+                  placeholder="Search available exercises ..."
+                  autoComplete="off"
+                  className={clsx(
+                    "w-full appearance-none border bg-background pl-8 shadow-none",
+                    "dark:bg-background-muted dark:text-muted-foreground dark:focus:text-foreground",
+                    "dark:border-border-muted dark:focus:border-ring"
+                  )}
+                />
+              </div>
             </Form>
             <StrictModeDroppable droppableId="availableCards" isDropDisabled={true}>
               {(provided: DroppableProvided) => (
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className="overflow-y-auto"
+                  className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-y-3 gap-x-3  overflow-y-auto"
                 >
                   {exercises.map((card, index) => (
                     <Draggable key={card.id} draggableId={card.id} index={index}>
@@ -731,16 +847,17 @@ export default function WorkoutBuilderForm() {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className="flex items-center gap-2 mb-2 bg-gray-100 rounded shadow *:select-none"
+                          className="flex flex-col bg-background rounded shadow dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted *:select-none"
                           style={{
                             ...provided.draggableProps.style,
                             transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'translate(0px, 0px)',
                           }}
                         >
-                          <div className="size-16 bg-white flex items-center justify-center rounded">
-                            Image
-                          </div>
-                          <div className="flex flex-col self-center">
+                          <img
+                            src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+                            className="w-full rounded-t"
+                          />
+                          <div className="flex flex-col p-4">
                             <p className="font-bold max-w-56 lg:max-w-64 truncate">{card.name}</p>
                             <div className="flex divide-x divide-gray-400 text-sm">
                               {card.body.slice(0,2).map((body, body_idx) => (
@@ -764,40 +881,48 @@ export default function WorkoutBuilderForm() {
       <AnimatePresence>
         {openExercisesPanel && (
           <motion.div
-            className="sm:hidden absolute bottom-0 left-0 md:left-64 md:max-w-[calc(100vw-16rem)] flex flex-col gap-y-2 h-2/3 bg-gray-200 w-screen rounded-t-lg p-6 md:p-8"
+            className={clsx(
+              "lg:hidden absolute bottom-0 left-0 md:left-[219px] md:max-w-[calc(100vw-13.6875rem)]",
+              "flex flex-col gap-y-2 h-3/5 bg-gray-200 w-screen rounded-t-lg p-8 sm:p-6",
+              "dark:bg-border-muted"
+            )}
             initial={{ translateY: "100%" }}
             animate={{ translateY: "0%" }}
             exit={{ translateY: "100%" }}
             transition={{ ease: [0, 0.71, 0.2, 1.01], }}
           >
-            <div className="flex justify-between">
+            <div className="flex justify-between text-foreground">
               <p className="text-lg font-semibold">Exercises</p>
-              <button onClick={(event) => {
-                setOpenExercisesPanel(false)
-                setSearchParams((prev) => {
-                  prev.set("q", "");
-                  return prev;
-                });
-              }}>
+              <button
+                onClick={(event) => {
+                  setOpenExercisesPanel(false)
+                  setSearchParams((prev) => {
+                    prev.set("q", "");
+                    return prev;
+                  });
+                }}
+              >
                 <XMarkIcon className="size-6 hover:text-primary"/>
               </button>
             </div>
             <Form
-              className={`flex content-center border-2 rounded-md focus-within:border-primary lg:w-2/3 xl:w-1/2 bg-white ${
-                isSearching ? "animate-pulse" : ""
-              }`}
+              className={isSearching ? "animate-pulse" : ""}
             >
-              <button type="submit">
-                <SearchIcon className="size-6 ml-2 text-slate-400" />
-              </button>
-              <input
-                defaultValue={searchParams.get("q") ?? ""}
-                type="text"
-                name="q"
-                placeholder="Search exercises ..."
-                autoComplete="off"
-                className="w-full p-2 outline-none rounded-md text-slate-400"
-              />
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground dark:text-muted-foreground peer-focus:text-foreground" />
+                <Input
+                  type="text"
+                  defaultValue={searchParams.get("q") ?? ""}
+                  name="q"
+                  placeholder="Search available exercises ..."
+                  autoComplete="off"
+                  className={clsx(
+                    "w-full appearance-none border bg-background pl-8 shadow-none",
+                    "dark:bg-background dark:text-muted-foreground dark:focus:text-foreground",
+                    "dark:border-border-muted dark:focus:border-ring"
+                  )}
+                />
+              </div>
             </Form>
             <div className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-0.5 pb-1 text-slate-900">
               {exercises.map((ex_item) => (

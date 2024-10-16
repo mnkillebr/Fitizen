@@ -1,4 +1,4 @@
-import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon, } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid, PlusIcon, TrashIcon, ArrowDownTrayIcon, Bars3Icon } from "@heroicons/react/24/solid";
 
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
@@ -13,6 +13,8 @@ import { requireLoggedInUser } from "~/utils/auth.server";
 import { Role as RoleType } from "@prisma/client";
 // import { useDrag, useDrop } from "react-dnd";
 import { useOpenDialog } from "~/components/Dialog";
+import { CheckCircleIcon, PlusCircleIcon } from "images/icons";
+import { darkModeCookie } from "~/cookies";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -20,6 +22,9 @@ const updateExerciseNameSchema = z.object({
 })
 const deleteExerciseSchema = z.object({
   exerciseId: z.string(),
+})
+const themeSchema = z.object({
+  darkMode: z.string(),
 })
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -54,6 +59,18 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
     default: {
       return null;
     }
@@ -83,8 +100,8 @@ export default function ExerciseLibrary() {
   const isSearching = navigation.formData?.has("q");
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
   return (
-    <div className="py-6 px-5 md:py-8 md:px-7 flex flex-col h-full gap-y-4">
-      <div className="flex flex-col gap-y-4 px-1">
+    <div className="py-6 px-5 md:py-8 md:px-7 flex flex-col gap-y-4 bg-background h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
+      <div className="flex flex-col gap-y-4">
         {/* <Form
           className={`flex content-center border-2 rounded-md focus-within:border-primary md:w-2/3 lg:w-1/2 xl:w-1/3 ${
             isSearching ? "animate-pulse" : ""
@@ -102,7 +119,7 @@ export default function ExerciseLibrary() {
             className="w-full p-2 outline-none rounded-md"
           />
         </Form> */}
-        <h1 className="text-lg font-semibold md:text-2xl">Exercises</h1>
+        <h1 className="text-lg font-semibold md:text-2xl text-foreground px-1">Exercises</h1>
         {data.role === "admin" ? (
           <createExerciseFetcher.Form method="post">
             <PrimaryButton
@@ -117,13 +134,20 @@ export default function ExerciseLibrary() {
           </createExerciseFetcher.Form>
         ) : null}
       </div>
-      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1">
+      {/* <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1"> */}
+      <div className="flex flex-col gap-y-3 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
         {data.exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={data.role} onViewExercise={() => {
             openDialog(
-              <div className="flex gap-x-4">
-                <div className="flex-none size-96 bg-slate-100 text-center content-center rounded">Image</div>
-                <div className="flex-1">{ex_item.cues.map((cue, cue_idx) => <div key={cue_idx}>{cue}</div>)}</div>
+              <div className="flex flex-col gap-y-3 gap-x-4">
+                <img
+                  src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+                  className="h-full rounded"
+                />
+                <div>
+                  <div className="font-bold">Cues</div>
+                  <div className="flex-1">{ex_item.cues.map((cue, cue_idx) => <div key={cue_idx}>{cue}</div>)}</div>
+                </div>
               </div>, ex_item.name
             )
           }} />
@@ -166,78 +190,90 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
   return isDeletingExercise ? null : (
     <div
       className={clsx(
-        "bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-md snap-start shadow-md",
-        selectable ? "" : "hover:shadow-primary"
+        "dark:bg-background-muted text-foreground dark:border dark:border-border-muted rounded-lg flex flex-col snap-start shadow-md dark:shadow-border-muted",
+        selectable ? "bg-background" : "bg-muted hover:shadow-primary"
       )}
       // draggable
       // onDragStart={(e) => {
       //   e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
       // }}
     >
-      <div className="flex gap-2 xs:gap-4">
-        <div
-          className="size-16 md:size-20 bg-white rounded-lg text-center content-center cursor-pointer"
+      <div className="flex flex-col overflow-hidden">
+        <img
+          src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+          className={clsx("w-full rounded-t-lg", selectable ? "" : "cursor-pointer")}
           onClick={() => onViewExercise(exercise)}
-        >
-          Image
-        </div>
-        <div className="flex flex-col self-center">
-          {role === "admin" ? (
-            <updateExerciseNameFetcher.Form method="post" className="hidden sm:flex">
-              <div className="flex flex-col peer">
-                <input
-                  type="text"
-                  className={`font-bold bg-slate-100 focus:outline-none max-w-36 xs:min-w-64 truncate focus:border-b-2 ${
-                    updateExerciseNameFetcher.data?.errors?.exerciseName ? "border-b-2 border-b-red-500" : ""
-                  }`}
-                  required
-                  name="exerciseName"
-                  placeholder="Exercise Name"
-                  defaultValue={exercise.name}
-                  autoComplete="off"
-                  onChange={(event) => {
-                    event.target.value !== "" &&
-                    updateExerciseNameFetcher.submit(
-                      {
-                        _action: "updateExerciseName",
-                        exerciseId: exercise.id,
-                        exerciseName: event.target.value,
-                      },
-                      { method: "post" }
-                    );
-                  }}
-                />
-                <ErrorMessage>{updateExerciseNameFetcher.data?.errors?.exerciseName}</ErrorMessage>
-              </div>
-              {isHydrated ? null : (
-                <button
-                  name="_action"
-                  value="updateExerciseName"
-                  className={clsx(
-                    "opacity-0 hover:opacity-100 focus:opacity-100",
-                    "peer-focus-within:opacity-100"
-                  )}
-                >
-                  <ArrowDownTrayIcon className="size-6"/>
-                </button>
-              )}
-              <input type="hidden" name="exerciseId" value={exercise.id} />
-            </updateExerciseNameFetcher.Form>
-          ) : (
-            <p className="font-bold max-w-40 xs:max-w-64 sm:max-w-full md:max-w-72 truncate">{exercise.name}</p>
-          )}
-          <div className="flex divide-x divide-gray-400 text-sm">
-            {exercise.body.slice(0,2).map((body, body_idx) => (
-              <p key={body_idx} className={`${body_idx > 0 ? "px-1" : "pr-1"} text-xs capitalize`}>{`${body} body`}</p>
-            ))}
-            <p className="px-1 text-xs capitalize">{exercise.contraction}</p>
+        />
+        <div className="flex p-4 justify-between items-center">
+          <div className="flex flex-col">
+            {role === "admin" ? (
+              <updateExerciseNameFetcher.Form method="post" className="hidden sm:flex justify-between">
+                <div className="flex flex-col peer">
+                  <input
+                    type="text"
+                    className={`font-bold bg-slate-100 focus:outline-none truncate focus:border-b-2 ${
+                      updateExerciseNameFetcher.data?.errors?.exerciseName ? "border-b-2 border-b-red-500" : ""
+                    }`}
+                    required
+                    name="exerciseName"
+                    placeholder="Exercise Name"
+                    defaultValue={exercise.name}
+                    autoComplete="off"
+                    onChange={(event) => {
+                      event.target.value !== "" &&
+                      updateExerciseNameFetcher.submit(
+                        {
+                          _action: "updateExerciseName",
+                          exerciseId: exercise.id,
+                          exerciseName: event.target.value,
+                        },
+                        { method: "post" }
+                      );
+                    }}
+                  />
+                  <ErrorMessage>{updateExerciseNameFetcher.data?.errors?.exerciseName}</ErrorMessage>
+                </div>
+                {isHydrated ? null : (
+                  <button
+                    name="_action"
+                    value="updateExerciseName"
+                    className={clsx(
+                      "opacity-0 hover:opacity-100 focus:opacity-100",
+                      "peer-focus-within:opacity-100"
+                    )}
+                  >
+                    <ArrowDownTrayIcon className="size-6"/>
+                  </button>
+                )}
+                <input type="hidden" name="exerciseId" value={exercise.id} />
+              </updateExerciseNameFetcher.Form>
+            ) : (
+              <p className="font-bold w-full md:max-w-[calc(100%-2rem)] truncate">{exercise.name}</p>
+            )}
+            <div className="flex divide-x divide-muted-foreground text-muted-foreground text-sm">
+              {exercise.body.slice(0,2).map((body, body_idx) => (
+                <p key={body_idx} className={`${body_idx > 0 ? "px-1" : "pr-1"} text-xs capitalize`}>{`${body} body`}</p>
+              ))}
+              <p className="px-1 text-xs capitalize">{exercise.contraction}</p>
+            </div>
           </div>
+          {selectable ? (
+            <div
+              className="relative flex items-center text-foreground"
+              onClick={() => selectFn ? selectFn(exercise) : null}
+            >
+              <button>
+                {selected ? <CheckCircleIcon className="xs:h-8 xs:w-8 text-primary" /> : <PlusCircleIcon className="xs:h-8 xs:w-8" />}
+              </button>
+              {selectCount && selectCount > 1 ? <p className="absolute -bottom-1 left-7 z-10 text-xs text-primary">{selectCount}</p> : null}
+            </div>
+          ) : null}
         </div>
       </div>
       {/* <div className="hidden lg:flex self-center pr-2">
         <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing" />
       </div> */}
-      {selectable ? (
+      {/* {selectable ? (
         <div
           className="border-l-2 h-full group relative content-center hover:bg-secondary-original hover:text-white hover:rounded-r-lg cursor-pointer"
           onClick={() => selectFn ? selectFn(exercise) : null}
@@ -252,7 +288,7 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
           </button>
           {selectCount && selectCount > 1 ? <p className="absolute bottom-2 left-6 z-10 text-xs">{selectCount}</p> : null}
         </div>
-      ) : null}
+      ) : null} */}
       {role === "admin" ? (
         <div className="hidden sm:flex gap-3 items-center p-4">
           <HeartOutline className="size-6 hover:text-rose-500 cursor-pointer"/>

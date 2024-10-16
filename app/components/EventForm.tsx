@@ -1,6 +1,7 @@
 import { useCloseDialog } from './Dialog';
 import clsx from 'clsx';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import AppointmentForm from './AppointmentForm';
 import SessionForm from './SessionForm';
 
@@ -48,35 +49,34 @@ const EventForm = ({ selectedDateTime, submitEvent, formOptions }: EventFormProp
   ]
 
   return (
-    <TabGroup className="w-full" defaultIndex={formOptions.defaults?.defaultTab}>
-      <TabList className="flex gap-4">
+    <Tabs className="w-full" defaultValue={formOptions.defaults?.defaultTab ?? "Appointment"}>
+      <TabsList>
         {eventTypes.map(({ name }, index) => {
           const defaultTab = formOptions.defaults?.defaultTab !== undefined ? formOptions.defaults?.defaultTab : undefined
-          const disabledTab = defaultTab === undefined ? false : defaultTab !== undefined && defaultTab === index ? false : true
+          const disabledTab = defaultTab === undefined ? false : defaultTab !== undefined && defaultTab === name ? false : true
           return (
-            <Tab
+            <TabsTrigger
               key={name}
               disabled={disabledTab}
-              className={clsx(
-                "rounded-full py-1 px-3 text-sm/6 font-semibold",
-                "focus:outline-none data-[selected]:bg-slate-200 data-[hover]:bg-slate-100",
-                "data-[selected]:data-[hover]:bg-slate-200 data-[focus]:outline-1 data-[focus]:outline-slate-100",
-                "disabled:cursor-not-allowed"
-              )}
+              // className={clsx(
+              //   "rounded-full py-1 px-3 text-sm/6 font-semibold",
+              //   "focus:outline-none data-[selected]:bg-primary data-[hover]:bg-primary/20 dark:data-[hover]:bg-primary/35",
+              //   "data-[selected]:data-[hover]:bg-primary data-[focus]:outline-1 data-[focus]:outline-primary/20",
+              //   "disabled:cursor-not-allowed"
+              // )}
+              value={name}
             >
               {name}
-            </Tab>
+            </TabsTrigger>
           )
         })}
-      </TabList>
-      <TabPanels className="p-2">
-        {eventTypes.map(({ name, form }) => (
-          <TabPanel key={name} className="w-full">
-            {form}
-          </TabPanel>
-        ))}
-      </TabPanels>
-    </TabGroup>
+      </TabsList>
+      {eventTypes.map(({ name, form }) => (
+        <TabsContent key={name} value={name} className="w-full">
+          {form}
+        </TabsContent>
+      ))}
+    </Tabs>
   )
 }
 

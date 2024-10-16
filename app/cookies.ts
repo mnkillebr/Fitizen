@@ -15,3 +15,5 @@ export const testCookie = createCookie("fitizen__testCookie", {
   httpOnly: true,
   secure: true,
 });
+
+export const darkModeCookie = createCookie("fitizen__darkModeCookie");

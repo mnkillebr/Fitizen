@@ -19,7 +19,8 @@ import { useOpenDialog } from "~/components/Dialog";
 import EventForm from "~/components/EventForm";
 import { convertObjectToFormData } from "~/utils/misc";
 import { format, setHours, setMinutes } from "date-fns";
-
+import CustomCarousel from "~/components/CustomCarousel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
@@ -118,7 +119,7 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
   if (exerciseDetailsArray.length) {
     // console.log(exerciseDetailsArray)
     return (
-      <div className="flex flex-col gap-y-2 content-center snap-y snap-mandatory px-1 pb-1">
+      <div className="h-full flex flex-col gap-y-2 content-center snap-y snap-mandatory px-1 pb-1">
         {exerciseDetailsArray.map((exercise: any, idx) => {
           if (exercise.circuitId) {
             return (
@@ -130,9 +131,13 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
                 {exercise.exercises.map((ex_item: any, idx: number) => (
                   <div
                     key={`${exercise.routineId}-${ex_item.id}-${idx}`}
-                    className="flex shadow-md rounded-md *:content-center bg-white snap-start"
+                    className="flex shadow-md rounded-md *:content-center bg-white dark:bg-background dark:shadow-sm dark:shadow-border-muted snap-start"
                   >
-                    <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div>
+                    {/* <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div> */}
+                    <img
+                      src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+                      className="h-16 rounded-sm"
+                    />
                     <div className="flex flex-col">
                       <div className="px-3 text-sm/6 font-medium max-w-[100%-6rem] truncate">{ex_item.name}</div>
                       <div className="px-3 flex flex-wrap max-w-full gap-4">
@@ -168,9 +173,13 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
             return (
               <div
                 key={`${exercise.routineId}-${exercise.id}-${idx}`}
-                className="flex shadow-md rounded-md *:content-center bg-white snap-start"
+                className="flex shadow-md rounded-md *:content-center bg-white dark:bg-background dark:shadow-sm dark:shadow-border-muted snap-start"
               >
-                <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div>
+                {/* <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div> */}
+                <img
+                  src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+                  className="h-16 rounded-sm"
+                />
                 <div className="flex flex-col">
                   <div className="px-3 text-sm/6 font-medium max-w-[100%-6rem] truncate">{exercise.name}</div>
                   <div className="px-3 flex flex-wrap max-w-full gap-4">
@@ -430,7 +439,13 @@ export default function WorkoutDetail() {
   }, []);
   
   return (
-    <div className="px-5 py-6 md:px-7 md:py-8 flex flex-col h-full gap-y-3 select-none">
+    <div
+      className={clsx(
+        "px-5 py-6 md:px-7 md:py-8 flex flex-col h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]",
+        "gap-y-4 select-none bg-background text-foreground"
+      )}
+    >
+      {/* Header Section */}
       <div className="flex-none">
         {/* Back and Context Menu */}
         <div className="flex justify-between">
@@ -452,15 +467,18 @@ export default function WorkoutDetail() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       anchor={{ to: 'bottom end', gap: '8px', }}
-                      className="flex flex-col rounded-md bg-white text-sm/6 shadow-md p-0.5 border gap-1"
+                      className={clsx(
+                        "flex flex-col rounded-md text-sm/6 shadow-md p-0.5 border gap-1",
+                        "bg-background-muted dark:border dark:border-border-muted text-foreground"
+                      )}
                     >
-                      <button className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1" onClick={addToCalendar}>
+                      <button className="flex items-center gap-1 hover:bg-slate-200 dark:hover:bg-primary/20 hover:rounded-md p-1" onClick={addToCalendar}>
                         <CalendarIcon className="h-4" />
                         Add to Calendar
                       </button>
                       {data.workout?.owns ? (
                         <>
-                          <Link to={`/app/workouts/edit?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 hover:rounded-md p-1">
+                          <Link to={`/app/workouts/edit?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 dark:hover:bg-primary/20 hover:rounded-md p-1">
                             <PencilIcon className="h-4" />
                             Edit
                           </Link>
@@ -476,7 +494,7 @@ export default function WorkoutDetail() {
                             <button
                               name="_action"
                               value="deleteWorkout"
-                              className="flex items-center gap-1 w-full hover:bg-slate-200 hover:rounded-md p-1"
+                              className="flex items-center gap-1 w-full hover:bg-slate-200 dark:hover:bg-primary/20 hover:rounded-md p-1"
                             >
                               <TrashIcon className="h-4" />
                               Delete
@@ -493,17 +511,62 @@ export default function WorkoutDetail() {
           </Popover>
         </div>
         {/* Title */}
-        <div className="font-semibold text-2xl select-none lg:mb-2 px-1">{data.workout?.name}</div>
+        <div className="font-semibold text-2xl select-none mb-2 px-">{data.workout?.name}</div>
         {/* Workout Image && Description */}
-        <div
-          ref={imageDescriptionScrollContainerRef}
-          className="px-1 flex overflow-x-auto snap-x snap-mandatory lg:snap-none lg:overflow-hidden w-full gap-x-5"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
+        <Tabs defaultValue="overview" className="w-full lg:hidden">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="description">Description</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <div
+              className={clsx(
+                "h-60 lg:h-72 rounded-md shadow-md text-center",
+                "content-end sm:bg-center lg:flex-none lg:rounded-lg mb-3",
+                "bg-background-muted bg-cover bg-center dark:shadow-border-muted"
+              )}
+              style={{backgroundImage: `url(${crunchGirl})`}}
+            >
+              <div className={clsx(
+                "flex justify-around mb-6 *:font-semibold *:flex *:flex-col *:leading-5",
+                "text-lg text-white *:drop-shadow-[0_2.2px_2.2px_rgba(0,0,0,0.8)] *:items-center"
+              )}>
+                <div>
+                  <ClockIcon />
+                  <div>40</div>
+                  <div>min</div>
+                </div>
+                <div>
+                  <FireIcon />
+                  <div>200</div>
+                  <div>kcal</div>
+                </div>
+                <div>
+                  <BarsIcon />
+                  <div>6</div>
+                  <div>level</div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="description">
+            <div
+              className={clsx(
+                "h-60 p-4 bg-slate-50 rounded-md shadow-md mb-3",
+                "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
+              )}
+            >
+              <div className="font-semibold">Description</div>
+              <div>{data.workout.description}</div>
+            </div>
+          </TabsContent>
+        </Tabs>
+        <div className="hidden lg:flex gap-4">
           <div
             className={clsx(
-              "flex-shrink-0 w-full snap-center bg-slate-50 bg-cover bg-center h-60 lg:h-72 rounded-md md:rounded-[20px] shadow-md text-center",
-              "content-end sm:bg-center lg:flex-none lg:w-[calc(50%-10px)] lg:rounded-lg mb-3"
+              "flex-1 w-full h-72 shadow-md text-center",
+              "content-end bg-center rounded-lg",
+              "bg-background-muted bg-cover bg-center dark:shadow-border-muted"
             )}
             style={{backgroundImage: `url(${crunchGirl})`}}
           >
@@ -530,108 +593,205 @@ export default function WorkoutDetail() {
           </div>
           <div
             className={clsx(
-              "flex-shrink-0 w-full snap-center bg-slate-50 h-60 lg:h-72 rounded-md md:rounded-[20px] shadow-md",
-              "lg:flex-none lg:w-[calc(50%-10px)] lg:rounded-lg mb-3 lg:flex lg:flex-col lg:shadow-none lg:bg-white lg:gap-y-2"
+              "flex-1 w-full h-72 rounded-lg flex flex-col gap-y-2",
+              "dark:shadow-border-muted"
             )}
-            
           >
-            <div className="h-2/3 flex-col py-2 px-4 bg-slate-50 rounded-md shadow-none lg:shadow-md">
+            <div
+              className={clsx(
+                "h-2/3 flex-col py-2 px-4 bg-slate-50 rounded-lg shadow-sm",
+                "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
+              )}
+            >
               <div className="font-semibold">Description</div>
               <div>{data.workout.description}</div>
             </div>
             <Link
               to={`/app/workouts/log?id=${data.workout?.id}`}
-              className="hidden lg:flex h-1/3 items-center justify-center bg-slate-50 rounded-md shadow-md active:scale-95 hover:cursor-pointer"
+              className={clsx(
+                "flex h-1/3 items-center justify-center rounded-lg shadow-sm active:scale-95 hover:cursor-pointer",
+                "bg-slate-50 dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
+              )}
               // onClick={() => setStartWorkout(!startWorkout)}
             >
               <div className="size-12"></div>
               <div className="select-none font-semibold self-center mr-4">Start Workout</div>
-              <div className="bg-slate-400 rounded-full p-3"><PlayIcon /></div>
+              <div className="bg-primary rounded-full p-3"><PlayIcon /></div>
             </Link>
           </div>
-        </div>
-        <div className="mb-3 lg:hidden flex justify-center">
-          {[...Array(2)].map((_, index) => (
-            <button
-              key={index}
-              className={`size-2 rounded-full mx-1 focus:outline-none ${
-                index === imgIndex ? 'bg-primary' : 'bg-gray-300'
-              }`}
-              onClick={() => {
-                scrollToImg(index)
-                setImgIndex(index)
-              }}
-              aria-label={`Go to image ${index + 1}`}
-            />
-          ))}
         </div>
         {/* Start Workout */}
         <Link
           to={`/app/workouts/log?id=${data.workout?.id}`}
-          className="flex lg:hidden h-12 items-center justify-between bg-slate-50 rounded-full shadow-md active:scale-95 hover:cursor-pointer mx-1"
+          className={clsx(
+            "flex lg:hidden h-12 items-center justify-between bg-slate-50",
+            "shadow-md active:scale-95 hover:cursor-pointer dark:bg-background-muted",
+            "dark:border dark:border-border-muted dark:shadow-border-muted",
+            "rounded-full"
+          )}
           // onClick={() => setStartWorkout(!startWorkout)}
         >
-          <div className="size-12"></div>
+          <div className="size-12 invisible"></div>
           <div className="select-none font-semibold self-center">Start Workout</div>
-          <div className="bg-slate-400 rounded-full p-3"><PlayIcon /></div>
+          <div className="bg-primary rounded-full p-3"><PlayIcon /></div>
         </Link>
       </div>
       {/* Exercises and Logs */}
-      <div
-        ref={panelScrollContainerRef}
-        className="px-1 pb-1 flex-1 flex overflow-x-auto snap-x snap-mandatory lg:snap-none lg:overflow-hidden w-full gap-x-5"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        <div className="flex-shrink-0 w-full lg:w-[calc(50%-10px)] lg:flex-none snap-center bg-slate-50 rounded-md shadow-md overflow-y-hidden">
-          <div className="py-1 px-4 text-sm/6 font-semibold pt-2">Exercises</div>
-          <div className="h-[calc(100%-3.5rem)] flex flex-col mt-2 overflow-y-auto gap-y-2 px-3 pb-1">
-            <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
-            {/* {[...Array(30)].map((item, idx) => <div key={Math.random()} className="bg-slate-500 rounded-md shadow-md text-white px-3 py-2">Item {idx+1} here</div>)} */}
+      <div className="flex-1">
+        <Tabs defaultValue="exercises" className="w-full lg:hidden">
+          <TabsList>
+            <TabsTrigger value="exercises">Exercises</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+          </TabsList>
+          <TabsContent value="exercises">
+            <div
+              className={clsx(
+                "h-[calc(100vh-35.875rem)] md:h-[calc(100vh-36.875rem)] bg-slate-50 rounded-md shadow-md",
+                "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted py-4 px-3"
+              )}
+            >
+              <div className="px-1 text-sm/6 font-semibold">Exercises</div>
+              <div className="mt-2 max-h-[calc(100%-2.125rem)] overflow-y-auto">
+                <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="history">
+            <div
+              className={clsx(
+                "h-[calc(100vh-35.875rem)] md:h-[calc(100vh-36.875rem)] bg-slate-50 rounded-md shadow-md",
+                "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted py-4 px-3"
+              )}
+            >
+              <div className="px-1 text-sm/6 font-semibold">History</div>
+              <div className="mt-2 h-full">
+                <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.125rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
+                  {data.logs.map(log => {
+                    return (
+                      <div key={log.id} className="flex flex-col shadow-md dark:shadow-sm dark:shadow-border-muted rounded-md *:content-center bg-white snap-start dark:bg-background">
+                        <div className="bg-slate-400 dark:bg-zinc-700 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
+                          <label className="text-sm font-medium w-20">Date</label>
+                          <label className="text-sm font-medium w-24">Duration</label>
+                          <label className="text-sm font-medium invisible">View</label>
+                        </div>
+                        <div className="w-full rounded-b-md flex justify-between px-3 py-1">
+                          <p className="text-sm h-5 w-20">{new Date(log.date).toLocaleDateString()}</p>
+                          <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
+                          <Link
+                            to={`/app/workouts/logview?id=${log.id}`}
+                            className="text-sm h-5 underline text-primary hover:text-yellow-500"
+                          >
+                            View
+                          </Link>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+        <div className="hidden lg:flex gap-4">
+          <div
+            className={clsx(
+              "flex-1 h-[calc(100vh-31.125rem)] bg-slate-50 rounded-lg shadow-md",
+              "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted py-4 px-3"
+            )}
+          >
+            <div className="px-1 text-sm/6 font-semibold">Exercises</div>
+            <div className="mt-2 max-h-[calc(100%-2.125rem)] overflow-y-auto">
+              <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
+            </div>
           </div>
-        </div>
-        <div className="flex-shrink-0 w-full lg:w-[calc(50%-10px)] lg:flex-none snap-center bg-slate-50 rounded-md shadow-md overflow-y-hidden">
-          <div className="py-1 px-4 text-sm/6 font-semibold ">History</div>
-          <div className="mt-2 h-full px-3 pb-2">
-            <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
-              {data.logs.map(log => {
-                return (
-                  <div key={log.id} className="flex flex-col shadow-md rounded-md *:content-center bg-white snap-start">
-                    <div className="bg-slate-400 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
-                      <label className="text-sm font-medium w-20">Date</label>
-                      <label className="text-sm font-medium w-24">Duration</label>
-                      <label className="text-sm font-medium invisible">View</label>
+          <div
+            className={clsx(
+              "flex-1 h-[calc(100vh-31.125rem)] bg-slate-50 rounded-lg shadow-md",
+              "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted py-4 px-3"
+            )}
+          >
+            <div className="px-1 text-sm/6 font-semibold">History</div>
+            <div className="mt-2 h-full">
+              <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.125rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
+                {data.logs.map(log => {
+                  return (
+                    <div key={log.id} className="flex flex-col shadow-md dark:shadow-sm dark:shadow-border-muted rounded-md *:content-center bg-white dark:bg-background snap-start">
+                      <div className="bg-slate-400 dark:bg-zinc-700 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
+                        <label className="text-sm font-medium w-20">Date</label>
+                        <label className="text-sm font-medium w-24">Duration</label>
+                        <label className="text-sm font-medium invisible">View</label>
+                      </div>
+                      <div className="w-full rounded-b-md flex justify-between px-3 py-1">
+                        <p className="text-sm h-5 w-20">{new Date(log.date).toLocaleDateString()}</p>
+                        <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
+                        <Link
+                          to={`/app/workouts/logview?id=${log.id}`}
+                          className="text-sm h-5 underline text-primary hover:text-yellow-500"
+                        >
+                          View
+                        </Link>
+                      </div>
                     </div>
-                    <div className="w-full rounded-b-md flex justify-between px-3 py-1">
-                      <p className="text-sm h-5 w-20">{new Date(log.date).toLocaleDateString()}</p>
-                      <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
-                      <Link
-                        to={`/app/workouts/logview?id=${log.id}`}
-                        className="text-sm h-5 underline text-primary hover:text-yellow-500"
-                      >
-                        View
-                      </Link>
-                    </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="lg:hidden flex justify-center">
-        {[...Array(2)].map((_, index) => (
-          <button
-            key={index}
-            className={`size-2 rounded-full mx-1 focus:outline-none ${
-              index === panelIndex ? 'bg-primary' : 'bg-gray-300'
-            }`}
-            onClick={() => {
-              scrollToPanel(index)
-              setPanelIndex(index)
-            }}
-            aria-label={`Go to image ${index + 1}`}
-          />
-        ))}
+        {/* <CustomCarousel
+          slides={[
+            (
+              <div
+                className={clsx(
+                  "h-full w-full lg:flex-none bg-slate-50 mb-3",
+                  "dark:bg-background-muted dark:border dark:border-border-muted",
+                  "dark:shadow-border-muted rounded-md shadow-md overflow-y-hidden"
+                )}
+              >
+                <div className="py-1 px-4 text-sm/6 font-semibold pt-2">Exercises</div>
+                <div className="h-full flex flex-col mt-2 overflow-y-auto gap-y-2 px-3 pb-1">
+                  <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
+                </div>
+              </div>
+            ),
+            (
+              <div
+                className={clsx(
+                  "h-full w-full lg:flex-none bg-slate-50 mb-3",
+                  "dark:bg-background-muted dark:border dark:border-border-muted",
+                  "dark:shadow-border-muted rounded-md shadow-md overflow-y-hidden"
+                )}
+              >
+                <div className="py-1 px-4 text-sm/6 font-semibold">History</div>
+                <div className="mt-2 h-full px-3 pb-2">
+                  <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
+                    {data.logs.map(log => {
+                      return (
+                        <div key={log.id} className="flex flex-col shadow-md rounded-md *:content-center bg-white snap-start">
+                          <div className="bg-slate-400 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
+                            <label className="text-sm font-medium w-20">Date</label>
+                            <label className="text-sm font-medium w-24">Duration</label>
+                            <label className="text-sm font-medium invisible">View</label>
+                          </div>
+                          <div className="w-full rounded-b-md flex justify-between px-3 py-1">
+                            <p className="text-sm h-5 w-20">{new Date(log.date).toLocaleDateString()}</p>
+                            <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
+                            <Link
+                              to={`/app/workouts/logview?id=${log.id}`}
+                              className="text-sm h-5 underline text-primary hover:text-yellow-500"
+                            >
+                              View
+                            </Link>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )
+          ]}
+        /> */}
       </div>
     </div>
   );

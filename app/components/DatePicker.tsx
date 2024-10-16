@@ -78,7 +78,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange
               key={month.toString()}
               onClick={() => handleMonthSelect(index)}
               className={clsx(
-                isSameMonth(month, currentDate) ? "bg-blue-500 text-white" : ""
+                isSameMonth(month, currentDate) ? "bg-primary text-white" : "hover:bg-primary/20"
               )}
             >
               {format(month, 'MMM')}
@@ -126,8 +126,8 @@ const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange
               key={week.toString()}
               className={clsx(
                 "grid grid-cols-7 gap-1",
-                view === "weekly" && isSameWeek(week, currentDate) ? "bg-blue-200" : "",
-                view === "weekly" ? "hover:bg-blue-100" : ""
+                view === "weekly" && isSameWeek(week, currentDate) ? "bg-primary/30" : "",
+                view === "weekly" ? "hover:bg-primary/20" : ""
               )}
             >
               {days.map(day => (
@@ -135,9 +135,9 @@ const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange
                   key={day.toString()}
                   onClick={() => handleWeekSelect(day)}
                   className={clsx(
-                    isSameDay(day, currentDate) ? "bg-blue-500 text-white" : "",
+                    isSameDay(day, currentDate) ? "bg-primary text-white" : "",
                     isSameMonth(day, pickerDate) ? "" : "opacity-30",
-                    view === "daily" ? "hover:bg-blue-100" : ""
+                    view === "daily" ? "hover:bg-primary/20" : ""
                   )}
                 >
                   {format(day, 'd')}
@@ -157,6 +157,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange
           <input
             type="text"
             placeholder="DD Month YYYY"
+            className="px-2 bg-background-muted rounded dark:border dark:border-border-muted focus:border-ring focus:outline-none"
             value={manualInput}
             onChange={(e) => setManualInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleManualInput()}
@@ -190,7 +191,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ currentDate, view, onDateChange
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 anchor={inForm ? "bottom start" : "bottom"}
-                className="flex origin-top flex-col w-auto p-2 border bg-white z-10"
+                className="flex origin-top flex-col w-auto p-2 border rounded dark:border-border-muted bg-background text-foreground z-10"
               >
                 {view === 'monthly' && renderMonthlyPicker()}
                 {view === 'weekly' && renderWeeklyPicker()}

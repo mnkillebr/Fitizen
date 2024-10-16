@@ -20,6 +20,16 @@ export function getAllExercises(query: string | null) {
   });
 };
 
+export function getExercisesById(exerciseIds: string[]) {
+  return db.exercise.findMany({
+    where: {
+      id: {
+        in: exerciseIds
+      }
+    }
+  });
+};
+
 export function createExercise() {
   return db.exercise.create({
     data: {

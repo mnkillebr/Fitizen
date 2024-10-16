@@ -10,6 +10,7 @@ import {
   isRouteErrorResponse,
   json,
   useSubmit,
+  useLoaderData,
 } from "@remix-run/react";
 import "./tailwind.css";
 import { useState, } from "react";
@@ -26,6 +27,7 @@ import clsx from "clsx";
 import { DialogProvider } from "./components/Dialog";
 import { Toaster } from "~/components/ui/sonner"
 import { DashboardLayout } from "./components/layout";
+import { darkModeCookie } from "./cookies";
 
 const navigation = [
   { name: "Settings", href: "settings" },
@@ -68,7 +70,8 @@ export const meta: MetaFunction = () => {
 
 export const links: LinksFunction = () => {
   return [
-    { rel: "stylesheet", href: globalStyles }
+    { rel: "stylesheet", href: globalStyles },
+    // { rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/cloudinary-video-player/2.0.5/cld-video-player.min.css", crossOrigin: "anonymous", referrerPolicy: "no-referrer" }
   ];
 };
 
@@ -81,7 +84,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="bg-background">
+        {/* <script src="https://cdnjs.cloudflare.com/ajax/libs/cloudinary-video-player/2.0.5/cld-video-player.min.js" crossOrigin="anonymous" referrerPolicy="no-referrer"></script> */}
         <DialogProvider>
           {children}
         </DialogProvider>
@@ -96,31 +100,42 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getCurrentUser(request);
-  return json({ isLoggedIn: user !== null })
+  const cookieHeader = request.headers.get("cookie");
+	const darkModeCookieValue = await darkModeCookie.parse(cookieHeader);
+  return json({ isLoggedIn: user !== null, darkMode: darkModeCookieValue })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const cookieHeader = request.headers.get("cookie")
-  const session = await getSession(cookieHeader)
-  return json("logging out", {
-    headers: {
-      "Set-Cookie": await destroySession(session)
+  const formData = await request.formData();
+  switch (formData.get("_action")) {
+    case "logout": {
+      const cookieHeader = request.headers.get("cookie")
+      const session = await getSession(cookieHeader)
+      return json("logging out", {
+        headers: {
+          "Set-Cookie": await destroySession(session)
+        }
+      });
     }
-  });
+    default: {
+      return null;
+    }
+  }
 }
 
 export default function App() {
+  const { darkMode } = useLoaderData<typeof loader>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const matches = useMatches();
   const inAppRoute = matches.map(m => m.id).includes("routes/app");
   const submit = useSubmit();
 
   const handleLogout = () => {
-    return submit("logging out", { method: "post" })
+    return submit({ "_action": "logout" }, { method: "post" })
   }
 
   if (inAppRoute) {
-    return <DashboardLayout navLinks={dashNavigation} />
+    return <DashboardLayout navLinks={dashNavigation} darkModeEnabled={darkMode} />
     return (
       <div className="bg-white h-screen overflow-y-hidden">
         <div className="flex flex-col-reverse sm:flex-col md:flex-row h-full">

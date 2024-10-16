@@ -15,7 +15,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Logout() {
   return (
-    <div className="text-center mt-40">
+    <div className="text-center mt-40 text-foreground">
       <h1 className="font-bold my-6">All set</h1>
       <p className="mb-4">You have successfully logged out</p>
       <RootNavLink to="/">Go To Home Page</RootNavLink>

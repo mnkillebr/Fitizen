@@ -3,6 +3,7 @@ import { addSeconds, format, setHours, setMinutes, setSeconds } from 'date-fns';
 import DatePicker from './DatePicker';
 import { Button, PrimaryButton } from './form';
 import { DEFAULT_WORKOUT_DURATION } from '~/utils/magicNumbers';
+import clsx from 'clsx';
 
 interface SessionFormProps {
   selectedDateTime: Date | null;
@@ -71,7 +72,11 @@ const SessionForm: React.FC<SessionFormProps> = ({
           id="workoutId"
           required
           disabled={defaults?.workoutId === undefined ? false : true}
-          className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+          className={clsx(
+            "w-full p-2 border rounded focus:outline-none text-sm",
+            "bg-background-muted dark:border-border-muted",
+            "focus:border-ring h-9"
+          )}
         >
           <option value="">Select workout</option>
           {workouts.map(({ name, id }, workout_idx) => <option key={workout_idx} value={id}>{name}</option>)}
@@ -84,7 +89,11 @@ const SessionForm: React.FC<SessionFormProps> = ({
           onChange={(e) => setRecurrence(e.target.value)}
           name="recurrence"
           id="recurrence"
-          className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+          className={clsx(
+            "w-full p-2 border rounded focus:outline-none text-sm",
+            "bg-background-muted dark:border-border-muted",
+            "focus:border-ring h-9"
+          )}
         >
           <option value="">No recurrence</option>
           <option value="daily">Daily</option>
@@ -107,7 +116,11 @@ const SessionForm: React.FC<SessionFormProps> = ({
           <select
             value={hour}
             onChange={(e) => setHour(e.target.value)}
-            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+            className={clsx(
+              "w-full p-2 border rounded focus:outline-none text-sm",
+              "bg-background-muted dark:border-border-muted",
+              "focus:border-ring h-9"
+            )}
           >
             {Array.from({ length: 12 }, (_, i) => i).map((h) => (
               <option key={h+1} value={(h+1).toString().padStart(2, '0')}>
@@ -118,7 +131,11 @@ const SessionForm: React.FC<SessionFormProps> = ({
           <select
             value={minute}
             onChange={(e) => setMinute(e.target.value)}
-            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+            className={clsx(
+              "w-full p-2 border rounded focus:outline-none text-sm",
+              "bg-background-muted dark:border-border-muted",
+              "focus:border-ring h-9"
+            )}
           >
             {['00', '15', '30', '45'].map((m) => (
               <option key={m} value={m}>
@@ -129,7 +146,11 @@ const SessionForm: React.FC<SessionFormProps> = ({
           <select
             value={meridiem}
             onChange={(e) => setMeridiem(e.target.value)}
-            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+            className={clsx(
+              "w-full p-2 border rounded focus:outline-none text-sm",
+              "bg-background-muted dark:border-border-muted",
+              "focus:border-ring h-9"
+            )}
           >
             <option key="am" value="AM">AM</option>
             <option key="pm" value="PM">PM</option>
@@ -140,14 +161,22 @@ const SessionForm: React.FC<SessionFormProps> = ({
       <div className="flex justify-end">
         {cancel ? (
           <>
-            <Button type="button" onClick={() => setCancel(false)} className="mr-2 bg-slate-200 hover:bg-slate-100">
+            <Button
+              type="button"
+              onClick={() => setCancel(false)}
+              className="mr-2 bg-gray-300 hover:bg-gray-200 dark:border dark:border-border-muted dark:bg-accent dark:hover:bg-border-muted"
+            >
               No
             </Button>
             <PrimaryButton type="submit">Yes</PrimaryButton>
           </>
         ) : (
           <>
-            <Button type="button" onClick={() => defaults?.sessionId ? setCancel(true) : onCancel()} className="mr-2 bg-slate-200 hover:bg-slate-100">
+            <Button
+              type="button"
+              onClick={() => defaults?.sessionId ? setCancel(true) : onCancel()}
+              className="mr-2 bg-gray-300 hover:bg-gray-200 dark:border dark:border-border-muted dark:bg-accent dark:hover:bg-border-muted"
+            >
               {defaults?.sessionId ? "Cancel Session" : "Cancel"}
             </Button>
             <PrimaryButton type="submit">{defaults?.sessionId ? "Update" : "Schedule"}</PrimaryButton>

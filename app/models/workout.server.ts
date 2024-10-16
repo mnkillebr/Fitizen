@@ -43,6 +43,17 @@ export function getWorkout(workoutId: string) {
   });
 }
 
+export function getWorkoutWithExercises(workoutId: string) {
+  return db.routine.findUnique({
+    where: {
+      id: workoutId
+    },
+    include: {
+      exercises: true,
+    },
+  })
+}
+
 export function getAllWorkouts(query: string | null) {
   return db.routine.findMany({
     where: {

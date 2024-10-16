@@ -25,7 +25,7 @@ export function PrimaryButton({ className, isLoading, ...props }: ButtonProps) {
     <Button
       {...props}
       className={clsx(
-        "text-white bg-secondary-original hover:bg-secondary-light",
+        "text-foreground bg-primary hover:bg-yellow-300",
         isLoading ? "animate-pulse" : "",
         className
       )}

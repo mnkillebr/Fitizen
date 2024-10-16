@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Dialog, DialogPanel, DialogTitle, } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/solid';
+import clsx from 'clsx';
 
 // Define the shape of our context
 interface DialogContextType {
@@ -37,7 +38,13 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       <Dialog open={isOpen} onClose={closeDialog} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="w-full max-w-[600px] transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
+          <DialogPanel
+            className={clsx(
+              "w-full max-w-[600px] transform overflow-hidden rounded-lg",
+              "bg-background text-foreground dark:border dark:border-border-muted",
+              "p-6 text-left align-middle shadow-xl transition-all"
+            )}
+          >
             <div className="flex justify-between mb-3">
               <DialogTitle className="font-bold">{dialogTitle}</DialogTitle>
               <button

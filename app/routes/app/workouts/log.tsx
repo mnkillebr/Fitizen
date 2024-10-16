@@ -15,6 +15,7 @@ import { validateObject } from "~/utils/validation";
 import { workoutLogFormDataToObject } from "~/utils/misc";
 import { saveUserWorkoutLog } from "~/models/workout.server";
 import { ExerciseTarget, LoadUnit } from "@prisma/client";
+import clsx from "clsx";
 
 const loadOptions = [
   "bw",
@@ -54,7 +55,11 @@ const loadOptions = [
   "95",
   "100",
 ]
-const unitOptions = ["bw", "lb(s)", "kg(s)"]
+const unitOptions = [
+  { value: "bw", label: "Bodyweight" },
+  { value: "lb(s)", label: "Pounds" },
+  { value: "kg(s)", label: "Kilograms" },
+]
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
@@ -180,7 +185,7 @@ export default function Log() {
   }, [exerciseDetails])
   // console.log("details", flattenedDetails, exerciseDetails)
   return (
-    <Form method="post" className="p-6 md:p-8 flex flex-col h-full gap-y-3 select-none">
+    <Form method="post" className="p-6 md:p-8 flex flex-col h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)] gap-y-3 select-none lg:w-3/4 xl:w-2/3 text-foreground">
       <div className="flex">
         <Link to={`/app/workouts/${workout?.id}`}>
           <ChevronLeft className="hover:text-primary" />
@@ -220,32 +225,39 @@ export default function Log() {
         />
       )}
       <div className="font-semibold text-lg">Exercises</div>
-      <div className="overflow-y-auto flex flex-col gap-y-2">
-        {exerciseDetails.map((item: any, index: number) => {
-          if (item.exercises) {
-            return (
-              <CircuitLog
-                key={`${item.circuitId}-${index}`}
-                item={item}
-                index={index}
-                unitOptions={unitOptions}
-                exerciseDetails={exerciseDetails}
-                flatDetails={flattenedDetails}
-              />
-            )
-          } else {
-            return (
-              <ExerciseLog
-                key={`${item.name}-${index}`}
-                item={item}
-                index={index}
-                unitOptions={unitOptions}
-                exerciseDetails={exerciseDetails}
-                flatDetails={flattenedDetails}
-              />
-            )
-          }
-        })}
+      <div
+        className={clsx(
+          "rounded-md shadow-md bg-slate-50 py-4 px-3 bg-background-muted overflow-y-auto",
+          "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
+        )}
+      >
+        <div className="overflow-y-auto flex flex-col gap-y-3">
+          {exerciseDetails.map((item: any, index: number) => {
+            if (item.exercises) {
+              return (
+                <CircuitLog
+                  key={`${item.circuitId}-${index}`}
+                  item={item}
+                  index={index}
+                  unitOptions={unitOptions}
+                  exerciseDetails={exerciseDetails}
+                  flatDetails={flattenedDetails}
+                />
+              )
+            } else {
+              return (
+                <ExerciseLog
+                  key={`${item.name}-${index}`}
+                  item={item}
+                  index={index}
+                  unitOptions={unitOptions}
+                  exerciseDetails={exerciseDetails}
+                  flatDetails={flattenedDetails}
+                />
+              )
+            }
+          })}
+        </div>
       </div>
       <PrimaryButton
         type="submit"

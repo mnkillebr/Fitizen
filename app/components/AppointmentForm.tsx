@@ -3,11 +3,26 @@ import { format, setHours, setMinutes, addSeconds, setSeconds } from 'date-fns';
 import DatePicker from './DatePicker';
 import { Button, PrimaryButton } from './form';
 import { FOLLOW_UP_DURATION, GOAL_SETTING_DURATION } from '~/utils/magicNumbers';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
+import { Form } from '@remix-run/react';
+import clsx from 'clsx';
+
+const appointmentTypes = [
+  {
+    value: "goal_setting",
+    label: "Goal Setting (15 min)",
+  },
+  {
+    value: "followup",
+    label: "Follow-up (30 min)",
+  },
+]
 
 interface AppointmentFormProps {
   selectedDateTime: Date | null;
   onSubmit: (appointmentData: any) => void;
   onCancel: () => void;
+  // coaches: Array<{ label: string; value: string }>;
   coaches: Array<{ name: string; id: string }>;
   defaults?: {
     [key: string]: any;
@@ -22,7 +37,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
   defaults,
 }) => {
   // console.log(selectedDateTime)
-  const [coach, setCoach] = useState('');
+  const [coach, setCoach] = useState(defaults?.coachId ?? '');
   const [appointmentType, setAppointmentType] = useState(defaults?.appointmentType || '');
   const [cancel, setCancel] = useState(false);
   const [date, setDate] = useState(selectedDateTime || new Date());
@@ -44,7 +59,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       const duration = appointmentType === "goal_setting" ? GOAL_SETTING_DURATION : FOLLOW_UP_DURATION
       const endTime = addSeconds(startTime, duration).toISOString();
       const submitObj = defaults ? {
-        coachId: defaults.coachId,
+        coachId: coach,
         id: defaults.appointmentId,
         type: defaults.appointmentType.toLowerCase(),
         startTime,
@@ -62,7 +77,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit}>
       <div className="mb-4">
         <label className="block mb-2 font-semibold" htmlFor="coachId">Coach</label>
         <select
@@ -71,11 +86,32 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           name="coachId"
           id="coachId"
           required
-          className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+          className={clsx(
+            "w-full p-2 border rounded focus:outline-none text-sm",
+            "bg-background-muted dark:border-border-muted",
+            "focus:border-ring h-9"
+          )}
         >
           <option value="">Select a coach</option>
           {coaches.map(({ name, id }, coach_idx) => <option key={coach_idx} value={id}>{name}</option>)}
         </select>
+        {/* <Select
+          defaultValue={defaults?.coachId ? defaults.coachId : coach}
+          name="coachId"
+          required
+          onValueChange={(val) => setCoach(val)}
+          value={coach}
+        >
+          <SelectTrigger className="bg-background dark:border-border-muted">
+            <SelectValue placeholder="Select Coach" />
+          </SelectTrigger>
+          <SelectContent className="dark:border-border-muted">
+            <SelectGroup>
+              <SelectLabel>Coach</SelectLabel>
+              {coaches.map((coach, coach_idx) => <SelectItem key={coach_idx} value={coach.value}>{coach.label}</SelectItem>)}
+            </SelectGroup>
+          </SelectContent>
+        </Select> */}
       </div>
       <div className="mb-4">
         <label className="block mb-2 font-semibold" htmlFor="type">Appointment Type</label>
@@ -85,12 +121,32 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           name="type"
           id="type"
           required
-          className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+          className={clsx(
+            "w-full p-2 border rounded focus:outline-none text-sm",
+            "bg-background-muted dark:border-border-muted",
+            "focus:border-ring h-9"
+          )}
         >
-          <option value="">Select appointment type</option>
+          <option value="">Select Appointment Type</option>
           <option value="goal_setting">Goal Setting (15 min)</option>
           <option value="followup">Follow-up (30 min)</option>
         </select>
+        {/* <Select
+          defaultValue={defaults?.appointmentType ? defaults.appointmentType: appointmentType}
+          name="coachId"
+          required
+          onValueChange={(val) => setAppointmentType(val)}
+        >
+          <SelectTrigger className="bg-background dark:border-border-muted">
+            <SelectValue placeholder="Select Appointment Type" />
+          </SelectTrigger>
+          <SelectContent className="dark:border-border-muted">
+            <SelectGroup>
+              <SelectLabel>Appointment</SelectLabel>
+              {appointmentTypes.map((apt_type, apt_type_idx) => <SelectItem key={apt_type_idx} value={apt_type.value}>{apt_type.label}</SelectItem>)}
+            </SelectGroup>
+          </SelectContent>
+        </Select> */}
       </div>
       <div className="mb-4">
         <label className="block mb-2 font-semibold">Date</label>
@@ -108,7 +164,11 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             value={hour}
             onChange={(e) => setHour(e.target.value)}
             name="hour"
-            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+            className={clsx(
+              "w-full p-2 border rounded focus:outline-none text-sm",
+              "bg-background-muted dark:border-border-muted",
+              "focus:border-ring h-9"
+            )}
           >
             {Array.from({ length: 12 }, (_, i) => i).map((h) => (
               <option key={h+1} value={(h+1).toString().padStart(2, '0')}>
@@ -120,7 +180,11 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             value={minute}
             onChange={(e) => setMinute(e.target.value)}
             name="minute"
-            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+            className={clsx(
+              "w-full p-2 border rounded focus:outline-none text-sm",
+              "bg-background-muted dark:border-border-muted",
+              "focus:border-ring h-9"
+            )}
           >
             {['00', '15', '30', '45'].map((m) => (
               <option key={m} value={m}>
@@ -132,7 +196,11 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             value={meridiem}
             onChange={(e) => setMeridiem(e.target.value)}
             name="meridiem"
-            className="w-full py-2 px-1 border-2 rounded focus:outline-primary bg-white"
+            className={clsx(
+              "w-full p-2 border rounded focus:outline-none text-sm",
+              "bg-background-muted dark:border-border-muted",
+              "focus:border-ring h-9"
+            )}
           >
             <option key="am" value="AM">AM</option>
             <option key="pm" value="PM">PM</option>
@@ -143,21 +211,29 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       <div className="flex justify-end">
         {cancel ? (
           <>
-            <Button type="button" onClick={() => setCancel(false)} className="mr-2 bg-slate-200 hover:bg-slate-100">
+            <Button
+              type="button"
+              onClick={() => setCancel(false)}
+              className="mr-2 bg-gray-300 hover:bg-gray-200 dark:border dark:border-border-muted dark:bg-accent dark:hover:bg-border-muted"
+            >
               No
             </Button>
             <PrimaryButton type="submit">Yes</PrimaryButton>
           </>
         ) : (
           <>
-            <Button type="button" onClick={() => defaults?.appointmentId ? setCancel(true) : onCancel()} className="mr-2 bg-slate-200 hover:bg-slate-100">
+            <Button
+              type="button"
+              onClick={() => defaults?.appointmentId ? setCancel(true) : onCancel()}
+              className="mr-2 bg-gray-300 hover:bg-gray-200 dark:border dark:border-border-muted dark:bg-accent dark:hover:bg-border-muted"
+            >
               {defaults?.appointmentId ? "Cancel Appointment" : "Cancel"}
             </Button>
             <PrimaryButton type="submit">{defaults?.appointmentId ? "Update" : "Schedule"}</PrimaryButton>
           </>
         )}
       </div>
-    </form>
+    </Form>
   );
 };
 

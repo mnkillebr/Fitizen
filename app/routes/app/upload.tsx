@@ -9,27 +9,31 @@ import {
 } from "@remix-run/node";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { Form, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
-import { CloudinaryUploadResult, cldConfig, cldInstance, uploadToCloudinary } from "~/utils/cloudinary.server";
+import { CloudinaryUploadResult, cldInstance, uploadToCloudinary } from "~/utils/cloudinary.server";
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
-import { Cloudinary } from "@cloudinary/url-gen"
-// import { AdvancedImage } from "@cloudinary/react";
+import { VideoPlayer } from "~/components/VideoPlayer";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const role = user.role;
-  // console.log("role", role, cldConfig, cldInstance)
   const testImage = cldInstance.utils.private_download_url("1724426838355-npsxq79i62", "jpg", {
     resource_type: "image",
-    expires_at: 1726071663,
+    expires_at: 1726240141,
   })
-  console.log("test image url", testImage)
+  const testVideo = cldInstance.video("samples/cld-sample-video", {quality: "auto", controls: true })
+  // const testVideoURL = cldInstance.url("samples/dance-2", {resource_type: "video", quality: "auto", controls: true })
+  const testVideoURL = cldInstance.utils.private_download_url("samples/dance-2", "mp4", {
+    resource_type: "video",
+    type: "upload",
+    // expires_at: 1726248512,
+  })
+  // console.log("test image url", testImage, "test video html", testVideo)
+  console.log("url", testVideoURL)
   // if (role !== "admin") {
   //   return redirect("/app")
   // }
-  return json({ image: testImage, })
-  // return json({ cldName: cldConfig.cloud_name })
-  return null
+  return json({ image: testImage, video: testVideo, url: testVideoURL })
 }
 
 type uploadActionType = {
@@ -73,19 +77,12 @@ export default function Upload() {
   const navigation = useNavigation();
   const formRef = useRef<HTMLFormElement>(null);
 
-  // const cldInstance = new Cloudinary({
-  //   cloud: {
-  //     cloudName: data?.cldName,
-  //   }
-  // })
-  // const testImage = cldInstance.image("1724347368316-e5aqe24t6j")
-
   useEffect(() => {
     if (actionData?.success && formRef.current) {
       formRef.current.reset();
     }
   }, [actionData]);
-
+  // console.log("video", typeof data.video)
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">File Upload</h1>
@@ -119,7 +116,9 @@ export default function Upload() {
         </button>
       </Form>
       <img src={data?.image} />
-      {/* <AdvancedImage cldImg={testImage} /> */}
+      {/* <div dangerouslySetInnerHTML={{ __html: data.video }} /> */}
+      {/* <video controls controlsList="nodownload" src={data.url} /> */}
+      <VideoPlayer height="540" width="960" />
       {actionData?.success && (
         <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
           Successfully uploaded {actionData.filename}

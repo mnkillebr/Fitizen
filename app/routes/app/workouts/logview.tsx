@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs, json, redirect } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
+import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
 import CurrentDate from "~/components/CurrentDate";
 import { PastCircuitLog, PastExerciseLog } from "~/components/logs";
@@ -102,7 +103,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function LogView() {
   const data = useLoaderData<typeof loader>();
   return (
-    <div className="p-6 md:p-8 flex flex-col h-full gap-y-3 select-none lg:w-3/4 xl:w-2/3">
+    <div className="py-6 px-5 md:px-7 md:py-8 flex flex-col h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)] gap-y-3 select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
       <div className="flex">
         <Link to={`/app/workouts/${data.userLog?.routineId}`}>
           <ChevronLeft className="hover:text-primary" />
@@ -117,7 +118,13 @@ export default function LogView() {
         <div className="font-semibold text-md">{data.workoutName?.name}</div>
       </div>
       <div className="font-semibold text-lg">Logged Exercises</div>
-      <div className="overflow-y-auto flex flex-col gap-y-2">
+      <div
+        className={clsx(
+          "overflow-y-auto flex flex-col gap-y-3 bg-background-muted",
+          "rounded-md shadow-md bg-slate-50 py-4 px-3",
+          "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
+        )}
+      >
         {data.userLog?.exerciseLogs?.map((exercise: any, index: number) => {
           if (exercise.circuitId) {
             return <PastCircuitLog key={`${exercise.circuitId}-${index}`} exercise={exercise} index={index} logs={data.userLog.exerciseLogs} />

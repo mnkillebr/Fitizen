@@ -7,6 +7,8 @@ import { createUser, getUserByEmail } from "~/models/user.server";
 import { commitSession, getSession } from "~/sessions";
 import { MAGIC_LINK_MAX_AGE } from "~/utils/magicNumbers";
 import { validateForm } from "~/utils/validation";
+import { Input } from "~/components/ui/input"
+import clsx from "clsx";
 
 type signUpActionType = {
   firstName?: string;
@@ -95,39 +97,49 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function ValidateMagicLink() {
   const actionData = useActionData<signUpActionType>();
 	return (
-		<div className="text-center mt-32">
+		<div className="text-center mt-32 text-foreground flex flex-col items-center">
       <h1 className="font-medium text-2xl mb-3">Almost there!</h1>
       <h2 className="mb-2">Enter your name to complete the registration</h2>
-      <form className="mx-auto sm:w-1/2 lg:w-1/3 border-2 p-3" method="post">
+      <form className="w-full sm:w-2/3 md:w-[450px] border dark:border-border-muted rounded-md p-6" method="post">
         <fieldset className="pb-4 text-left flex flex-col gap-y-2">
           <div>
             <label htmlFor="firstName" className="text-sm/3 font-medium">First Name</label>
-            <PrimaryInput
+            <Input
               type="text"
               id="firstName"
               name="firstName"
               defaultValue={actionData?.firstName}
               autoComplete="off"
-              // required
-              // placeholder="Enter first name"
+              className={clsx(
+                "w-full appearance-none border bg-background shadow-none",
+                "dark:bg-background dark:text-muted-foreground dark:focus:text-foreground",
+                "dark:border-border-muted dark:focus:border-ring"
+              )}
+              required
+              placeholder="Enter first name"
             />
             <ErrorMessage>{actionData?.errors?.firstName}</ErrorMessage>
           </div>
           <div>
             <label htmlFor="lastName" className="text-sm/3 font-medium">Last Name</label>
-            <PrimaryInput
+            <Input
               type="text"
               id="lastName"
               name="lastName"
               defaultValue={actionData?.lastName}
               autoComplete="off"
-              // required
-              // placeholder="Enter last name"
+              className={clsx(
+                "w-full appearance-none border bg-background shadow-none",
+                "dark:bg-background dark:text-muted-foreground dark:focus:text-foreground",
+                "dark:border-border-muted dark:focus:border-ring"
+              )}
+              required
+              placeholder="Enter last name"
             />
             <ErrorMessage>{actionData?.errors?.lastName}</ErrorMessage>
           </div>
         </fieldset>
-        <PrimaryButton className="mx-auto w-1/2">Sign Up</PrimaryButton>
+        <PrimaryButton className="mx-auto w-full text-foreground">Sign Up</PrimaryButton>
       </form>
 		</div>
 	)

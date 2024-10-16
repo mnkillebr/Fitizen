@@ -10,6 +10,7 @@ import { convertObjectToFormData } from "~/utils/misc";
 import { validateForm, } from "~/utils/validation";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { darkModeCookie } from "~/cookies";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
@@ -24,6 +25,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const nameMappedSessions = userSessions.map(session => ({
     ...session,
     routineName: userWorkouts.find(workout => workout.id === session.routineId)?.name
+  }))
+  const coachOptions = coaches.map(coach => ({
+    label: coach.name,
+    value: coach.id,
   }))
   return json({ coaches, appointments: coachMappedAppointments, userWorkouts, userSessions: nameMappedSessions })
 }
@@ -47,6 +52,9 @@ const sessionSchema = z.object({
 })
 const deleteSessionSchema = z.object({
   id: z.string(),
+})
+const themeSchema = z.object({
+  darkMode: z.string(),
 })
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -171,6 +179,18 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
     default: {
       return null;
     }
@@ -207,7 +227,7 @@ export default function Schedule() {
     submit(formData, { method: "post" })
   }
   return (
-    <div className="h-full">
+    <div className="h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
       {/* This is the Schedule page */}
       <Calendar
         submitEvent={handleSubmitEvent}

@@ -92,7 +92,7 @@ export default function Stopwatch({
 
   return (
     <div className="flex flex-col justify-center">
-      <div className="px-4 py-2 bg-white rounded-lg shadow-md">
+      <div className="px-4 py-2 bg-white dark:bg-background-muted dark:border dark:border-border-muted rounded-lg shadow-md">
         {label ? (
           <h2 className="text-xl text-center font-medium">{label}</h2>
         ) : null}

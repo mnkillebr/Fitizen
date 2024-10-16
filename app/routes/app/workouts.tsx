@@ -12,12 +12,16 @@ import { requireLoggedInUser } from "~/utils/auth.server";
 import { ArrowRight, ChevronLeft } from "images/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { darkModeCookie } from "~/cookies";
 
 const createSubRoutes = ["routes/app/workouts/create"]
 const createPathnames = ["/app/workouts/create"]
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
+})
+const themeSchema = z.object({
+  darkMode: z.string(),
 })
 
 interface deleteWorkoutFetcherType extends ActionFunctionArgs{
@@ -101,6 +105,18 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
     default: {
       return null;
     }
@@ -155,7 +171,7 @@ export default function Workouts() {
   // }
 
   return (
-    <div className="px-4 md:px-6 py-6 md:py-8 flex flex-col h-full gap-y-4">
+    <div className="px-4 md:px-6 py-6 md:py-8 flex flex-col gap-y-4 h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)] bg-background text-foreground">
       <div className="flex flex-col gap-y-4 px-2">
         {/* <Form
           className={`flex content-center border-2 rounded-md focus-within:border-primary md:w-1/2 ${
@@ -191,8 +207,8 @@ export default function Workouts() {
         <Link
           to="create"
           className={clsx(
-            "w-full sm:w-1/2 xl:w-1/3 md:active:scale-95 md:px-3",
-            "bg-secondary-original hover:bg-secondary-light rounded-md text-center text-white py-2",
+            "w-full sm:w-1/2 xl:w-1/3 md:active:scale-95 md:px-3 font-medium",
+            "text-foreground bg-primary hover:bg-yellow-300 rounded-md text-center py-2",
             isNavigatingSubRoute ? "animate-pulse" : ""
           )}
           // onClick={() => setOpenPanel(!openPanel)}
@@ -205,7 +221,7 @@ export default function Workouts() {
           <Workout key={workout.id} workout={workout} role={data.role} />
         ))}
       </div>
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {openPanel && (
           <motion.div
             className="absolute bottom-0 left-0 md:left-80 md:max-w-[calc(100vw-20rem)] flex flex-col gap-y-2 h-1/3 bg-slate-400 w-screen rounded-t-lg text-white px-8 py-6"
@@ -255,7 +271,7 @@ export default function Workouts() {
             </Link>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </div>
   )
 }
@@ -273,17 +289,27 @@ type WorkoutProps = {
 function Workout({ workout, role }: WorkoutProps) {
   const deleteWorkoutFetcher = useFetcher<deleteWorkoutFetcherType>();
   return (
-    <Link to={workout.id} className="bg-slate-100 rounded-lg flex justify-between items-center hover:shadow-primary hover:cursor-pointer snap-start shadow-md">
-      <div className="flex gap-4">
-        <div className="size-16 md:size-20 bg-white rounded-lg text-center content-center">Image</div>
-        <div className="flex flex-col self-center">
-          <p className="font-bold max-w-40  xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden lg:overflow-visible">{workout.name}</p>
-          <p className="text-sm max-w-40 xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden lg:overflow-visible">{workout.description}</p>
+    <Link
+      to={workout.id}
+      className={clsx(
+        "bg-muted dark:bg-background-muted text-foreground hover:shadow-primary dark:border dark:border-border-muted rounded-lg flex flex-col snap-start shadow-md dark:shadow-border-muted"
+      )}
+    >
+      <div className="flex flex-col overflow-hidden">
+        <img
+          src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+          className={clsx("w-full rounded-t-lg")}
+        />
+        <div className="flex justify-between">
+          <div className="flex flex-col p-4">
+            <p className="font-bold max-w-40 text-foreground xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden lg:overflow-visible">{workout.name}</p>
+            <p className="text-sm max-w-40 xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden lg:overflow-visible">{workout.description}</p>
+          </div>
+          <div className="px-4 border-l border-border-muted h-full flex flex-col justify-center hover:bg-primary rounded-r-lg">
+            {/* <ArrowRight className=""/> */}
+            <ChevronLeft className="rotate-180" />
+          </div>
         </div>
-      </div>
-      <div className="px-2 border-l-2 h-full flex flex-col justify-center hover:bg-primary rounded-r-lg">
-        {/* <ArrowRight className=""/> */}
-        <ChevronLeft className="rotate-180" />
       </div>
       {/* {role === "admin" || workout.userId ? (
         <deleteWorkoutFetcher.Form

@@ -34,9 +34,8 @@ import { AppNavLink, MobileNavLink } from "./AppNavLink"
 import logo from "images/Sample Fitizen.png?url";
 import { useEffect, useState } from "react"
 import clsx from "clsx"
-
-export const description =
-  "A products dashboard with a sidebar navigation and a main content area. The dashboard has a header with a search input and a user menu. The sidebar has a logo, navigation links, and a card with a call to action. The main content area shows an empty state with a call to action."
+import { Switch } from "./ui/switch"
+import { MoonStarIcon } from "images/icons"
 
 type DashboardLayoutProps = {
   navLinks: Array<{
@@ -45,16 +44,29 @@ type DashboardLayoutProps = {
     icon: React.ReactNode;
     label: string;
   }>;
+  darkModeEnabled: boolean;
   // children: React.ReactNode;
 }
-export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
+
+export function DashboardLayout({ navLinks, darkModeEnabled }: DashboardLayoutProps) {
   const [searchParams] = useSearchParams();
   const [headerSearch, setHeaderSearch] = useState(searchParams.get("q") ?? "")
+  const [darkMode, setDarkMode] = useState(false)
   const location = useLocation();
   const submit = useSubmit();
 
   const handleLogout = () => {
-    return submit("logging out", { action: "/", method: "post" })
+    return submit({ "_action": "logout" }, { action: "/", method: "post" })
+  }
+  const handleToggleDarkMode = (checked: boolean) => {
+    if (checked) {
+      setDarkMode(true)
+      document.documentElement.classList.add('dark')
+    } else {
+      setDarkMode(false)
+      document.documentElement.classList.remove('dark')
+    }
+    return submit({ "_action": "toggleDarkMode", darkMode: checked }, { method: "post", action: location?.pathname })
   }
   const showSearch =
     location.pathname === "/app/workouts" ||
@@ -67,9 +79,19 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
     }
   }, [location.search])
 
+  useEffect(() => {
+    if (darkModeEnabled) {
+      setDarkMode(true)
+      document.documentElement.classList.add('dark')
+    } else {
+      setDarkMode(false)
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r border-border dark:border-border-muted bg-muted/40 dark:bg-background-muted md:block">
+      <div className="hidden border-r border-border dark:border-border-muted bg-muted/80 dark:bg-background-muted md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b border-border dark:border-border-muted px-4 lg:h-[60px] lg:px-6">
             <Link to="/" className="flex items-center gap-2 font-semibold dark:text-foreground">
@@ -139,7 +161,7 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
         </div>
       </div>
       <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b border-border dark:border-border-muted bg-muted/40 dark:bg-background-muted px-4 lg:h-[60px] lg:px-6">
+        <header className="flex h-14 items-center gap-4 border-b border-border dark:border-border-muted bg-muted/80 dark:bg-background-muted px-4 lg:h-[60px] lg:px-6">
           <Sheet>
             <SheetTrigger asChild className="dark:text-foreground dark:border-border-muted">
               <Button
@@ -239,7 +261,7 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
                       setHeaderSearch(e.target.value)
                     }}
                     className={clsx(
-                      "w-full appearance-none border bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3",
+                      "w-full appearance-none border bg-background pl-8 shadow-none md:w-2/3 lg:w-2/5",
                       "dark:bg-background dark:text-muted-foreground dark:focus:text-foreground",
                       "dark:border-border-muted dark:focus:border-ring"
                     )}
@@ -247,6 +269,13 @@ export function DashboardLayout({ navLinks }: DashboardLayoutProps) {
                 </div>
               </Form>
             ) : null}
+          </div>
+          <div className="flex items-center gap-x-1">
+            <Switch id="dark-mode"
+              checked={darkMode}
+              onCheckedChange={handleToggleDarkMode}
+            />
+            <label htmlFor="dark-mode"><MoonStarIcon className="h-5 text-muted-foreground" /></label>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

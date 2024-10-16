@@ -178,7 +178,7 @@ export default function CountdownTimer({
 
   return (
     <div className="flex flex-col">
-      <div className="p-8 bg-white rounded-lg shadow-md">
+      <div className="p-8 bg-white dark:bg-background-muted dark:border dark:border-border-muted rounded-lg shadow-md">
         <div className="text-center mb-4">
           {time <= 10 && time > 0 ? (
             <motion.div

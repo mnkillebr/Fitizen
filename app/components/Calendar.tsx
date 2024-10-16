@@ -38,7 +38,7 @@ const EventChip = ({ event, handleClick }: EventChipProps) => {
       key={event.id}
       className={clsx(
         "text-xs py-1 px-4 font-semibold rounded-md cursor-pointer truncate",
-        event.type ? "bg-amber-300" : "bg-teal-300"
+        event.type ? "bg-primary" : "bg-teal-300 dark:bg-ring"
       )}
       onClick={() => handleClick(event)}
     >
@@ -174,12 +174,12 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
       coachId: event.coachId,
       appointmentId: event.id,
       appointmentType: event.type.toLowerCase(),
-      defaultTab: 0,
+      defaultTab: "Appointment",
     } : {
       workoutId: event.routineId,
       sessionId: event.id,
       recurrence: event.recurrence ? event.recurrence.toLowerCase() : undefined,
-      defaultTab: 1,
+      defaultTab: "Workout",
     }
     const dialogTitle = event.type ? `${eventTitle(event.type)} with ${event.coach}` : `${event.routineName} Session`
     openDialog(
@@ -228,15 +228,15 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           <div
             key={day.toString()}
             className={clsx(
-              "p-2 border rounded-lg overflow-hidden h-full",
-              !isSameMonth(day, monthStart) ? "text-gray-400" : "",
-              "hover:bg-blue-50 transition duration-100"
+              "p-2 border dark:border-border-muted rounded-lg overflow-y-auto h-full relative",
+              !isSameMonth(day, monthStart) ? "text-muted-foreground/65" : "",
+              "hover:bg-primary/10 dark:hover:bg-primary/20 transition duration-100 bg-background-muted"
             )}
           >
             {dayDiff < 7
               ? (
                 <div
-                  className={clsx(isSameDay(day, new Date()) ? "bg-blue-500 text-white w-8 rounded-t-md pt-1 px-1" : "")}
+                  className={clsx(isSameDay(day, new Date()) ? "bg-primary w-8 rounded-t-md pt-1 px-1" : "")}
                   onClick={() => handleDayClick(cloneDay)}
                 >
                   {format(day, "EEE")}
@@ -244,7 +244,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
               ) : null}
             <div
               className={clsx(
-                isSameDay(day, new Date()) ? "bg-blue-500 text-white px-1" : "",
+                isSameDay(day, new Date()) ? "bg-primary px-1" : "",
                 dayDiff >= 7 ? "w-fit rounded-md mb-1" : "w-8 pb-1 rounded-b-md"
               )}
               onClick={() => handleDayClick(cloneDay)}
@@ -289,10 +289,10 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           {hours.map((hour) => (
             <div
               key={hour}
-              className="p-2 first:border-t-none first:rounded-t-lg last:rounded-b-lg border h-32 relative"
+              className="p-2 first:border-t-none first:rounded-t-lg last:rounded-b-lg border dark:border-border-muted bg-background-muted h-32 relative"
               // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
             >
-              <span className="absolute left-2 top-2 z-20 text-xs text-gray-500">
+              <span className="absolute left-2 top-2 z-20 text-xs text-muted-foreground">
                 {format(new Date().setHours(hour), 'ha')}
               </span>
               {isToday && hour === currentHour && (
@@ -324,7 +324,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                     key={minute}
                     className={clsx(
                       "absolute left-0 w-full h-1/4 pl-10 pr-2 transition duration-100",
-                      !slotEvents.length ? "hover:bg-blue-50" : ""
+                      !slotEvents.length ? "hover:bg-primary/20 dark:hover:bg-primary/30" : ""
                     )}
                     style={{ top: `${(minute / 60) * 100}%` }}
                     onClick={() => !slotEvents.length && handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
@@ -337,8 +337,8 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                             key={evt.id}
                             className={clsx(
                               `h-${slotHeight*8} z-10 rounded-md cursor-pointer`,
-                              "text-xs py-1 border px-4 overflow-hidden font-semibold z-10",
-                              evt.type ? "bg-amber-300" : "bg-teal-300"
+                              "text-xs py-1 border dark:border-white/50 px-4 overflow-hidden font-semibold z-10",
+                              evt.type ? "bg-primary" : "bg-teal-300 dark:bg-ring"
                             )}
                             onClick={() => handleEventClick(evt, day)}
                           >
@@ -385,8 +385,8 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
             <div
               key={day.toString()}
               className={clsx(
-                "border border-b-2 h-full rounded-t-lg p-2",
-                isSameDay(day, new Date()) ? "bg-blue-500 text-white" : ""
+                "border border-b-2 dark:border-border-muted dark:border-b-white/50 bg-background-muted h-full rounded-t-lg p-2",
+                isSameDay(day, new Date()) ? "bg-primary text-foreground" : ""
               )}>
               <div>{format(day, "EEE")}</div>
               <div>{format(day, "d")}</div>
@@ -397,14 +397,14 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           <div className="grid grid-cols-7 gap-px absolute w-full">
             {days.map((day) => {
               return (
-                <div key={day.toString()} className="border-x">
+                <div key={day.toString()} className="border-x dark:border-border-muted bg-background-muted">
                   {hours.map((hour) => (
                     <div
                       key={hour}
-                      className="p-2 border-b h-24 relative"
+                      className="p-2 border-b dark:border-border-muted h-24 relative"
                       // onClick={() => handleTimeClick(day, format(new Date().setHours(hour), 'HH:mm'))}
                     >
-                      <span className="absolute left-2 top-2 z-10 text-xs text-gray-500">
+                      <span className="absolute left-2 top-2 z-10 text-xs text-muted-foreground">
                         {format(new Date().setHours(hour), 'ha')}
                       </span>
                       {isSameDay(day, new Date()) &&
@@ -446,7 +446,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                             key={minute}
                             className={clsx(
                               "absolute left-0 w-full h-1/4 pl-2 md:pl-10 pr-2",
-                              slotEvents.length ? "cursor-pointer" : "hover:bg-blue-50 transition duration-100"
+                              slotEvents.length ? "cursor-pointer" : "hover:bg-primary/20 dark:hover:bg-primary/30 transition duration-100"
                             )}
                             style={{ top: `${(minute / 60) * 100}%` }}
                             onClick={() => !slotEvents.length && handleTimeClick(setMinutes(setHours(day, hour), minute), minute)}
@@ -459,8 +459,8 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
                                     key={evt.id}
                                     className={clsx(
                                       `h-${slotHeight*6} z-10 rounded-md`,
-                                      "text-xs py-1 border px-4 overflow-hidden font-semibold z-10",
-                                      evt.type ? "bg-amber-300" : "bg-teal-300"
+                                      "text-xs py-1 border dark:border-white/50 px-4 overflow-hidden font-semibold z-10",
+                                      evt.type ? "bg-primary" : "bg-teal-300 dark:bg-ring"
                                     )}
                                     onClick={() => handleEventClick(evt, day)}
                                   >
@@ -488,17 +488,17 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
   };
 
   return (
-    <div className="p-6 md:p-8 h-full overflow-hidden">
+    <div className="p-6 md:p-8 h-full overflow-hidden bg-background text-foreground">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
-          <Button onClick={navigatePrevious} className="rounded-full hover:shadow-md transition duration-100">
+          <Button onClick={navigatePrevious} className="rounded-full hover:shadow-md bg-background-muted dark:border dark:border-border-muted dark:hover:shadow-border-muted transition duration-100">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button onClick={navigateNext} className="rounded-full hover:shadow-md transition duration-100">
+          <Button onClick={navigateNext} className="rounded-full hover:shadow-md bg-background-muted dark:border dark:border-border-muted dark:hover:shadow-border-muted transition duration-100">
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button onClick={navigateToToday} className="md:hidden hover:bg-blue-100 transition duration-100">T</Button>
-          <Button onClick={navigateToToday} className="hidden md:flex hover:bg-blue-100 transition duration-100">Today</Button>
+          <Button onClick={navigateToToday} className="md:hidden hover:bg-primary/35 transition duration-100 text-muted-foreground">T</Button>
+          <Button onClick={navigateToToday} className="hidden md:flex hover:bg-primary/35 transition duration-100 text-muted-foreground">Today</Button>
         </div>
         {/* <h2 className="md:hidden text-xl font-bold">
           {format(currentDate, "MMM yyyy")}
@@ -512,9 +512,9 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           onDateChange={setCurrentDate}
         />
         <div className="flex md:hidden items-center">
-          <Button onClick={() => setView("daily")} className={view === "daily" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>D</Button>
-          <Button onClick={() => setView("weekly")} className={view === "weekly" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>W</Button>
-          <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>M</Button>
+          <Button onClick={() => setView("daily")} className={view === "daily" ? "bg-primary" : "text-muted-foreground hover:bg-primary/35 transition duration-100"}>D</Button>
+          <Button onClick={() => setView("weekly")} className={view === "weekly" ? "bg-primary" : "text-muted-foreground hover:bg-primary/35 transition duration-100"}>W</Button>
+          <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-primary" : "text-muted-foreground hover:bg-primary/35 transition duration-100"}>M</Button>
           <Button
             onClick={handleAddEvent}
             className="items-center"
@@ -524,12 +524,12 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           </Button>
         </div>
         <div className="hidden md:flex items-center">
-          <Button onClick={() => setView("daily")} className={view === "daily" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>Daily</Button>
-          <Button onClick={() => setView("weekly")} className={view === "weekly" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>Weekly</Button>
-          <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-blue-500 text-white" : "hover:bg-blue-100 transition duration-100"}>Monthly</Button>
+          <Button onClick={() => setView("daily")} className={view === "daily" ? "bg-primary" : "text-muted-foreground hover:bg-primary/35 transition duration-100"}>Daily</Button>
+          <Button onClick={() => setView("weekly")} className={view === "weekly" ? "bg-primary" : "text-muted-foreground hover:bg-primary/35 transition duration-100"}>Weekly</Button>
+          <Button onClick={() => setView("monthly")} className={view === "monthly" ? "bg-primary" : "text-muted-foreground hover:bg-primary/35 transition duration-100"}>Monthly</Button>
           <Button
             onClick={handleAddEvent}
-            className="items-center hover:shadow-md transition duration-100"
+            className="items-center bg-background-muted text-muted-foreground hover:text-foreground hover:shadow-md dark:border dark:border-border-muted dark:hover:shadow-border-muted transition duration-100"
           >
             <PlusIcon className="h-4 w-4" />
             Add Event
