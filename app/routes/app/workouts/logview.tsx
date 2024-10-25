@@ -50,8 +50,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     throw redirect("/app", 401)
   }
   const nameMappedUserLog = {
-      ...userLog,
-      exerciseLogs: userLog?.exerciseLogs.map(log => {
+    ...userLog,
+    exerciseLogs: userLog?.exerciseLogs.map(log => {
       const match = exerciseNames.find(eName => eName.id === log.exerciseId)
       if (match) {
         return {
@@ -64,41 +64,73 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }).reduce((result: any, curr: any) => {
       let resultArr = result
       if (resultArr.length && resultArr.find((item: any) => item.circuitId === curr.circuitId && curr.circuitId !== null)) {
-        resultArr = resultArr.map((item: any) => {
-          if (item.circuitId === curr.circuitId) {
-            return {
-              ...item,
+        resultArr = resultArr.map((res_item: any) => {
+          if (res_item.circuitId === curr.circuitId) {
+            if (res_item.sets.length) {
+              return {
+                ...res_item,
+                sets: [
+                  ...res_item.sets,
+                  ...curr.sets.map((set: any) => ({
+                    ...set,
+                    target: curr.target,
+                    targetReps: curr.targetReps,
+                    time: curr.time,
+                    name: curr.exerciseName,
+                    orderInRoutine: curr.orderInRoutine,
+                  })),
+                ].sort((a, b) => a.set - b.set)
+              }
+            } else {
+              return {
+                ...curr,
+                sets: [
+                  ...curr.sets.map((set: any) => ({
+                    ...set,
+                    target: curr.target,
+                    targetReps: curr.targetReps,
+                    time: curr.time,
+                    notes: curr.notes,
+                    name: curr.exerciseName,
+                    orderInRoutine: curr.orderInRoutine,
+                  })),
+                ]
+              }
+            }
+          } else {
+            return res_item
+          }
+        })
+        return resultArr
+      } else {
+        if (curr.circuitId && curr.circuitId !== null) {
+          return resultArr.concat(
+            {
+              ...curr,
               sets: [
-                ...item.sets.map((set: any) => ({
-                  ...set,
-                  target: item.target,
-                  targetReps: item.targetReps,
-                  time: item.time,
-                  notes: item.notes,
-                  name: item.exerciseName
-                })),
                 ...curr.sets.map((set: any) => ({
                   ...set,
                   target: curr.target,
                   targetReps: curr.targetReps,
                   time: curr.time,
-                  notes: curr.notes,
-                  name: curr.exerciseName
+                  name: curr.exerciseName,
+                  orderInRoutine: curr.orderInRoutine,
                 })),
               ]
             }
-          } else {
-            return item
-          }
-        })
-        return resultArr
-      } else {
-        return resultArr.concat(curr)
+          )
+        } else {
+          return resultArr.concat(curr)
+        }
       }
     }, [])
   }
   return json({ userLog: nameMappedUserLog, workoutName })
 };
+
+export async function action() {
+  return null
+}
 
 export default function LogView() {
   const data = useLoaderData<typeof loader>();
@@ -114,7 +146,7 @@ export default function LogView() {
         <div className="*:text-sm"><CurrentDate incomingDate={data.userLog?.date} /></div>
       </div>
       <div className="flex flex-col">
-        <div className="font-medium text-xs">Workout Name</div>
+        <div className="font-medium text-xs text-muted-foreground">Workout Name</div>
         <div className="font-semibold text-md">{data.workoutName?.name}</div>
       </div>
       <div className="font-semibold text-lg">Logged Exercises</div>

@@ -66,7 +66,16 @@ export function DashboardLayout({ navLinks, darkModeEnabled }: DashboardLayoutPr
       setDarkMode(false)
       document.documentElement.classList.remove('dark')
     }
-    return submit({ "_action": "toggleDarkMode", darkMode: checked }, { method: "post", action: location?.pathname })
+    return submit(
+      {
+        "_action": "toggleDarkMode",
+        darkMode: checked,
+      },
+      {
+        method: "post",
+        action: location?.pathname + location?.search,
+      }
+    )
   }
   const showSearch =
     location.pathname === "/app/workouts" ||

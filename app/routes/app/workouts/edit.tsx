@@ -21,6 +21,7 @@ import { Textarea } from '~/components/ui/textarea';
 import { Search } from 'lucide-react';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
+import { generateMuxThumbnailToken } from '~/mux-tokens.server';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -68,7 +69,7 @@ export function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> 
             if (ex_item.circuitId === circuitId) {
               return {
                 ...ex_item,
-                exercises: ex_item.exercises.concat(curr)
+                exercises: ex_item.exercises.concat(curr).sort((a: any, b: any) => a.orderInRoutine - b.orderInRoutine)
               }
             } else {
               return ex_item
@@ -111,8 +112,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
   const exercises = await getExercisesById(exerciseIds);
+  const tokenMappedExercises = allExercises.map(ex_item => {
+    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId)
+    return {
+      ...ex_item,
+      thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
+    }
+  })
   const exerciseDetails = exerciseDetailsMap(workout?.exercises, exercises, true)
-  return json({ workout, exerciseDetails, allExercises })
+  return json({ workout, exerciseDetails, allExercises: tokenMappedExercises })
 }
 
 // Define Zod schema for form validation
@@ -932,7 +940,7 @@ export default function Edit() {
                           }}
                         >
                           <img
-                            src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+                            src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
                             className="w-full rounded-t"
                           />
                           <div className="flex flex-col p-4">

@@ -4,7 +4,7 @@ import { Link, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 import clsx from "clsx";
 import { ArrowLeft, ClockIcon, FireIcon, PlayIcon, BarsIcon, ContextMenuIcon, TrashIcon, PencilIcon, ChevronLeft, CalendarIcon } from "images/icons";
 import db from "~/db.server";
-import crunchGirl from "images/jonathan-borba-lrQPTQs7nQQ-unsplash copy.jpg";
+// import crunchGirl from "images/jonathan-borba-lrQPTQs7nQQ-unsplash copy.jpg";
 import { Popover, PopoverButton, PopoverPanel, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { Exercise as ExerciseType, Recurrence, RoutineExercise as RoutineExerciseType } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
@@ -21,6 +21,7 @@ import { convertObjectToFormData } from "~/utils/misc";
 import { format, setHours, setMinutes } from "date-fns";
 import CustomCarousel from "~/components/CustomCarousel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
+import { generateMuxThumbnailToken } from "~/mux-tokens.server";
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
@@ -60,7 +61,7 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
           if (item.circuitId === curr.circuitId) {
             return {
               ...item,
-              exercises: [...item.exercises, curr]
+              exercises: [...item.exercises, curr].sort((a, b) => a.orderInRoutine - b.orderInRoutine)
             }
           } else {
             return item
@@ -135,7 +136,7 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
                   >
                     {/* <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div> */}
                     <img
-                      src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+                      src={ex_item.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
                       className="h-16 rounded-sm"
                     />
                     <div className="flex flex-col">
@@ -177,7 +178,7 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
               >
                 {/* <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div> */}
                 <img
-                  src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+                  src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
                   className="h-16 rounded-sm"
                 />
                 <div className="flex flex-col">
@@ -268,8 +269,15 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
       }
     }
   });
+  const tokenMappedExercises = exercises.map(ex_item => {
+    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId)
+    return {
+      ...ex_item,
+      thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
+    }
+  })
   // console.log('loader workout', workout, 'loader exercises', exercises)
-  const exerciseDetails = exerciseDetailsMap(workout?.exercises, exercises)
+  const exerciseDetails = exerciseDetailsMap(workout?.exercises, tokenMappedExercises)
   const logs = await getWorkoutLogsById(user.id, workoutId)
   // const exerciseDetailss = {
   //   warmup: exerciseDetailMap(workout?.exercises, exercises, "warmup"),
@@ -511,7 +519,7 @@ export default function WorkoutDetail() {
           </Popover>
         </div>
         {/* Title */}
-        <div className="font-semibold text-2xl select-none mb-2 px-">{data.workout?.name}</div>
+        <div className="font-semibold text-2xl select-none mb-2">{data.workout?.name}</div>
         {/* Workout Image && Description */}
         <Tabs defaultValue="overview" className="w-full lg:hidden">
           <TabsList>
@@ -525,7 +533,7 @@ export default function WorkoutDetail() {
                 "content-end sm:bg-center lg:flex-none lg:rounded-lg mb-3",
                 "bg-background-muted bg-cover bg-center dark:shadow-border-muted"
               )}
-              style={{backgroundImage: `url(${crunchGirl})`}}
+              style={{backgroundImage: `url(https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/v1/fitizen/tfvpajxu5dj9s5xcac7t)`}}
             >
               <div className={clsx(
                 "flex justify-around mb-6 *:font-semibold *:flex *:flex-col *:leading-5",
@@ -568,7 +576,7 @@ export default function WorkoutDetail() {
               "content-end bg-center rounded-lg",
               "bg-background-muted bg-cover bg-center dark:shadow-border-muted"
             )}
-            style={{backgroundImage: `url(${crunchGirl})`}}
+            style={{backgroundImage: `url(https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/v1/fitizen/tfvpajxu5dj9s5xcac7t)`}}
           >
             <div className={clsx(
               "flex justify-around mb-6 *:font-semibold *:flex *:flex-col *:leading-5",
@@ -614,7 +622,7 @@ export default function WorkoutDetail() {
               )}
               // onClick={() => setStartWorkout(!startWorkout)}
             >
-              <div className="size-12"></div>
+              {/* <div className="size-12"></div> */}
               <div className="select-none font-semibold self-center mr-4">Start Workout</div>
               <div className="bg-primary rounded-full p-3"><PlayIcon /></div>
             </Link>

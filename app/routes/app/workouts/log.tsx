@@ -148,16 +148,16 @@ export async function action({ request }: ActionFunctionArgs) {
           //   }
           //   return resultArr
           // }, [])
-          const mappedExerciseLogs = data.exercises.map(exercise => ({
+          const mappedExerciseLogs = data.exercises.map((exercise, idx) => ({
             ...exercise,
             target: exercise.target === "reps" ? ExerciseTarget.reps : ExerciseTarget.time,
+            orderInRoutine: idx + 1,
             sets: exercise.sets.map(set => ({
               ...set,
               load: set.load ? parseFloat(set.load) : undefined,
               unit: set.unit === "bw" ? LoadUnit.bodyweight : set.unit === "lb(s)" ? LoadUnit.pound : LoadUnit.kilogram,
             }))
           }))
-          // console.log("workout log data", mappedExerciseLogs, data.exercises)
           
           await saveUserWorkoutLog(user.id, data.workoutId, data.duration, mappedExerciseLogs)
           return redirect(`/app/workouts/${data.workoutId}`);
@@ -185,7 +185,7 @@ export default function Log() {
   }, [exerciseDetails])
   // console.log("details", flattenedDetails, exerciseDetails)
   return (
-    <Form method="post" className="p-6 md:p-8 flex flex-col h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)] gap-y-3 select-none lg:w-3/4 xl:w-2/3 text-foreground">
+    <Form method="post" className="p-6 md:p-8 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
       <div className="flex">
         <Link to={`/app/workouts/${workout?.id}`}>
           <ChevronLeft className="hover:text-primary" />
@@ -207,7 +207,7 @@ export default function Log() {
         />
       </div>
       <div className="flex flex-col">
-        <div className="font-medium text-xs">Workout Name</div>
+        <div className="font-medium text-xs text-muted-foreground">Workout Name</div>
         <div className="font-semibold text-md">{workout?.name}</div>
       </div>
       {showStopwatch ? (
@@ -227,7 +227,7 @@ export default function Log() {
       <div className="font-semibold text-lg">Exercises</div>
       <div
         className={clsx(
-          "rounded-md shadow-md bg-slate-50 py-4 px-3 bg-background-muted overflow-y-auto",
+          "rounded-md shadow-md bg-slate-50 py-4 px-3 bg-background-muted",
           "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
         )}
       >

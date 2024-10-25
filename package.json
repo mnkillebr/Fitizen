@@ -16,6 +16,7 @@
     "@cloudinary/url-gen": "^1.20.0",
     "@headlessui/react": "^2.0.4",
     "@heroicons/react": "^2.1.4",
+    "@mux/mux-player-react": "^3.0.0",
     "@prisma/client": "^5.15.1",
     "@radix-ui/react-checkbox": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -40,6 +41,7 @@
     "form-data": "^4.0.0",
     "framer-motion": "^11.2.13",
     "isbot": "^4.1.0",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.439.0",
     "mailgun.js": "^10.2.1",
     "next-themes": "^0.3.0",
@@ -57,6 +59,7 @@
   "devDependencies": {
     "@remix-run/dev": "^2.12.1",
     "@types/cryptr": "^4.0.3",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/react": "^18.2.20",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18.2.7",

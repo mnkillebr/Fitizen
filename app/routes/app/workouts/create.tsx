@@ -1,5 +1,5 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { Form, Link, useFetcher, useLoaderData, useNavigation, useSearchParams, } from '@remix-run/react';
+import { Form, Link, useFetcher, useLoaderData, useMatches, useNavigation, useSearchParams, } from '@remix-run/react';
 import { z } from 'zod';
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/node';
@@ -21,6 +21,7 @@ import { Textarea } from '~/components/ui/textarea';
 import { Search } from 'lucide-react';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
+import { generateMuxThumbnailToken } from '~/mux-tokens.server';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -51,7 +52,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const exercises = await getAllExercises(query);
-  return json({ exercises })
+  const tokenMappedExercises = exercises.map(ex_item => {
+    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId)
+    return {
+      ...ex_item,
+      thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
+    }
+  })
+  return json({ exercises: tokenMappedExercises })
 }
 
 // Define Zod schema for form validation
@@ -854,7 +862,7 @@ export default function WorkoutBuilderForm() {
                           }}
                         >
                           <img
-                            src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+                            src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
                             className="w-full rounded-t"
                           />
                           <div className="flex flex-col p-4">

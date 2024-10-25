@@ -28,6 +28,7 @@ export type ExerciseLogType = {
   time?: string;
   targetReps?: string;
   sets: ExerciseLogSet[];
+  orderInRoutine: number;
   // set: string;
   // actualReps?: string;
   // load?: number;

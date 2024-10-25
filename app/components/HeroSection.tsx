@@ -34,7 +34,7 @@ export default function HeroSection() {
           </div>
           <div className="md:w-1/2">
             <img
-              src={fit_couple}
+              src="https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/v1/fitizen/odnsoupzpzvvsa5qo7js"
               alt="People connecting"
               className="rounded-lg shadow-lg"
             />

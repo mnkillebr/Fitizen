@@ -40,7 +40,7 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <DialogPanel
             className={clsx(
-              "w-full max-w-[600px] transform overflow-hidden rounded-lg",
+              "w-full max-w-[408px] md:max-w-[784px] transform overflow-hidden rounded-lg",
               "bg-background text-foreground dark:border dark:border-border-muted",
               "p-6 text-left align-middle shadow-xl transition-all"
             )}

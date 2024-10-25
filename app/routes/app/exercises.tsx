@@ -15,6 +15,8 @@ import { Role as RoleType } from "@prisma/client";
 import { useOpenDialog } from "~/components/Dialog";
 import { CheckCircleIcon, PlusCircleIcon } from "images/icons";
 import { darkModeCookie } from "~/cookies";
+import MuxPlayer from '@mux/mux-player-react';
+import { generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -34,7 +36,28 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const exercises = await getAllExercises(query);
-  return json({ exercises, role })
+  const tokenMappedExercises = exercises.map(ex_item => {
+    const smartCrop = () => {
+      switch (ex_item.name) {
+       case "Lateral Lunge":
+        return "smartcrop"
+      case "Band Assisted Leg Lowering":
+        return "smartcrop"
+      case "Ankle Mobility":
+        return "smartcrop"
+       default:
+        return undefined
+      }
+    }
+    const videoToken = generateMuxVideoToken(ex_item.muxPlaybackId)
+    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId, smartCrop())
+    return {
+      ...ex_item,
+      token: videoToken,
+      thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
+    }
+  })
+  return json({ exercises: tokenMappedExercises, role })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -91,7 +114,7 @@ interface deleteExerciseFetcherType extends ActionFunctionArgs{
 }
 
 export default function ExerciseLibrary() {
-  const data = useLoaderData<typeof loader>();
+  const { exercises, role } = useLoaderData<typeof loader>();
   const createExerciseFetcher = useFetcher();
   const [searchParams] = useSearchParams();
   const navigation = useNavigation();
@@ -99,6 +122,7 @@ export default function ExerciseLibrary() {
 
   const isSearching = navigation.formData?.has("q");
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
+
   return (
     <div className="py-6 px-5 md:py-8 md:px-7 flex flex-col gap-y-4 bg-background h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
       <div className="flex flex-col gap-y-4">
@@ -120,7 +144,7 @@ export default function ExerciseLibrary() {
           />
         </Form> */}
         <h1 className="text-lg font-semibold md:text-2xl text-foreground px-1">Exercises</h1>
-        {data.role === "admin" ? (
+        {role === "admin" ? (
           <createExerciseFetcher.Form method="post">
             <PrimaryButton
               className="w-full sm:w-1/2 md:w-fit md:active:scale-95"
@@ -136,17 +160,36 @@ export default function ExerciseLibrary() {
       </div>
       {/* <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1"> */}
       <div className="flex flex-col gap-y-3 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
-        {data.exercises.map((ex_item) => (
-          <Exercise key={ex_item.id} exercise={ex_item} role={data.role} onViewExercise={() => {
+        {exercises.map((ex_item) => (
+          <Exercise key={ex_item.id} exercise={ex_item} role={role} onViewExercise={() => {
             openDialog(
-              <div className="flex flex-col gap-y-3 gap-x-4">
-                <img
-                  src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
-                  className="h-full rounded"
-                />
-                <div>
-                  <div className="font-bold">Cues</div>
-                  <div className="flex-1">{ex_item.cues.map((cue, cue_idx) => <div key={cue_idx}>{cue}</div>)}</div>
+              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
+                <div className="w-full">
+                  <MuxPlayer
+                    streamType="on-demand"
+                    playbackId={ex_item.muxPlaybackId ? ex_item.muxPlaybackId : undefined}
+                    tokens={{ playback: ex_item.token, thumbnail: ex_item.token }}
+                    metadataVideoTitle="Placeholder (optional)"
+                    metadataViewerUserId="Placeholder (optional)"
+                    primaryColor="#FFFFFF"
+                    secondaryColor="#000000"
+                    style={{
+                      aspectRatio: 9/16,
+                      width: "100%",
+                      height: "100%",
+                      maxHeight: 640,
+                      maxWidth: 360,
+                    }}
+                  />
+                </div>
+                <div className="w-full">
+                  <div className="font-bold mb-2">Cues</div>
+                  <div className="flex-1">{ex_item.cues.map((cue, cue_idx) => (
+                    <div key={cue_idx} className="flex w-full">
+                      <div className="flex-none w-5">{cue_idx+1}.</div>
+                      <div className="flex-1">{cue}</div>
+                    </div>
+                  ))}</div>
                 </div>
               </div>, ex_item.name
             )
@@ -162,6 +205,7 @@ interface ExerciseItemProps {
   name: string;
   body: string[];
   contraction: string | null;
+  thumbnail?: string;
 }
 
 type ExerciseProps = {
@@ -200,7 +244,7 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
     >
       <div className="flex flex-col overflow-hidden">
         <img
-          src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+          src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
           className={clsx("w-full rounded-t-lg", selectable ? "" : "cursor-pointer")}
           onClick={() => onViewExercise(exercise)}
         />
