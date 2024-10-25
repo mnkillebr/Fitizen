@@ -49,8 +49,22 @@ export default function ProgramDetail() {
         {program.name}
       </div>
       <div className="flex-none h-1/4 md:h-1/3 flex flex-col lg:flex-row gap-3">
+        <div className="relative h-full group lg:hidden">
+          <div
+            className={clsx(
+              "absolute inset-0 transition-opacity duration-300 group-hover:opacity-30",
+              "h-full w-full shadow-md lg:shadow-none rounded-md",
+              "dark:border dark:border-border-muted dark:shadow-border-muted bg-cover bg-top"
+            )}
+            style={{backgroundImage: `url(${program.s3ImageKey})`}}
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="font-semibold mb-2">Description</div>
+            <div className="text-muted-foreground text-sm">{program.description}</div>
+          </div>
+        </div>
         <div
-          className="h-[calc(100%-3.75rem)] lg:h-full w-full shadow-md lg:shadow-none rounded-md dark:border dark:border-border-muted dark:shadow-border-muted bg-cover bg-top"
+          className="hidden lg:flex h-full w-full shadow-md lg:shadow-none rounded-md dark:border dark:border-border-muted dark:shadow-border-muted bg-cover bg-top"
           style={{backgroundImage: `url(${program.s3ImageKey})`}}
         />
         <div className="hidden lg:flex lg:flex-col lg:h-full w-full gap-3">
