@@ -1,15 +1,19 @@
+import MuxPlayer from "@mux/mux-player-react";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
+import { Video } from "lucide-react";
 import { useState } from "react";
 import CountdownTimer from "~/components/CountdownTimer";
 import CurrentDate from "~/components/CurrentDate";
+import { useOpenDialog } from "~/components/Dialog";
 import Stopwatch from "~/components/Stopwatch";
 import { PrimaryButton } from "~/components/form";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { getProgramById, getUserProgramLogs } from "~/models/program.server";
+import { generateMuxVideoToken } from "~/mux-tokens.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 
 const unitOptions = [
@@ -37,7 +41,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const programDay = ((userLogs.length) % (programLength) % (program.weeks[0].days.length)) + 1
   const programWeek = Math.ceil(programDay / program.weeks[0].days.length)
   const currentProgramWorkout = program.weeks[programWeek-1].days[programDay-1]
-  return json({ program, programLength, programDay, programWeek, currentProgramWorkout })
+  const tokenMappedProgramWorkout = {
+    ...currentProgramWorkout,
+    blocks: currentProgramWorkout.blocks.map(block => ({
+      ...block,
+      exercises: block.exercises.map(block_ex_item => ({
+        ...block_ex_item,
+        exercise: {
+          ...block_ex_item.exercise,
+          videoToken: generateMuxVideoToken(block_ex_item.exercise.muxPlaybackId),
+        }
+      }))
+    }))
+  }
+  return json({ program, programLength, programDay, programWeek, currentProgramWorkout: tokenMappedProgramWorkout })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -53,7 +70,8 @@ export default function ProgramLog() {
     programWeek,
   } = useLoaderData<typeof loader>();
   const [showStopwatch, setShowStopwatch] = useState(false);
-  console.log(currentProgramWorkout)
+  const openDialog = useOpenDialog();
+
   return (
     <Form method="post" className="p-6 md:p-8 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
       <div className="flex">
@@ -117,9 +135,47 @@ export default function ProgramLog() {
                           <div key={`${set_idx}-${ex_idx}`} className="bg-slate-100 dark:bg-background px-2 py-1 rounded">
                             {ex_idx === 0 ? <div className="tex-base font-semibold">{`Set ${currentSet}`}</div> : null}
                             <div className="flex flex-wrap gap-x-3">
-                              <div className="flex flex-col w-full sm:w-56 truncate">
+                              <div className="flex flex-col w-full sm:w-56">
                                 <label className="text-xs font-semibold text-muted-foreground">Name</label>
-                                <div>{ex_item.exercise.name}</div>
+                                <div className="flex gap-2">
+                                  <div>{ex_item.exercise.name}</div>
+                                  {currentSet === 1 ? (
+                                    <Video
+                                      className="hover:cursor-pointer"
+                                      onClick={() => openDialog(
+                                        <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
+                                          <div className="w-full">
+                                            <MuxPlayer
+                                              streamType="on-demand"
+                                              playbackId={ex_item.exercise.muxPlaybackId ? ex_item.exercise.muxPlaybackId : undefined}
+                                              tokens={{ playback: ex_item.exercise.videoToken, thumbnail: ex_item.exercise.videoToken }}
+                                              metadataVideoTitle="Placeholder (optional)"
+                                              metadataViewerUserId="Placeholder (optional)"
+                                              primaryColor="#FFFFFF"
+                                              secondaryColor="#000000"
+                                              style={{
+                                                aspectRatio: 9/16,
+                                                width: "100%",
+                                                height: "100%",
+                                                maxHeight: 640,
+                                                maxWidth: 360,
+                                              }}
+                                            />
+                                          </div>
+                                          <div className="w-full">
+                                            <div className="font-bold mb-2">Cues</div>
+                                            <div className="flex-1">{ex_item.exercise.cues.map((cue, cue_idx) => (
+                                              <div key={cue_idx} className="flex w-full">
+                                                <div className="flex-none w-5">{cue_idx+1}.</div>
+                                                <div className="flex-1">{cue}</div>
+                                              </div>
+                                            ))}</div>
+                                          </div>
+                                        </div>, ex_item.exercise.name
+                                      )}
+                                    />
+                                  ) : null}
+                                </div>
                               </div>
                               {ex_item.reps ? (
                                 <>

@@ -1359,6 +1359,7 @@ export function getProgramById(programId: string) {
                         select: {
                           name: true,
                           muxPlaybackId: true,
+                          cues: true,
                         },
                       },
                       orderInBlock: true,
