@@ -48,8 +48,9 @@ export default function Programs() {
   const matches = useMatches();
   const navigate = useNavigate();
   const inProgramDetailRoute = matches.map(m => m.id).includes("routes/app/programs/$programId");
+  const inLogSubRoute = matches.map(m => m.id).includes("routes/app/programs/log");
 
-  if (inProgramDetailRoute) {
+  if (inProgramDetailRoute || inLogSubRoute) {
     return (
       <div className="flex flex-col h-full">
         <Outlet />

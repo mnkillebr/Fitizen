@@ -169,7 +169,7 @@ export async function action({ request }: ActionFunctionArgs) {
   return null
 }
 
-export default function Log() {
+export default function WorkoutLog() {
   const{ workout, exerciseDetails } = useLoaderData<typeof loader>();
   const [showStopwatch, setShowStopwatch] = useState(false);
 
@@ -263,7 +263,7 @@ export default function Log() {
         type="submit"
         name="_action"
         value="saveUserWorkoutLog"
-        className="text-white px-4 py-2 rounded w-fit self-end"
+        className="text-foreground px-4 py-2 rounded w-fit self-end"
         // disabled={isSavingWorkout}
         // isLoading={isSavingWorkout}
       >

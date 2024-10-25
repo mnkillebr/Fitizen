@@ -1358,6 +1358,7 @@ export function getProgramById(programId: string) {
                       exercise: {
                         select: {
                           name: true,
+                          muxPlaybackId: true,
                         },
                       },
                       orderInBlock: true,
@@ -1374,4 +1375,23 @@ export function getProgramById(programId: string) {
       },
     },
   })
+}
+
+export async function getUserProgramLogs(userId: string, programId: string) {
+  try {
+    const userProgramLogs = await db.programLog.findMany({
+      where: {
+        userId,
+        programId,
+      }
+    })
+    return userProgramLogs
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2011") {
+        return error.message
+      }
+    }
+    throw error
+  };
 }
