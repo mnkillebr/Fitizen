@@ -4,8 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import clsx from "clsx";
 import { ChevronLeft, PlayIcon } from "images/icons";
 import CustomCarousel from "~/components/CustomCarousel";
-import { createIntroProgram, getProgramById } from "~/models/program.server";
+import { createIntroProgram, getProgramById, getUserProgramLogsByProgramId } from "~/models/program.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
+import { ProgramLog } from "@prisma/client";
 
 export async function action({ request }: ActionFunctionArgs) {
   // const program = await createIntroProgram()
@@ -23,18 +24,25 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
       { status: 404, statusText: "Program Not Found" }
     )
   }
+  const userCurrentProgramLogs = await getUserProgramLogsByProgramId(user.id, programId) as Array<ProgramLog>
+  const programLength = program.weeks.length * program.weeks[0].days.length
+  const programDay = ((userCurrentProgramLogs.length) % (programLength) % (program.weeks[0].days.length)) + 1
+  const programWeek = Math.ceil(((userCurrentProgramLogs.length) % (programLength) + 1) / program.weeks[0].days.length)
   return json({
     program: {
       ...program,
       owns: program?.userId === user.id,
     },
+    userCurrentProgramLogs,
+    programDay,
+    programWeek,
   });
 }
 
 export default function ProgramDetail() {
-  const { program } = useLoaderData<typeof loader>();
+  const { program, userCurrentProgramLogs, programWeek, programDay } = useLoaderData<typeof loader>();
   const submit = useSubmit()
-  // console.log("program", program)
+
   return (
     <div
       className={clsx(
@@ -70,8 +78,9 @@ export default function ProgramDetail() {
         <div className="hidden lg:flex lg:flex-col lg:h-full w-full gap-3">
           <div
             className={clsx(
-              "h-2/3 flex-col py-2 px-4 bg-slate-50 rounded-lg shadow-sm",
-              "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
+              "h-2/3 flex-col py-2 px-4 bg-slate-50 rounded-lg shadow-md",
+              "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted",
+              "dark:shadow-sm"
             )}
           >
             <div className="font-semibold mb-2">Description</div>
@@ -80,13 +89,17 @@ export default function ProgramDetail() {
           <Link
             to={`/app/programs/log?id=${program.id}`}
             className={clsx(
-              "flex h-1/3 items-center justify-center rounded-lg shadow-sm active:scale-95 hover:cursor-pointer",
-              "bg-slate-50 dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
+              "flex h-1/3 items-center justify-center rounded-lg shadow-md active:scale-95 hover:cursor-pointer",
+              "bg-slate-50 dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted",
+              "dark:shadow-sm"
             )}
             // onClick={() => setStartWorkout(!startWorkout)}
           >
             {/* <div className="size-12"></div> */}
-            <div className="select-none font-semibold self-center mr-4">Start Program</div>
+            <div className="flex flex-col">
+              <div className="select-none font-semibold self-center mr-4">{userCurrentProgramLogs.length ? 'Continue Program' : 'Start Program'}</div>
+              {userCurrentProgramLogs.length ? <div className="select-none self-center text-sm text-muted-foreground mr-4">Week {programWeek} - Day {programDay}</div> : null}
+            </div>
             <div className="bg-primary rounded-full p-3"><PlayIcon /></div>
           </Link>
         </div>
@@ -101,7 +114,10 @@ export default function ProgramDetail() {
           // onClick={() => setStartWorkout(!startWorkout)}
         >
           <div className="size-12 invisible"></div>
-          <div className="select-none font-semibold self-center">Start Program</div>
+          <div className="flex gap-2">
+            <div className="select-none font-semibold self-center">{userCurrentProgramLogs.length ? 'Continue Program' : 'Start Program'}</div>
+            {userCurrentProgramLogs.length ? <div className="select-none self-center text-sm text-muted-foreground">Week {programWeek} - Day {programDay}</div> : null}
+          </div>
           <div className="bg-primary rounded-full p-3"><PlayIcon /></div>
         </Link>
       </div>
@@ -117,13 +133,23 @@ export default function ProgramDetail() {
             >
               {week.days.map((day, day_idx) => (
                 <div key={`day-${day_idx}`} className="p-2 overflow-hidden overflow-y-auto">
-                  <div className="font-semibold mb-2 text-muted-foreground">Day {day.dayNumber}</div>
+                  <div className="flex items-end justify-between mb-2">
+                    <div className="font-semibold text-muted-foreground">Day {day.dayNumber}</div>
+                    {userCurrentProgramLogs.find(log => log.programDay === day.dayNumber && log.programWeek === week.weekNumber) ? (
+                      <Link
+                        to={`/app/programs/logview?id=${userCurrentProgramLogs.find(log => log.programDay === day.dayNumber && log.programWeek === week.weekNumber)?.id}`}
+                        className="text-sm h-5 underline text-primary hover:text-yellow-500"
+                      >
+                        View Log
+                      </Link>
+                    ) : null}
+                  </div>
                   <div className="flex flex-col p-1 gap-1 *:bg-slate-100 *:rounded *:px-2 *:py-1 *:dark:bg-background-muted">
                     {day.blocks.map((block, block_idx) => (
                       <div key={`block-${block_idx}`} className="">
                         {block.exercises.map((exercise, exercise_idx) => (
                           <div key={`exercise-${exercise_idx}`} className="flex">
-                            <div className="w-2/3">{exercise.exercise.name}</div>
+                            <div className="w-2/3 truncate">{exercise.exercise.name}</div>
                             <div className="w-1/3">{exercise.sets} x {exercise.time ? `${exercise.time} sec` : exercise.reps}</div>
                           </div>
                         ))}
@@ -149,7 +175,7 @@ export default function ProgramDetail() {
                       <div key={`block-${block_idx}`} className="">
                         {block.exercises.map((exercise, exercise_idx) => (
                           <div key={`exercise-${exercise_idx}`} className="flex">
-                            <div className="w-2/3">{exercise.exercise.name}</div>
+                            <div className="w-2/3 truncate">{exercise.exercise.name}</div>
                             <div className="w-1/3">{exercise.sets} x {exercise.time ? `${exercise.time} sec` : exercise.reps}</div>
                           </div>
                         ))}

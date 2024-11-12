@@ -49,8 +49,9 @@ export default function Programs() {
   const navigate = useNavigate();
   const inProgramDetailRoute = matches.map(m => m.id).includes("routes/app/programs/$programId");
   const inLogSubRoute = matches.map(m => m.id).includes("routes/app/programs/log");
+  const inLogViewSubRoute = matches.map(m => m.id).includes("routes/app/programs/logview");
 
-  if (inProgramDetailRoute || inLogSubRoute) {
+  if (inProgramDetailRoute || inLogSubRoute || inLogViewSubRoute) {
     return (
       <div className="flex flex-col h-full">
         <Outlet />
@@ -60,7 +61,7 @@ export default function Programs() {
 
   return (
     <div className="p-6 md:p-8 flex flex-col h-full gap-x-6 gap-y-4 snap-y snap-mandatory overflow-y-auto bg-background">
-      <h1 className="text-lg font-semibold md:text-2xl text-foreground">Programs</h1>
+      {/* <h1 className="text-lg font-semibold md:text-2xl text-foreground">Programs</h1> */}
       {programs.map((program, program_idx) => (
         <div
           key={program_idx}

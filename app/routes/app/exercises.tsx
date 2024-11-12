@@ -124,25 +124,8 @@ export default function ExerciseLibrary() {
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
 
   return (
-    <div className="py-6 px-5 md:py-8 md:px-7 flex flex-col gap-y-4 bg-background h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
-      <div className="flex flex-col gap-y-4">
-        {/* <Form
-          className={`flex content-center border-2 rounded-md focus-within:border-primary md:w-2/3 lg:w-1/2 xl:w-1/3 ${
-            isSearching ? "animate-pulse" : ""
-          }`}
-        >
-          <button type="submit">
-            <SearchIcon className="size-6 ml-2" />
-          </button>
-          <input
-            defaultValue={searchParams.get("q") ?? ""}
-            type="search"
-            name="q"
-            placeholder="Search exercises ..."
-            autoComplete="off"
-            className="w-full p-2 outline-none rounded-md"
-          />
-        </Form> */}
+    <div className="px-5 md:px-7 flex flex-col gap-y-4 bg-background h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
+      {/* <div className="flex flex-col gap-y-4">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground px-1">Exercises</h1>
         {role === "admin" ? (
           <createExerciseFetcher.Form method="post">
@@ -157,9 +140,9 @@ export default function ExerciseLibrary() {
             </PrimaryButton>
           </createExerciseFetcher.Form>
         ) : null}
-      </div>
+      </div> */}
       {/* <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1"> */}
-      <div className="flex flex-col gap-y-3 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
+      <div className="flex flex-col gap-y-3 py-6 md:py-8 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
         {exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={role} onViewExercise={() => {
             openDialog(
@@ -242,20 +225,20 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
       //   e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
       // }}
     >
-      <div className="flex flex-col overflow-hidden">
+      <div className="flex flex-col overflow-hidden justify-between h-full">
         <img
-          src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
-          className={clsx("w-full rounded-t-lg", selectable ? "" : "cursor-pointer")}
+          src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
+          className={clsx("w-full rounded-t-lg flex-1", selectable ? "" : "cursor-pointer")}
           onClick={() => onViewExercise(exercise)}
         />
         <div className="flex p-4 justify-between items-center">
-          <div className="flex flex-col">
+          <div className="flex flex-col w-full">
             {role === "admin" ? (
               <updateExerciseNameFetcher.Form method="post" className="hidden sm:flex justify-between">
                 <div className="flex flex-col peer">
                   <input
                     type="text"
-                    className={`font-bold bg-slate-100 focus:outline-none truncate focus:border-b-2 ${
+                    className={`font-bold bg-background-muted focus:outline-none truncate focus:border-b-2 ${
                       updateExerciseNameFetcher.data?.errors?.exerciseName ? "border-b-2 border-b-red-500" : ""
                     }`}
                     required

@@ -32,7 +32,7 @@ import { Input } from "~/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet"
 import { AppNavLink, MobileNavLink } from "./AppNavLink"
 import logo from "images/Sample Fitizen.png?url";
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import clsx from "clsx"
 import { Switch } from "./ui/switch"
 import { MoonStarIcon } from "images/icons"
@@ -97,6 +97,13 @@ export function DashboardLayout({ navLinks, darkModeEnabled }: DashboardLayoutPr
       document.documentElement.classList.remove('dark')
     }
   }, [])
+
+  const headerTitle = useMemo(() => {
+    return navLinks.find(navLink => `/${navLink.href}` === location.pathname)?.name
+  }, [
+    location,
+    navLinks,
+  ])
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -253,9 +260,10 @@ export function DashboardLayout({ navLinks, darkModeEnabled }: DashboardLayoutPr
               </nav>
             </SheetContent>
           </Sheet>
+          <h1 className="text-lg font-semibold md:text-2xl text-foreground max-w-50">{headerTitle}</h1>
           <div className="w-full flex-1">
             {showSearch ? (
-              <Form action={location?.pathname}>
+              <Form action={location?.pathname} className="w-full">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground dark:text-muted-foreground peer-focus:text-foreground" />
                   <Input

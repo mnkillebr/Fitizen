@@ -136,7 +136,7 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
                   >
                     {/* <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div> */}
                     <img
-                      src={ex_item.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
+                      src={ex_item.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
                       className="h-16 rounded-sm"
                     />
                     <div className="flex flex-col">
@@ -178,7 +178,7 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
               >
                 {/* <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div> */}
                 <img
-                  src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
+                  src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
                   className="h-16 rounded-sm"
                 />
                 <div className="flex flex-col">

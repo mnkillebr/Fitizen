@@ -5,7 +5,7 @@ if (typeof AUTH_COOKIE_SECRET !== "string") {
   throw new Error("Missing env: AUTH_COOKIE_SECRET")
 }
 
-export const sessionCookie = createCookie("fitizer__session", {
+export const sessionCookie = createCookie("fitizen__session", {
   secrets: [AUTH_COOKIE_SECRET],
   httpOnly: true,
   secure: true,

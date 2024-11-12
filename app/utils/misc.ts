@@ -149,27 +149,57 @@ export function workoutLogFormDataToObject(formData: FormData): { [key: string]:
   let formDataObject: { [key: string]: any } = {};
 
   for (const [key, value] of formData.entries()) {
-      const keys = key.match(/([^\[\].]+)/g);
+    const keys = key.match(/([^\[\].]+)/g);
 
-      if (!keys) {
-          formDataObject[key] = value;
-          continue;
+    if (!keys) {
+      formDataObject[key] = value;
+      continue;
+    }
+
+    let current = formDataObject;
+    for (let i = 0; i < keys.length; i++) {
+      const prop = keys[i];
+      const nextProp = keys[i + 1];
+
+      if (nextProp !== undefined) {
+        if (!current[prop]) {
+          current[prop] = /^\d+$/.test(nextProp) ? [] : {};
+        }
+        current = current[prop];
+      } else {
+        current[prop] = value;
       }
+    }
+  }
 
-      let current = formDataObject;
-      for (let i = 0; i < keys.length; i++) {
-          const prop = keys[i];
-          const nextProp = keys[i + 1];
+  return formDataObject;
+}
 
-          if (nextProp !== undefined) {
-              if (!current[prop]) {
-                  current[prop] = /^\d+$/.test(nextProp) ? [] : {};
-              }
-              current = current[prop];
-          } else {
-              current[prop] = value;
-          }
+export function programLogFormDataToObject(formData: FormData): { [key: string]: any } {
+  let formDataObject: { [key: string]: any } = {};
+
+  for (const [key, value] of formData.entries()) {
+    const keys = key.match(/([^\[\].]+)/g);
+
+    if (!keys) {
+      formDataObject[key] = value;
+      continue;
+    }
+
+    let current = formDataObject;
+    for (let i = 0; i < keys.length; i++) {
+      const prop = keys[i];
+      const nextProp = keys[i + 1];
+
+      if (nextProp !== undefined) {
+        if (!current[prop]) {
+          current[prop] = /^\d+$/.test(nextProp) ? [] : {};
+        }
+        current = current[prop];
+      } else {
+        current[prop] = value;
       }
+    }
   }
 
   return formDataObject;

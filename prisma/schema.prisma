@@ -347,8 +347,10 @@ model ProgramLog {
   id            String        @id @default(cuid())
   user          User          @relation(fields: [userId], references: [id])
   userId        String
-  Program       Program       @relation(fields: [programId], references: [id])
+  program       Program       @relation(fields: [programId], references: [id])
   programId     String
+  programWeek   Int           @default(1)
+  programDay    Int           @default(1)
   date          DateTime      @default(now())
   duration      String        
   exerciseLogs  ProgramExerciseLog[]

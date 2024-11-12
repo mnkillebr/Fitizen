@@ -190,7 +190,7 @@ export default function Workouts() {
             className="w-full p-2 outline-none rounded-md"
           />
         </Form> */}
-        <h1 className="text-lg font-semibold md:text-2xl">Workouts</h1>
+        {/* <h1 className="text-lg font-semibold md:text-2xl">Workouts</h1> */}
         {data.role === "admin" ? (
           <createWorkoutFetcher.Form method="post">
             <PrimaryButton
@@ -297,7 +297,7 @@ function Workout({ workout, role }: WorkoutProps) {
     >
       <div className="flex flex-col overflow-hidden">
         <img
-          src="https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"
+          src="https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"
           className={clsx("w-full rounded-t-lg")}
         />
         <div className="flex justify-between">

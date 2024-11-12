@@ -1,5 +1,13 @@
-import { ExerciseTarget, Prisma } from "@prisma/client";
+import { ExerciseTarget, LoadUnit, Prisma, ProgramExerciseLog } from "@prisma/client";
 import db from "~/db.server";
+
+interface ProgramExerciseLogType extends ProgramExerciseLog {
+  set: string;
+  actualReps?: string;
+  load?: number;
+  notes?: string;
+  unit: LoadUnit,
+}
 
 export async function createIntroProgram() {
   try {
@@ -1355,8 +1363,10 @@ export function getProgramById(programId: string) {
                 include: {
                   exercises: {
                     select: {
+                      programBlockId: true,
                       exercise: {
                         select: {
+                          id: true,
                           name: true,
                           muxPlaybackId: true,
                           cues: true,
@@ -1378,13 +1388,13 @@ export function getProgramById(programId: string) {
   })
 }
 
-export async function getUserProgramLogs(userId: string, programId: string) {
+export async function getUserProgramLogsByProgramId(userId: string, programId: string) {
   try {
     const userProgramLogs = await db.programLog.findMany({
       where: {
         userId,
         programId,
-      }
+      },
     })
     return userProgramLogs
   } catch (error) {
@@ -1393,6 +1403,47 @@ export async function getUserProgramLogs(userId: string, programId: string) {
         return error.message
       }
     }
+    throw error
+  };
+}
+
+export async function saveUserProgramLog(userId: string, programId: string, programWeek: number, programDay: number, duration: string, exerciseLogs: Array<ProgramExerciseLogType>) {
+  try {
+    const createUserWorkoutLog = await db.programLog.create({
+      data: {
+        userId,
+        programId,
+        programWeek,
+        programDay,
+        duration,
+        exerciseLogs: {
+          create: exerciseLogs.map(log => ({
+            programBlockId: log.programBlockId,
+            exerciseId: log.exerciseId,
+            sets: {
+              create: [
+                {
+                  set: log.set,
+                  actualReps: log.actualReps,
+                  load: log.load,
+                  notes: log.notes,
+                  unit: log.unit,
+                },
+              ],
+            },
+          })),
+        },
+      },
+      include: {
+        exerciseLogs: true
+      },
+    })
+    return createUserWorkoutLog;
+  } catch (error) {
+    console.error('Error creating WorkoutLog with exercise logs:', error);
+    // if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    //   return error.message
+    // }
     throw error
   };
 }

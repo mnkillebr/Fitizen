@@ -1,5 +1,8 @@
+import MuxPlayer from '@mux/mux-player-react';
+import { Video } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
+import { useOpenDialog } from './Dialog';
 
 type ExerciseItemType = {
   id: string;
@@ -9,6 +12,9 @@ type ExerciseItemType = {
   time: string;
   notes: string;
   sets: string;
+  muxPlaybackId: string;
+  videoToken: string;
+  cues: string[];
 }
 
 interface CircuitLogProps {
@@ -78,6 +84,7 @@ interface PastLogProps {
 
 export function CircuitLog({ item, index, unitOptions, exerciseDetails, flatDetails }: CircuitLogProps) {
   const numSets = item.exercises.find((ex_item: ExerciseItemType) => ex_item.sets)?.sets as string;
+  const openDialog = useOpenDialog();
   return (
     <div key={`${item.circuitId}-${index}`} className="flex flex-col">
       <div className="flex gap-x-1 flex-nowrap">
@@ -103,6 +110,45 @@ export function CircuitLog({ item, index, unitOptions, exerciseDetails, flatDeta
                       <label className="text-xs font-semibold text-muted-foreground">Name</label>
                       <div>{ex_item.name}</div>
                     </div>
+                    {currentSet === 1 ? (
+                      <div className="flex flex-col">
+                        <label className="text-xs font-semibold text-muted-foreground">Video</label>
+                        <Video
+                          className="hover:cursor-pointer min-w-6"
+                          onClick={() => openDialog(
+                            <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
+                              <div className="w-full">
+                                <MuxPlayer
+                                  streamType="on-demand"
+                                  playbackId={ex_item.muxPlaybackId ? ex_item.muxPlaybackId : undefined}
+                                  tokens={{ playback: ex_item.videoToken, thumbnail: ex_item.videoToken }}
+                                  metadataVideoTitle="Placeholder (optional)"
+                                  metadataViewerUserId="Placeholder (optional)"
+                                  primaryColor="#FFFFFF"
+                                  secondaryColor="#000000"
+                                  style={{
+                                    aspectRatio: 9/16,
+                                    width: "100%",
+                                    height: "100%",
+                                    maxHeight: 640,
+                                    maxWidth: 360,
+                                  }}
+                                />
+                              </div>
+                              <div className="w-full">
+                                <div className="font-bold mb-2">Cues</div>
+                                <div className="flex-1">{ex_item.cues.map((cue, cue_idx) => (
+                                  <div key={cue_idx} className="flex w-full">
+                                    <div className="flex-none w-5">{cue_idx+1}.</div>
+                                    <div className="flex-1">{cue}</div>
+                                  </div>
+                                ))}</div>
+                              </div>
+                            </div>, ex_item.name
+                          )}
+                        />
+                      </div>
+                    ) : null}
                     {ex_item.target === "reps" ? (
                       <>
                         <div className="flex flex-col">
@@ -181,11 +227,46 @@ export function CircuitLog({ item, index, unitOptions, exerciseDetails, flatDeta
 }
 
 export function ExerciseLog({ item, index, unitOptions, exerciseDetails, flatDetails }: ExerciseLogProps) {
+  const openDialog = useOpenDialog();
   return (
     <div key={`${item.name}-${index}`} className="flex flex-col">
       <div className="flex gap-x-1 flex-nowrap">
         <div className="flex-none font-semibold w-28">{`Exercise #${exerciseDetails.filter(e => !e.exercises).findIndex(e => e.id === item.id) + 1}:`}</div>
-        <div className="flex-1 truncate">{item.name}</div>
+        <div className="max-w-60 truncate">{item.name}</div>
+        <Video
+          className="hover:cursor-pointer min-w-6 ml-4"
+          onClick={() => openDialog(
+            <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
+              <div className="w-full">
+                <MuxPlayer
+                  streamType="on-demand"
+                  playbackId={item.muxPlaybackId ? item.muxPlaybackId : undefined}
+                  tokens={{ playback: item.videoToken, thumbnail: item.videoToken }}
+                  metadataVideoTitle="Placeholder (optional)"
+                  metadataViewerUserId="Placeholder (optional)"
+                  primaryColor="#FFFFFF"
+                  secondaryColor="#000000"
+                  style={{
+                    aspectRatio: 9/16,
+                    width: "100%",
+                    height: "100%",
+                    maxHeight: 640,
+                    maxWidth: 360,
+                  }}
+                />
+              </div>
+              <div className="w-full">
+                <div className="font-bold mb-2">Cues</div>
+                <div className="flex-1">{item.cues.map((cue, cue_idx) => (
+                  <div key={cue_idx} className="flex w-full">
+                    <div className="flex-none w-5">{cue_idx+1}.</div>
+                    <div className="flex-1">{cue}</div>
+                  </div>
+                ))}</div>
+              </div>
+            </div>, item.name
+          )}
+        />
       </div>
       <div className="flex flex-col gap-y-2 p-2">
         {[...Array(parseInt(item.sets))].map((set: unknown, idx: number) => {

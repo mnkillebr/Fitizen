@@ -940,7 +940,7 @@ export default function Edit() {
                           }}
                         >
                           <img
-                            src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/v1724263117/cld-sample-3.jpg"}
+                            src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
                             className="w-full rounded-t"
                           />
                           <div className="flex flex-col p-4">

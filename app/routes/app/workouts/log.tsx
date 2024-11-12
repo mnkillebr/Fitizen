@@ -16,6 +16,7 @@ import { workoutLogFormDataToObject } from "~/utils/misc";
 import { saveUserWorkoutLog } from "~/models/workout.server";
 import { ExerciseTarget, LoadUnit } from "@prisma/client";
 import clsx from "clsx";
+import { generateMuxVideoToken } from "~/mux-tokens.server";
 
 const loadOptions = [
   "bw",
@@ -89,7 +90,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
   });
   const exerciseDetails = exerciseDetailsMap(workout?.exercises, exercises, false)
-  return json({ workout, exerciseDetails })
+  const tokenMappedDetails = exerciseDetails.map(detail => {
+    if (detail.exercises) {
+      return {
+        ...detail,
+        exercises: detail.exercises.map((ex_item: any) => ({
+          ...ex_item,
+          videoToken: generateMuxVideoToken(ex_item.muxPlaybackId),
+        }))
+      }
+    } else {
+      return {
+        ...detail,
+        videoToken: generateMuxVideoToken(detail.muxPlaybackId),
+      }
+    }
+  })
+  return json({ workout, exerciseDetails: tokenMappedDetails })
 }
 
 // Define Zod schema for form validation
@@ -183,7 +200,7 @@ export default function WorkoutLog() {
       }
     }, [])
   }, [exerciseDetails])
-  // console.log("details", flattenedDetails, exerciseDetails)
+
   return (
     <Form method="post" className="p-6 md:p-8 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
       <div className="flex">

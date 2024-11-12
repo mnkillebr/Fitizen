@@ -28,6 +28,7 @@ import { DialogProvider } from "./components/Dialog";
 import { Toaster } from "~/components/ui/sonner"
 import { DashboardLayout } from "./components/layout";
 import { darkModeCookie } from "./cookies";
+import { ChartIcon } from "images/icons";
 
 const navigation = [
   { name: "Settings", href: "settings" },
@@ -59,6 +60,12 @@ const dashNavigation = [
     icon: <CalendarIcon />,
     label: "Calendar",
   },
+  {
+    name: "Statistics",
+    href: "app/stats",
+    icon: <ChartIcon className="h-4 w-4"/>,
+    label: "Statistics",
+  },
 ]
 
 export const meta: MetaFunction = () => {
@@ -71,7 +78,6 @@ export const meta: MetaFunction = () => {
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: globalStyles },
-    // { rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/cloudinary-video-player/2.0.5/cld-video-player.min.css", crossOrigin: "anonymous", referrerPolicy: "no-referrer" }
   ];
 };
 
@@ -85,7 +91,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="bg-background">
-        {/* <script src="https://cdnjs.cloudflare.com/ajax/libs/cloudinary-video-player/2.0.5/cld-video-player.min.js" crossOrigin="anonymous" referrerPolicy="no-referrer"></script> */}
         <DialogProvider>
           {children}
         </DialogProvider>
