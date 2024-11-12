@@ -1,9 +1,8 @@
-import { LoaderFunctionArgs, json, redirect } from "@remix-run/node";
+import { LoaderFunctionArgs, json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
 import CurrentDate from "~/components/CurrentDate";
-import { PastCircuitLog, PastExerciseLog } from "~/components/logs";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 
