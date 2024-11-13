@@ -32,7 +32,7 @@ import { Input } from "~/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet"
 import { AppNavLink, MobileNavLink } from "./AppNavLink"
 import logo from "images/Sample Fitizen.png?url";
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useState } from "react"
 import clsx from "clsx"
 import { Switch } from "./ui/switch"
 import { MoonStarIcon } from "images/icons"
@@ -94,10 +94,10 @@ export function DashboardLayout({ avatar, navLinks, darkModeEnabled, initials }:
   useEffect(() => {
     if (darkModeEnabled) {
       setDarkMode(true)
-      document.documentElement.classList.add('dark')
+      // document.documentElement.classList.add('dark')
     } else {
       setDarkMode(false)
-      document.documentElement.classList.remove('dark')
+      // document.documentElement.classList.remove('dark')
     }
   }, [])
 

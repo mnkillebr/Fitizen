@@ -81,33 +81,12 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body className="bg-background">
-        <DialogProvider>
-          {children}
-        </DialogProvider>
-        <ScrollRestoration />
-        <Scripts />
-        <Toaster richColors />
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
-      </body>
-    </html>
-  );
-}
-
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getCurrentUser(request);
   const cookieHeader = request.headers.get("cookie");
 	const darkModeCookieValue = await darkModeCookie.parse(cookieHeader);
-  return json({ isLoggedIn: user !== null, darkMode: darkModeCookieValue, avatar: user?.profilePhotoUrl, initials: `${user?.firstName[0]}${user?.lastName[0]}` })
+  const darkMode = darkModeCookieValue === "true" ? true : false
+  return json({ isLoggedIn: user !== null, darkMode, avatar: user?.profilePhotoUrl, initials: `${user?.firstName[0]}${user?.lastName[0]}` })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -126,6 +105,53 @@ export async function action({ request }: ActionFunctionArgs) {
       return null;
     }
   }
+}
+
+const DarkModeScript = ({ darkMode }: { darkMode: boolean }) => {
+  const script = `
+  ;(() => {
+    const darkMode = ${JSON.stringify(darkMode)};
+    // we're running in the server
+    if (typeof window === 'undefined') {
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+      }
+      return;
+    }
+    // we're running in the browser
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  })()
+  `;
+
+  return <script dangerouslySetInnerHTML={{ __html: script }} />;
+};
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  const { darkMode } = useLoaderData<typeof loader>();
+  return (
+    <html lang="en" className={darkMode ? "dark" : ""}>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+        <DarkModeScript darkMode={darkMode} />
+      </head>
+      <body className="bg-background">
+        <DialogProvider>
+          {children}
+        </DialogProvider>
+        <ScrollRestoration />
+        <Scripts />
+        <Toaster richColors />
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+      </body>
+    </html>
+  );
 }
 
 export default function App() {
