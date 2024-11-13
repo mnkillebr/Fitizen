@@ -27,3 +27,28 @@ export function createUser(email: string, firstName: string, lastName: string) {
     }
   });
 };
+
+export function updateUserProfile(userId: string, email: string, firstName: string, lastName: string) {
+  return db.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      email,
+      firstName,
+      lastName,
+    }
+  })
+}
+
+export function updateUserProfilePhoto(userId: string, profilePhotoUrl: string, profilePhotoId: string) {
+  return db.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      profilePhotoUrl,
+      profilePhotoId,
+    }
+  })
+}

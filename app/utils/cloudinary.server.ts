@@ -119,3 +119,11 @@ export const uploadToCloudinary = async ({ name, contentType, data, filename }: 
 
   return uploadPromise;
 };
+
+export const deleteCloudinaryAsset = (public_id: string, resourceType: string = "image") => {
+  const destroyOptions = {
+    type: "private",
+    resource_type: resourceType,
+  };
+  cldInstance.api.delete_resources([public_id], destroyOptions);
+}

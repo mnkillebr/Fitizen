@@ -107,7 +107,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getCurrentUser(request);
   const cookieHeader = request.headers.get("cookie");
 	const darkModeCookieValue = await darkModeCookie.parse(cookieHeader);
-  return json({ isLoggedIn: user !== null, darkMode: darkModeCookieValue })
+  return json({ isLoggedIn: user !== null, darkMode: darkModeCookieValue, avatar: user?.profilePhotoUrl, initials: `${user?.firstName[0]}${user?.lastName[0]}` })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -129,7 +129,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function App() {
-  const { darkMode } = useLoaderData<typeof loader>();
+  const { avatar, darkMode, initials } = useLoaderData<typeof loader>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const matches = useMatches();
   const inAppRoute = matches.map(m => m.id).includes("routes/app");
@@ -140,7 +140,7 @@ export default function App() {
   }
 
   if (inAppRoute) {
-    return <DashboardLayout navLinks={dashNavigation} darkModeEnabled={darkMode} />
+    return <DashboardLayout navLinks={dashNavigation} darkModeEnabled={darkMode} avatar={avatar ?? undefined} initials={initials} />
     return (
       <div className="bg-white h-screen overflow-y-hidden">
         <div className="flex flex-col-reverse sm:flex-col md:flex-row h-full">

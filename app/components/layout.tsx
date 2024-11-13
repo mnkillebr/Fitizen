@@ -36,8 +36,11 @@ import { useEffect, useMemo, useState } from "react"
 import clsx from "clsx"
 import { Switch } from "./ui/switch"
 import { MoonStarIcon } from "images/icons"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 
 type DashboardLayoutProps = {
+  avatar?: string;
+  initials?: string;
   navLinks: Array<{
     name: string;
     href: string;
@@ -48,7 +51,7 @@ type DashboardLayoutProps = {
   // children: React.ReactNode;
 }
 
-export function DashboardLayout({ navLinks, darkModeEnabled }: DashboardLayoutProps) {
+export function DashboardLayout({ avatar, navLinks, darkModeEnabled, initials }: DashboardLayoutProps) {
   const [searchParams] = useSearchParams();
   const [headerSearch, setHeaderSearch] = useState(searchParams.get("q") ?? "")
   const [darkMode, setDarkMode] = useState(false)
@@ -99,6 +102,9 @@ export function DashboardLayout({ navLinks, darkModeEnabled }: DashboardLayoutPr
   }, [])
 
   const headerTitle = useMemo(() => {
+    if (location.pathname === "/app/profile") {
+      return "Profile"
+    }
     return navLinks.find(navLink => `/${navLink.href}` === location.pathname)?.name
   }, [
     location,
@@ -298,14 +304,28 @@ export function DashboardLayout({ navLinks, darkModeEnabled }: DashboardLayoutPr
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
                 {/* <CircleUser className="h-5 w-5" /> */}
-                <img className="rounded-full drop-shadow-lg" src="https://i.pravatar.cc/50?img=16"/>
+                <Avatar
+                  className="size-8"
+                >
+                  <AvatarImage
+                    src={avatar} 
+                    alt="profile_avatar"
+                  />
+                  <AvatarFallback>
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="dark:border-border-muted">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link to="/app/profile">
+                  Profile
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>

@@ -21,19 +21,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
     resource_type: "image",
     expires_at: 1726240141,
   })
-  const testVideo = cldInstance.video("samples/cld-sample-video", {quality: "auto", controls: true })
-  // const testVideoURL = cldInstance.url("samples/dance-2", {resource_type: "video", quality: "auto", controls: true })
-  const testVideoURL = cldInstance.utils.private_download_url("samples/dance-2", "mp4", {
-    resource_type: "video",
-    type: "upload",
-    // expires_at: 1726248512,
-  })
-  // console.log("test image url", testImage, "test video html", testVideo)
-  console.log("url", testVideoURL)
   // if (role !== "admin") {
   //   return redirect("/app")
   // }
-  return json({ image: testImage, video: testVideo, url: testVideoURL })
+  return json({ image: testImage })
 }
 
 type uploadActionType = {
@@ -48,27 +39,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     uploadToCloudinary,
     unstable_createMemoryUploadHandler()
   );
-
   const formData = await unstable_parseMultipartFormData(request, uploadHandler);
   const resultString = formData.get("file") as string | null;
-  // for (const [key, value] of formData.entries()) {
-  //   console.log("key", key, "value", JSON.stringify(value))
-  // }
-  // console.log(JSON.parse(result))
-  // console.log(result)
   if (!resultString) {
     return json({ error: "Upload failed" }, { status: 500 });
   }
-
   try {
     const result = JSON.parse(resultString) as CloudinaryUploadResult;
-    console.log("upload result", result)
     return json({ success: true, url: result.url, filename: result.filename });
   } catch (error) {
-    console.error("Failed to parse upload result:", error);
     return json({ error: "Failed to process upload result" }, { status: 500 });
   }
-  // return json({ success: true, url: result?.url, filename: result?.filename });
 };
 
 export default function Upload() {
@@ -88,7 +69,7 @@ export default function Upload() {
       <h1 className="text-2xl font-bold mb-4">File Upload</h1>
       <Form ref={formRef} method="post" encType="multipart/form-data" className="space-y-4">
         <div>
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="file" className="block text-sm font-medium text-foreground">
             Choose a file
           </label>
           <input
@@ -118,7 +99,7 @@ export default function Upload() {
       <img src={data?.image} />
       {/* <div dangerouslySetInnerHTML={{ __html: data.video }} /> */}
       {/* <video controls controlsList="nodownload" src={data.url} /> */}
-      <VideoPlayer height="540" width="960" />
+      {/* <VideoPlayer height="540" width="960" /> */}
       {actionData?.success && (
         <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
           Successfully uploaded {actionData.filename}
