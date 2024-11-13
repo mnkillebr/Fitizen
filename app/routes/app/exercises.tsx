@@ -17,6 +17,7 @@ import { CheckCircleIcon, PlusCircleIcon } from "images/icons";
 import { darkModeCookie } from "~/cookies";
 import MuxPlayer from '@mux/mux-player-react';
 import { generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
+import { hash } from "~/cryptography.server";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -57,7 +58,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
   })
-  return json({ exercises: tokenMappedExercises, role })
+  const exercisesEtag = hash(JSON.stringify(tokenMappedExercises))
+  return json(
+    {
+      exercises: tokenMappedExercises,
+      role
+    },
+    {
+      headers: {
+        exercisesEtag,
+        "Cache-control": "max-age=600, stale-while-revalidate=3600"
+      }
+    })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -213,6 +225,7 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
   //   accept: 'exerciseItem',
   //   drop: (item: ExerciseItemProps) => onDragExercise(item),
   // });
+
 
   return isDeletingExercise ? null : (
     <div

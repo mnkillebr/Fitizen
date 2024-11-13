@@ -18,50 +18,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
       // routineId: workoutId,
     },
     include: {
+      routine: {
+        select: {
+          name: true,
+        },
+      },
       exerciseLogs: {
         include: {
+          exercise: {
+            select: {
+              name: true,
+            },
+          },
           sets: true,
         },
       },
     },
   });
-  const workoutName = await db.routine.findUnique({
-    where: {
-      id: userLog?.routineId,
-      userId: user.id,
-    },
-    select: {
-      name: true,
-    },
-  });
-  const exerciseIds = userLog?.exerciseLogs.map(e => e.exerciseId)
-  const exerciseNames = await db.exercise.findMany({
-    where: {
-      id: {
-        in: exerciseIds,
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-    }
-  })
   if (userLog !== null && userLog.userId !== user.id) {
     throw redirect("/app", 401)
   }
   const nameMappedUserLog = {
     ...userLog,
-    exerciseLogs: userLog?.exerciseLogs.map(log => {
-      const match = exerciseNames.find(eName => eName.id === log.exerciseId)
-      if (match) {
-        return {
-          ...log,
-          exerciseName: match.name,
-        }
-      } else {
-        return log
-      }
-    }).reduce((result: any, curr: any) => {
+    exerciseLogs: userLog?.exerciseLogs.map(log => ({
+      ...log,
+      exerciseName: log.exercise.name,
+    })).reduce((result: any, curr: any) => {
       let resultArr = result
       if (resultArr.length && resultArr.find((item: any) => item.circuitId === curr.circuitId && curr.circuitId !== null)) {
         resultArr = resultArr.map((res_item: any) => {
@@ -125,7 +107,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     }, [])
   }
-  return json({ userLog: nameMappedUserLog, workoutName })
+  return json({ userLog: nameMappedUserLog })
 };
 
 export async function action() {
@@ -147,7 +129,7 @@ export default function LogView() {
       </div>
       <div className="flex flex-col">
         <div className="font-medium text-xs text-muted-foreground">Workout Name</div>
-        <div className="font-semibold text-md">{data.workoutName?.name}</div>
+        <div className="font-semibold text-md">{data.userLog.routine?.name}</div>
       </div>
       <div className="font-semibold text-lg">Logged Exercises</div>
       <div

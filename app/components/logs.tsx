@@ -355,53 +355,75 @@ export function ExerciseLog({ item, index, unitOptions, exerciseDetails, flatDet
 }
 
 export function PastCircuitLog({ exercise, index, logs }: PastLogProps) {
+  const circuitMappedExercises = exercise.sets.reduce((result: any, curr: any) => {
+    let resultArr = result
+    if (resultArr.find((obj: { set: number }) => obj.set === parseInt(curr.set))) {
+      resultArr = resultArr.map((obj: { set: number, exercises: Array<{ orderInRoutine: number }> }) => {
+        if (obj.set === parseInt(curr.set)) {
+          return {
+            ...obj,
+            exercises: obj.exercises.concat(curr).sort((a, b) => a.orderInRoutine - b.orderInRoutine)
+          }
+        } else {
+          return obj
+        }
+      })
+    } else {
+      resultArr = resultArr.concat({
+        set: parseInt(curr.set),
+        exercises: [curr],
+      })
+    }
+    return resultArr
+  }, [])
   return (
     <div key={`${exercise.circuitId}-${index}`} className="flex flex-col">
       <div className="flex gap-x-1 flex-nowrap">
         <div className="flex-none font-semibold w-28">{`Circuit #${logs.filter((e: any) => e.circuitId).findIndex((e: any) => e.circuitId === exercise.circuitId) + 1}:`}</div>
       </div>
       <div className="border-2 border-dashed border-gray-200 p-2 rounded shadow-inner flex flex-col gap-y-2">
-        {exercise.sets.map((set: SetType, idx: number) =>
+        {circuitMappedExercises.map((set: any, idx: number) =>
           <div key={`${index}-${idx}`} className="border rounded bg-slate-100 dark:border-none dark:bg-background dark:shadow-sm dark:shadow-border-muted px-2 py-1">
-            <div className="flex w-full mb-1">
-              <div className="text-base font-semibold mr-6">{`Set ${set.set}`}</div>
-              <div className="flex flex-col sm:w-56 truncate">{set.name}</div>
-            </div>
-            <div className="flex flex-wrap gap-x-6">
-              {/* <div className="flex flex-col w-full sm:w-56 truncate">
-                <label className="text-xs font-semibold">Name</label>
-                <div>{set.name}</div>
-              </div> */}
-              {set.target === "reps" ? (
-                <>
+            <div className="text-base font-semibold mr-6">{`Set ${set.set}`}</div>
+            {set.exercises.map((ex_item: SetType, ex_idx: number) => (
+              <div key={`${ex_item.name}-${ex_idx}`} className="py-1">
+                <div className="flex flex-wrap gap-x-6">
+                  <div className="flex flex-col w-full sm:w-56 truncate">
+                    <label className="text-xs font-semibold text-muted-foreground">Name</label>
+                    <div>{ex_item.name}</div>
+                  </div>
+                  {ex_item.target === "reps" ? (
+                    <>
+                      <div className="flex flex-col">
+                        <label className="text-xs font-semibold text-muted-foreground">Target Reps</label>
+                        <div className="text-start">{ex_item?.targetReps}</div>
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-xs font-semibold text-muted-foreground">Actual Reps</label>
+                        <div className="text-start">{ex_item?.actualReps}</div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col">
+                      <label className="text-xs font-semibold capitalize text-muted-foreground">Time</label>
+                      <div className="text-start">{ex_item?.time}</div>
+                    </div>
+                  )}
                   <div className="flex flex-col">
-                    <label className="text-xs font-semibold text-muted-foreground">Target Reps</label>
-                    <div className="text-start">{set?.targetReps}</div>
+                    <label className="text-xs font-semibold text-muted-foreground">Load</label>
+                    <div className="text-start">{ex_item?.load}</div>
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-xs font-semibold text-muted-foreground">Actual Reps</label>
-                    <div className="text-start">{set?.actualReps}</div>
+                    <label className="text-xs font-semibold text-muted-foreground">Load Units</label>
+                    <div className="text-start">{ex_item?.unit === "kilogram" ? "kg(s)" : ex_item?.unit === "pound" ? "lb(s)": ex_item?.unit}</div>
                   </div>
-                </>
-              ) : (
-                <div className="flex flex-col">
-                  <label className="text-xs font-semibold capitalize text-muted-foreground">Time</label>
-                  <div className="text-start">{set?.time}</div>
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-muted-foreground">Notes</label>
+                    <div className="text-start">{ex_item?.notes}</div>
+                  </div>
                 </div>
-              )}
-              <div className="flex flex-col">
-                <label className="text-xs font-semibold text-muted-foreground">Load</label>
-                <div className="text-start">{set?.load}</div>
               </div>
-              <div className="flex flex-col">
-                <label className="text-xs font-semibold text-muted-foreground">Load Units</label>
-                <div className="text-start">{set?.unit === "kilogram" ? "kg(s)" : set?.unit === "pound" ? "lb(s)": set?.unit}</div>
-              </div>
-              <div className="flex flex-col">
-                <label className="text-xs font-semibold text-muted-foreground">Notes</label>
-                <div className="text-start">{set?.notes}</div>
-              </div>
-            </div>
+            ))}
           </div>
         )}
       </div>

@@ -40,8 +40,6 @@ interface deleteWorkoutFetcherType extends ActionFunctionArgs{
   }
 }
 
-const tabOptions = ["Warmup", "Main", "Cooldown"]
-
 function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undefined, exerciseDetails: Array<ExerciseType>) {
   if (routineExercises) {
     const detailedExercises = routineExercises.map((item) => {

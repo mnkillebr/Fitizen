@@ -4,6 +4,7 @@ import { Outlet, useLoaderData, useMatches, useNavigate } from "@remix-run/react
 // import squatGirl from "images/squat_lady.jpeg"
 import { z } from "zod";
 import { darkModeCookie } from "~/cookies";
+import { hash } from "~/cryptography.server";
 import { getAllPrograms } from "~/models/program.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { validateForm } from "~/utils/validation";
@@ -15,7 +16,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const programs = await getAllPrograms(query);
-  return json({ programs, });
+  const programsEtag = hash(JSON.stringify(programs))
+
+  if (programsEtag === request.headers.get("if-none-match")) {
+    return new Response(null, { status: 304 })
+  }
+
+  return json(
+    { programs },
+    { headers: {
+        programsEtag,
+        "Cache-control": "max-age=60, stale-while-revalidate=3600"
+      }
+    });
 }
 
 const themeSchema = z.object({
