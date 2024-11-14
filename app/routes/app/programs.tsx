@@ -75,7 +75,7 @@ export default function Programs() {
   return (
     <div className="p-6 md:p-8 flex flex-col h-full gap-x-6 gap-y-4 snap-y snap-mandatory overflow-y-auto bg-background">
       {/* <h1 className="text-lg font-semibold md:text-2xl text-foreground">Programs</h1> */}
-      {programs.map((program, program_idx) => (
+      {programs.map((program: any, program_idx: number) => (
         <div
           key={program_idx}
           className="relative flex-1 shadow-md dark:shadow-border-muted dark:border dark:border-border-muted cursor-pointer rounded-lg hover:shadow-primary transition duration-150 bg-cover bg-top snap-start text-center"

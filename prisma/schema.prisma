@@ -35,6 +35,48 @@ model User {
   scheduledAppointments Appointment[]
 
   role                  Role
+  fitnessProfile        FitnessProfile?
+}
+
+model FitnessProfile {
+  id                                  String        @id @default(cuid())
+  user                                User          @relation(fields: [userId], references: [id])
+  userId                              String        @unique
+  unit                                LoadUnit      @default(pound)
+  currentWeight                       Int?
+  targetWeight                        Int?
+  goal_fatLoss                             Boolean?
+  goal_endurance                           Boolean?
+  goal_buildMuscle                         Boolean?
+  goal_loseWeight                          Boolean?
+  goal_improveBalance                      Boolean?
+  goal_improveFlexibility                  Boolean?
+  goal_learnNewSkills                      Boolean?
+  parq_heartCondition                      Boolean?
+  parq_chestPainActivity                   Boolean?
+  parq_chestPainNoActivity                 Boolean?
+  parq_balanceConsciousness                Boolean?
+  parq_boneJoint                           Boolean?
+  parq_bloodPressureMeds                   Boolean?
+  parq_otherReasons                        Boolean?
+  operational_occupation                          String?
+  operational_extendedSitting                     Boolean?
+  operational_repetitiveMovements                 Boolean?
+  operational_explanation_repetitiveMovements     String?
+  operational_heelShoes                           Boolean?
+  operational_mentalStress                        Boolean?
+  recreational_physicalActivities                  Boolean?
+  recreational_explanation_physicalActivities      String?
+  recreational_hobbies                             Boolean?
+  recreational_explanation_hobbies                 String?
+  medical_injuriesPain                        Boolean?
+  medical_explanation_injuriesPain            String?
+  medical_surgeries                           Boolean?
+  medical_explanation_surgeries               String?
+  medical_chronicDisease                      Boolean?
+  medical_explanation_chronicDisease          String?
+  medical_medications                         Boolean?
+  medical_explanation_medications             String?
 }
 
 model SocialLogin {

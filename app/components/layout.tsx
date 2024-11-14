@@ -326,7 +326,7 @@ export function DashboardLayout({ avatar, navLinks, darkModeEnabled, initials }:
                   Profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
+              <DropdownMenuItem disabled>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

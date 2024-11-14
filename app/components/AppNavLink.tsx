@@ -1,12 +1,51 @@
 import { NavLink, useNavigation, useResolvedPath } from "@remix-run/react";
 import clsx from "clsx";
 
+type NavLinkRenderProps = {
+  isActive: boolean;
+  isPending: boolean;
+};
+
+type ClassNameProp = 
+  | string 
+  | ((props: NavLinkRenderProps) => string)
+  | undefined;
+
+type ChildrenProp = 
+  | React.ReactNode
+  | ((props: NavLinkRenderProps) => React.ReactNode);
+
+type TypeSafeNavLinkProps = {
+  to: string;
+  children: ChildrenProp;
+  className?: ClassNameProp;
+};
+
+const TypeSafeNavLink = ({ 
+  to, 
+  children,
+  className,
+}: TypeSafeNavLinkProps) => {
+  return (
+    <NavLink 
+      to={to} 
+      className={className}
+    >
+      {typeof children === "function"
+        ? (props: NavLinkRenderProps) => children(props)
+        : children
+      }
+    </NavLink>
+  );
+};
+
 type RootNavLinkProps = {
   to: string;
-  children: React.ReactNode;
+  children: ChildrenProp;
+  className?: ClassNameProp;
 }
 
-export function RootNavLink({ to, children }: RootNavLinkProps) {
+export function RootNavLink({ to, children }: TypeSafeNavLinkProps) {
   const path = useResolvedPath(to);
   const navigation = useNavigation();
 
@@ -17,7 +56,7 @@ export function RootNavLink({ to, children }: RootNavLinkProps) {
 
 
   return (
-    <NavLink
+    <TypeSafeNavLink
       to={to}
       className={({ isActive }) =>
         `text-md font-semibold transition duration-200 rounded px-4 py-2 ${
@@ -28,11 +67,11 @@ export function RootNavLink({ to, children }: RootNavLinkProps) {
       }
     >
       {children}
-    </NavLink>
+    </TypeSafeNavLink>
   )
 }
 
-export function AppNavLink({ to, children }: RootNavLinkProps) {
+export function AppNavLink({ to, children }: TypeSafeNavLinkProps) {
   const path = useResolvedPath(to);
   const navigation = useNavigation();
 
@@ -42,7 +81,7 @@ export function AppNavLink({ to, children }: RootNavLinkProps) {
     navigation.formData === undefined;
 
   return (
-    <NavLink
+    <TypeSafeNavLink
       to={to}
       className={({ isActive }) => clsx(
         "rounded-lg flex gap-3 items-center px-3 py-2 text-sm transition duration-100",
@@ -51,11 +90,11 @@ export function AppNavLink({ to, children }: RootNavLinkProps) {
       )}
     >
       {children}
-    </NavLink>
+    </TypeSafeNavLink>
   )
 }
 
-export function MobileNavLink({ to, children }: RootNavLinkProps) {
+export function MobileNavLink({ to, children }: TypeSafeNavLinkProps) {
   const path = useResolvedPath(to);
   const navigation = useNavigation();
 

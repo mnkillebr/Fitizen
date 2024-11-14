@@ -228,7 +228,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           <div
             key={day.toString()}
             className={clsx(
-              "p-2 border dark:border-border-muted rounded-lg overflow-y-auto h-full relative",
+              "p-2 border dark:border-border-muted rounded-lg overflow-hidden h-full relative",
               !isSameMonth(day, monthStart) ? "text-muted-foreground/65" : "",
               "hover:bg-primary/10 dark:hover:bg-primary/20 transition duration-100 bg-background-muted"
             )}
@@ -251,7 +251,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
             >
               {formattedDate}
             </div>
-            <div className="flex flex-col gap-y-1">
+            <div className="flex flex-col gap-y-1 overflow-y-auto">
               {/* Overflow behavior needs revisit */}
               {nonRecurringDayEvents.map((evt: any) => <EventChip key={evt.id} event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
               {dailyRecurringSessions.map((evt: any) => <EventChip key={evt.id} event={evt} handleClick={(event) => handleEventClick(event, cloneDay)} />)}
