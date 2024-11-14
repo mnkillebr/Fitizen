@@ -19,6 +19,7 @@ import { FitnessSettings } from "~/components/FitnessSettings";
 import { LoadUnit } from "@prisma/client";
 import db from "~/db.server";
 import { getSession } from "~/sessions";
+import { darkModeCookie } from "~/cookies";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("cookie");
@@ -124,6 +125,11 @@ const updateFitnessProfileSchema = z.object({
   explanation_medications: z.string().optional(),
 })
 
+const themeSchema = z.object({
+  darkMode: z.string(),
+})
+
+
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireLoggedInUser(request);
 
@@ -205,6 +211,18 @@ export async function action({ request }: ActionFunctionArgs) {
           return updateUserFitnessProfile(user.id, fitnessProfileObj)
           // return null
         },
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
         (errors) => json({ errors }, { status: 400 })
       )
     }

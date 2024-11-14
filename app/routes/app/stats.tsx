@@ -2,10 +2,13 @@ import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 import { LineChartComponent } from "~/components/LineChartComponent";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectTrigger, SelectValue, SelectItem } from "~/components/ui/select";
+import { darkModeCookie } from "~/cookies";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
+import { validateForm } from "~/utils/validation";
 
 const metricOptions = [
   { label: "Time Load (pounds)", value: "timeLoad" },
@@ -269,8 +272,29 @@ export async function loader({ request }: LoaderFunctionArgs) {
   })
 }
 
+const themeSchema = z.object({
+  darkMode: z.string(),
+})
+
 export const action = async ({ request }: ActionFunctionArgs) => {
-  return null
+  const formData = await request.formData()
+  switch (formData.get("_action")) {
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    default: {
+      return null;
+    }
+  }
 }
 
 export default function Stats() {
