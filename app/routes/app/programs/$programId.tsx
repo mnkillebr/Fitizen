@@ -7,11 +7,33 @@ import CustomCarousel from "~/components/CustomCarousel";
 import { createIntroProgram, getProgramById, getUserProgramLogsByProgramId } from "~/models/program.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { ProgramLog } from "@prisma/client";
+import { validateForm } from "~/utils/validation";
+import { darkModeCookie } from "~/cookies";
+import { z } from "zod";
+
+const themeSchema = z.object({
+  darkMode: z.string(),
+})
 
 export async function action({ request }: ActionFunctionArgs) {
-  // const program = await createIntroProgram()
-  // console.log("here", program)
-  return null
+  const formData = await request.formData()
+  switch (formData.get("_action")) {
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    default: {
+      return null;
+    }
+  }
 }
 
 export async function loader({ params, request }: LoaderFunctionArgs) {

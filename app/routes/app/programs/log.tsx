@@ -15,12 +15,13 @@ import { PrimaryButton } from "~/components/form";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { darkModeCookie } from "~/cookies";
 import db from "~/db.server";
 import { getProgramById, getUserProgramLogsByProgramId, saveUserProgramLog } from "~/models/program.server";
 import { generateMuxVideoToken } from "~/mux-tokens.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { programLogFormDataToObject } from "~/utils/misc";
-import { validateObject } from "~/utils/validation";
+import { validateForm, validateObject } from "~/utils/validation";
 
 const unitOptions = [
   { value: "bw", label: "Bodyweight" },
@@ -254,6 +255,10 @@ const programLogSchema = z.object({
   })).min(1, "You must log at least one exercise"),
 });
 
+const themeSchema = z.object({
+  darkMode: z.string(),
+})
+
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const formData = await request.formData();
@@ -283,8 +288,22 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    default: {
+      return null;
+    }
   }
-  return null
 }
 
 export default function ProgramLog() {

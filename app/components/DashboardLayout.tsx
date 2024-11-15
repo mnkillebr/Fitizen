@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { Link, Outlet, useLocation, useMatches } from "@remix-run/react";
+import { Link, Outlet, useLocation, useMatches, useSubmit } from "@remix-run/react";
 import { AppSidebar } from "~/components/AppSidebar"
 import {
   Breadcrumb,
@@ -20,9 +20,12 @@ import {
   Calendar,
   ChartLine,
   Flame,
+  MoonStar,
+  Sun,
   Table,
 } from "lucide-react"
 import { useMemo, } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const navLinks = [
   {
@@ -59,6 +62,7 @@ interface DashboardLayoutProps {
 export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutProps) {
   const location = useLocation();
   const matches = useMatches();
+  const submit = useSubmit();
   const headerTitle = useMemo(() => {
     if (location.pathname === "/app/profile") {
       return {
@@ -107,12 +111,24 @@ export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutPro
     navLinks,
     matches,
   ])
+  const toggleDarkMode = () => {
+    return submit(
+      {
+        "_action": "toggleDarkMode",
+        darkMode: !darkModeEnabled,
+      },
+      {
+        method: "post",
+        action: location?.pathname + location?.search,
+      }
+    )
+  }
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} darkModeEnabled={darkModeEnabled} navLinks={navLinks} />
+      <AppSidebar user={user} navLinks={navLinks} />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 justify-between">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -157,6 +173,15 @@ export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutPro
               </BreadcrumbList>
             </Breadcrumb>
           </div>
+          <Tooltip delayDuration={200}>
+            <TooltipTrigger>
+              {darkModeEnabled ? <MoonStar className="mr-8 hover:text-primary" size={20} onClick={toggleDarkMode}/> : <Sun className="mr-8 hover:text-primary" size={20} onClick={toggleDarkMode}/>}
+            </TooltipTrigger>
+            <TooltipContent>
+              {darkModeEnabled ? "Dark Mode Enabled" : "Toggle Dark Mode"}
+            </TooltipContent>
+          </Tooltip>
+          
         </header>
         <div className="flex flex-1 flex-col gap-4 px-4 pt-0">
           <Outlet />

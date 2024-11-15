@@ -1,10 +1,13 @@
-import { LoaderFunctionArgs, json } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
+import { z } from "zod";
 import CurrentDate from "~/components/CurrentDate";
+import { darkModeCookie } from "~/cookies";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
+import { validateForm } from "~/utils/validation";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
@@ -106,8 +109,29 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return json({ userLog, mappedBlocks })
 };
 
-export async function action() {
-  return null
+const themeSchema = z.object({
+  darkMode: z.string(),
+})
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData()
+  switch (formData.get("_action")) {
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    default: {
+      return null;
+    }
+  }
 }
 
 export default function LogView() {

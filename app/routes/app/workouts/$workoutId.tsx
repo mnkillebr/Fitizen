@@ -28,6 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip"
+import { darkModeCookie } from "~/cookies";
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
@@ -305,6 +306,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   });
 }
 
+const themeSchema = z.object({
+  darkMode: z.string(),
+})
+
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const formData = await request.formData();
@@ -343,6 +348,18 @@ export async function action({ request }: ActionFunctionArgs) {
           }
           return createUserWorkoutSession(user.id, workoutId, sessionObj)
         },
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
         (errors) => json({ errors }, { status: 400 })
       )
     }

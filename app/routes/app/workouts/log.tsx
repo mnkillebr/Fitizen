@@ -11,13 +11,14 @@ import CurrentDate from "~/components/CurrentDate";
 import { PrimaryButton } from "~/components/form";
 import { CircuitLog, ExerciseLog, } from "~/components/logs";
 import { z } from "zod";
-import { validateObject } from "~/utils/validation";
+import { validateForm, validateObject } from "~/utils/validation";
 import { workoutLogFormDataToObject } from "~/utils/misc";
 import { saveUserWorkoutLog } from "~/models/workout.server";
 import { ExerciseTarget, LoadUnit } from "@prisma/client";
 import clsx from "clsx";
 import { generateMuxVideoToken } from "~/mux-tokens.server";
 import { HeaderContext } from "~/components/AppSideBarHeaderContext";
+import { darkModeCookie } from "~/cookies";
 
 const loadOptions = [
   "bw",
@@ -135,6 +136,10 @@ const workoutLogSchema = z.object({
   // _action: z.string(),
 });
 
+const themeSchema = z.object({
+  darkMode: z.string(),
+})
+
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const formData = await request.formData();
@@ -161,8 +166,22 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    default: {
+      return null;
+    }
   }
-  return null
 }
 
 export default function WorkoutLog() {

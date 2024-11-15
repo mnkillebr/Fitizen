@@ -22,7 +22,7 @@ import { User } from "@prisma/client";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: User;
-  darkModeEnabled: boolean;
+  // darkModeEnabled: boolean;
   navLinks: {
     title: string
     url: string
