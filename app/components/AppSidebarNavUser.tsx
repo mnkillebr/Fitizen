@@ -1,5 +1,4 @@
-"use client"
-
+import { useNavigate, useSubmit } from "@remix-run/react"
 import {
   BadgeCheck,
   Bell,
@@ -7,6 +6,7 @@ import {
   CreditCard,
   LogOut,
   Sparkles,
+  UserPen,
 } from "lucide-react"
 
 import {
@@ -39,7 +39,13 @@ export function NavUser({
     avatar: string
   }
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
+  const navigate = useNavigate();
+  const submit = useSubmit();
+
+  const handleLogout = () => {
+    return submit({ "_action": "logout" }, { action: "/", method: "post" })
+  }
 
   return (
     <SidebarMenu>
@@ -80,30 +86,13 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+            <DropdownMenuItem className="flex gap-2" onClick={() => navigate("app/profile")}>
+              <UserPen size={20}/>
+              Profile
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
+            <DropdownMenuItem className="flex gap-2" onClick={handleLogout}>
+              <LogOut size="20" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

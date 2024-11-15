@@ -314,7 +314,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-6 md:p-8 flex flex-col h-full select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
+    <div className="px-2 md:px-3 flex flex-col h-full select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
       <Tabs defaultValue="general" className="w-full">
         <TabsList>
           <TabsTrigger value="general">General Settings</TabsTrigger>
@@ -448,7 +448,7 @@ export default function Profile() {
         <TabsContent value="fitness">
           <fitnessProfileFetcher.Form method="post" className="flex flex-col gap-y-4">
             <div className="text-muted-foreground -mt-2">Keep your fitness profile up to date.</div>
-            <ScrollArea className="h-[calc(100vh-16rem)] lg:h-[calc(100vh-16.5rem)]">
+            <ScrollArea className="h-[calc(100vh-16rem)] lg:h-[calc(100vh-12.5rem)]">
               <FitnessSettings fitnessProfile={user.fitnessProfile} />
             </ScrollArea>
             <div className="flex justify-end">
