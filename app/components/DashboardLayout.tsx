@@ -127,7 +127,7 @@ export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutPro
   return (
     <SidebarProvider>
       <AppSidebar user={user} navLinks={navLinks} />
-      <SidebarInset>
+      <SidebarInset className="max-w-8xl mx-auto">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 justify-between">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
@@ -174,8 +174,8 @@ export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutPro
             </Breadcrumb>
           </div>
           <Tooltip delayDuration={200}>
-            <TooltipTrigger>
-              {darkModeEnabled ? <MoonStar className="mr-8 hover:text-primary" size={20} onClick={toggleDarkMode}/> : <Sun className="mr-8 hover:text-primary" size={20} onClick={toggleDarkMode}/>}
+            <TooltipTrigger className="*:mr-5 *:hover:text-primary">
+              {darkModeEnabled ? <MoonStar size={20} onClick={toggleDarkMode}/> : <Sun size={20} onClick={toggleDarkMode}/>}
             </TooltipTrigger>
             <TooltipContent>
               {darkModeEnabled ? "Dark Mode Enabled" : "Toggle Dark Mode"}

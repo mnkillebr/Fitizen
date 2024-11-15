@@ -31,7 +31,7 @@ import {
 import { Input } from "~/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet"
 import { AppNavLink, MobileNavLink } from "./AppNavLink"
-import logo from "images/Sample Fitizen.png?url";
+import logo from "images/fitizen_logo.svg?url";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react"
 import clsx from "clsx"
 import { Switch } from "./ui/switch"

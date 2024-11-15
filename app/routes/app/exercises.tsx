@@ -154,7 +154,7 @@ export default function ExerciseLibrary() {
         ) : null}
       </div> */}
       {/* <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1"> */}
-      <div className="flex flex-col gap-y-3 pb-5 md:pb-7 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
+      <div className="flex flex-col gap-y-3 pb-6 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
         {exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={role} onViewExercise={() => {
             openDialog(

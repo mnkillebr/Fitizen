@@ -45,6 +45,7 @@ export function AppSidebar({ navLinks, user, ...props }: AppSidebarProps) {
       <SidebarFooter>
         <NavUser user={{
           name: `${user.firstName} ${user.lastName}`,
+          initials: `${user.firstName[0]}${user.lastName[0]}`,
           email: user.email,
           avatar: user.profilePhotoUrl ?? "",
         }} />

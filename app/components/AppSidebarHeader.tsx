@@ -1,6 +1,6 @@
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "~/components/ui/sidebar"
 import { useNavigate } from "@remix-run/react"
-import logo from "images/Sample Fitizen.png?url";
+import logo from "images/fitizen_logo.svg?url";
 
 export function SidebarHeaderButton() {
   const navigate = useNavigate();

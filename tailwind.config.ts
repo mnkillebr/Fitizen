@@ -9,6 +9,9 @@ export default {
   		screens: {
   			xs: '431px'
   		},
+			maxWidth: {
+				'8xl': '1440px',
+			},
   		colors: {
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',

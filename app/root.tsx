@@ -19,7 +19,7 @@ import globalStyles from "~/tailwind.css?url";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, FireIcon, TableCellsIcon } from "@heroicons/react/24/solid";
-import logo from "images/Sample Fitizen.png?url";
+import logo from "images/fitizen_logo.svg?url";
 import { AppNavLink, MobileNavLink, RootNavLink } from "./components/AppNavLink";
 import { getCurrentUser } from "./utils/auth.server";
 import { destroySession, getSession } from "./sessions";

@@ -216,7 +216,7 @@ export default function Workouts() {
           Create Workout
         </Link>
       </div>
-      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2 pb-6 md:pb-7">
+      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2 pb-6">
         {data.workouts.map((workout) => (
           <Workout key={workout.id} workout={workout} role={data.role} />
         ))}
