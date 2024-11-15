@@ -114,20 +114,30 @@ export default function LogView() {
   const data = useLoaderData<typeof loader>();
 
   return (
-    <div className="py-6 px-5 md:px-7 md:py-8 flex flex-col h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)] gap-y-3 select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
-      <div className="flex">
+    <div className="px-2 pt-0 md:px-3 md:pt-0 flex flex-col h-[calc(100vh-4rem)] gap-y-3 select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
+      {/* <div className="flex">
         <Link to={`/app/programs/${data.userLog?.programId}`}>
           <ChevronLeft className="hover:text-primary" />
         </Link>
-      </div>
+      </div> */}
       <div className="flex justify-between items-center">
-        <div className="font-semibold text-lg">Program Log</div>
+        <Link
+          to={`/app/programs/${data.userLog?.programId}`}
+          className={clsx(
+            "flex items-center text-primary-foreground bg-primary",
+            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+            "text-sm"
+          )}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <div className="">Back</div>
+        </Link>
         <div className="*:text-sm"><CurrentDate incomingDate={data.userLog?.date} /></div>
       </div>
-      <div className="flex flex-col">
+      {/* <div className="flex flex-col">
         <div className="font-semibold text-md">{data.userLog?.program.name}</div>
         <div className="font-medium text-xs text-muted-foreground">Week {data.userLog?.programWeek} - Day {data.userLog?.programDay}</div>
-      </div>
+      </div> */}
       <div className="font-semibold text-lg">Logged Exercises</div>
       <div
         className={clsx(

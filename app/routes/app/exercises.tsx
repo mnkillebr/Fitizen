@@ -136,7 +136,7 @@ export default function ExerciseLibrary() {
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
 
   return (
-    <div className="px-5 md:px-7 flex flex-col gap-y-4 bg-background h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
+    <div className="px-1 pt-0 md:px-2 md:pt-0 flex flex-col gap-y-4 bg-background h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-4rem)]">
       {/* <div className="flex flex-col gap-y-4">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground px-1">Exercises</h1>
         {role === "admin" ? (
@@ -154,7 +154,7 @@ export default function ExerciseLibrary() {
         ) : null}
       </div> */}
       {/* <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1"> */}
-      <div className="flex flex-col gap-y-3 py-6 md:py-8 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
+      <div className="flex flex-col gap-y-3 pb-5 md:pb-7 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
         {exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={role} onViewExercise={() => {
             openDialog(

@@ -1,11 +1,11 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData, useNavigate } from "@remix-run/react";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { exerciseDetailsMap } from "./edit";
 import { ArrowLeft, ChevronLeft } from "images/icons";
 import CountdownTimer from "~/components/CountdownTimer";
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import Stopwatch from "~/components/Stopwatch";
 import CurrentDate from "~/components/CurrentDate";
 import { PrimaryButton } from "~/components/form";
@@ -17,6 +17,7 @@ import { saveUserWorkoutLog } from "~/models/workout.server";
 import { ExerciseTarget, LoadUnit } from "@prisma/client";
 import clsx from "clsx";
 import { generateMuxVideoToken } from "~/mux-tokens.server";
+import { HeaderContext } from "~/components/AppSideBarHeaderContext";
 
 const loadOptions = [
   "bw",
@@ -143,28 +144,6 @@ export async function action({ request }: ActionFunctionArgs) {
         workoutLogFormDataToObject(formData),
         workoutLogSchema,
         async (data) => {     
-          // const mappedExerciseLogs = data.exercises.reduce((result, curr) => {
-          //   let resultArr = result
-          //   if (curr && curr.sets) {
-          //     const setArrays = curr.sets.map((set, set_idx) => ({
-          //       exerciseId: curr.exerciseId,
-          //       circuitId: curr.circuitId,
-          //       target: curr.target === "reps" ? ExerciseTarget.reps : ExerciseTarget.time,
-          //       set: set_idx + 1,
-          //       targetReps: curr.targetReps,
-          //       actualReps: set.actualReps,
-          //       time: curr.time,
-          //       load: set.load ? parseFloat(set.load) : null,
-          //       unit: set.unit === "bw" ? LoadUnit.bodyweight : set.unit === "lb(s)" ? LoadUnit.pound : LoadUnit.kilogram,
-          //       notes: set.notes,
-          //     }))
-          //     // const exerciseLog = {
-          //     //   curr
-          //     // }
-          //     return resultArr.concat(setArrays)
-          //   }
-          //   return resultArr
-          // }, [])
           const mappedExerciseLogs = data.exercises.map((exercise, idx) => ({
             ...exercise,
             target: exercise.target === "reps" ? ExerciseTarget.reps : ExerciseTarget.time,
@@ -202,15 +181,25 @@ export default function WorkoutLog() {
   }, [exerciseDetails])
 
   return (
-    <Form method="post" className="p-6 md:p-8 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
-      <div className="flex">
+    <Form method="post" className="px-2 md:px-3 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
+      {/* <div className="flex">
         <Link to={`/app/workouts/${workout?.id}`}>
           <ChevronLeft className="hover:text-primary" />
         </Link>
-      </div>
+      </div> */}
       {/* Title */}
       <div className="flex justify-between items-center">
-        <div className="font-semibold text-lg">New Workout Log</div>
+        <Link
+          to={`/app/workouts/${workout?.id}`}
+          className={clsx(
+            "flex items-center text-primary-foreground bg-primary",
+            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+            "text-sm"
+          )}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <div className="">Back</div>
+        </Link>
         <div className="*:text-sm"><CurrentDate /></div>
         <input
           type="hidden"
@@ -223,10 +212,10 @@ export default function WorkoutLog() {
           value={workout.id}
         />
       </div>
-      <div className="flex flex-col">
+      {/* <div className="flex flex-col">
         <div className="font-medium text-xs text-muted-foreground">Workout Name</div>
         <div className="font-semibold text-md">{workout?.name}</div>
-      </div>
+      </div> */}
       {showStopwatch ? (
         <Stopwatch autoStart label="Elapsed Time" />
       ) : (

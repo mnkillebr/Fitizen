@@ -171,7 +171,7 @@ export default function Workouts() {
   // }
 
   return (
-    <div className="px-4 md:px-6 py-6 md:py-8 flex flex-col gap-y-4 h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)] bg-background text-foreground">
+    <div className="md:px-1 flex flex-col gap-y-4 h-[calc(100vh-4rem)] bg-background text-foreground">
       <div className="flex flex-col gap-y-4 px-2">
         {/* <Form
           className={`flex content-center border-2 rounded-md focus-within:border-primary md:w-1/2 ${
@@ -216,7 +216,7 @@ export default function Workouts() {
           Create Workout
         </Link>
       </div>
-      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2 pb-1">
+      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2 pb-6 md:pb-7">
         {data.workouts.map((workout) => (
           <Workout key={workout.id} workout={workout} role={data.role} />
         ))}

@@ -16,7 +16,7 @@ interface TimeoutRef extends HTMLDivElement {
 const Tooltip = ({
   children,
   label,
-  className = "bg-gray-400 text-white",
+  className = "bg-primary text-foreground",
   relativePosition = "-top-4.5 left-4.5",
   delay = 500,
 }: TooltipProps) => {

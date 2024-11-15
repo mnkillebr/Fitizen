@@ -29,6 +29,7 @@ import { Toaster } from "~/components/ui/sonner"
 import { DashboardLayout } from "./components/layout";
 import { darkModeCookie } from "./cookies";
 import { ChartIcon } from "images/icons";
+import { AppDashboardLayout } from "./components/DashboardLayout";
 
 const navigation = [
   { name: "Settings", href: "settings" },
@@ -86,7 +87,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("cookie");
 	const darkModeCookieValue = await darkModeCookie.parse(cookieHeader);
   const darkMode = darkModeCookieValue === "true" ? true : false
-  return json({ isLoggedIn: user !== null, darkMode, avatar: user?.profilePhotoUrl, initials: `${user?.firstName[0]}${user?.lastName[0]}` })
+  return json({ user, isLoggedIn: user !== null, darkMode, avatar: user?.profilePhotoUrl, initials: `${user?.firstName[0]}${user?.lastName[0]}` })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -155,17 +156,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { avatar, darkMode, initials } = useLoaderData<typeof loader>();
+  const { avatar, darkMode, initials, user } = useLoaderData<typeof loader>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const matches = useMatches();
   const inAppRoute = matches.map(m => m.id).includes("routes/app");
   const submit = useSubmit();
-
   const handleLogout = () => {
     return submit({ "_action": "logout" }, { method: "post" })
   }
 
   if (inAppRoute) {
+    return <AppDashboardLayout darkModeEnabled={darkMode} user={user} />
     return <DashboardLayout navLinks={dashNavigation} darkModeEnabled={darkMode} avatar={avatar ?? undefined} initials={initials} />
     return (
       <div className="bg-white h-screen overflow-y-hidden">

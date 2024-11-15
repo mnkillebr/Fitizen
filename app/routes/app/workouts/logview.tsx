@@ -117,20 +117,30 @@ export async function action() {
 export default function LogView() {
   const data = useLoaderData<typeof loader>();
   return (
-    <div className="py-6 px-5 md:px-7 md:py-8 flex flex-col h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)] gap-y-3 select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
-      <div className="flex">
+    <div className="px-2 md:px-3 flex flex-col h-[calc(100vh-4rem)] gap-y-3 select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
+      {/* <div className="flex">
         <Link to={`/app/workouts/${data.userLog?.routineId}`}>
           <ChevronLeft className="hover:text-primary" />
         </Link>
-      </div>
+      </div> */}
       <div className="flex justify-between items-center">
-        <div className="font-semibold text-lg">Workout Log</div>
+        <Link
+          to={`/app/workouts/${data.userLog.routineId}`}
+          className={clsx(
+            "flex items-center text-primary-foreground bg-primary",
+            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+            "text-sm"
+          )}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <div className="">Back</div>
+        </Link>
         <div className="*:text-sm"><CurrentDate incomingDate={data.userLog?.date} /></div>
       </div>
-      <div className="flex flex-col">
+      {/* <div className="flex flex-col">
         <div className="font-medium text-xs text-muted-foreground">Workout Name</div>
         <div className="font-semibold text-md">{data.userLog.routine?.name}</div>
-      </div>
+      </div> */}
       <div className="font-semibold text-lg">Logged Exercises</div>
       <div
         className={clsx(

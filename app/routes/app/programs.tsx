@@ -73,7 +73,7 @@ export default function Programs() {
   }
 
   return (
-    <div className="p-6 md:p-8 flex flex-col h-full gap-x-6 gap-y-4 snap-y snap-mandatory overflow-y-auto bg-background">
+    <div className="pb-6 px-2 pt-0 md:pb-7 md:px-3 md:pt-0 flex flex-col h-full gap-x-6 gap-y-4 snap-y snap-mandatory overflow-y-auto bg-background">
       {/* <h1 className="text-lg font-semibold md:text-2xl text-foreground">Programs</h1> */}
       {programs.map((program: any, program_idx: number) => (
         <div

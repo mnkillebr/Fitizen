@@ -302,25 +302,35 @@ export default function ProgramLog() {
   const openDialog = useOpenDialog();
 
   return (
-    <Form method="post" className="p-6 md:p-8 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
-      <div className="flex">
+    <Form method="post" className="px-2 pt-0 md:px-3 md:pt-0 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
+      {/* <div className="flex">
         <Link to={`/app/programs/${program?.id}`}>
           <ChevronLeft className="hover:text-primary" />
         </Link>
-      </div>
+      </div> */}
       {/* Title */}
       <div className="flex justify-between items-center">
-        <div className="font-semibold text-lg">Week {programWeek} - Day {programDay}</div>
+        <Link
+          to={`/app/programs/${program?.id}`}
+          className={clsx(
+            "flex items-center text-primary-foreground bg-primary",
+            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+            "text-sm"
+          )}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <div className="">Back</div>
+        </Link>
         <div className="*:text-sm"><CurrentDate /></div>
         <input type="hidden" name="date" value={new Date().toISOString()} />
         <input type="hidden" name="programId" value={program.id} />
         <input type="hidden" name="programWeek" value={programWeek} />
         <input type="hidden" name="programDay" value={programDay} />
       </div>
-      <div className="flex flex-col">
+      {/* <div className="flex flex-col">
         <div className="font-medium text-xs text-muted-foreground">Program Name</div>
         <div className="font-semibold text-md">{program?.name}</div>
-      </div>
+      </div> */}
       {showStopwatch ? (
         <Stopwatch autoStart label="Elapsed Time" />
       ) : (
@@ -747,7 +757,7 @@ export default function ProgramLog() {
                   <div className="flex-none font-semibold w-28">{`Block #${block.blockNumber}:`}</div>
                 </div>
                 <div className="border-2 border-dashed border-gray-200 p-2 rounded shadow-inner flex flex-col gap-y-2">
-                  {[...Array(block.exercises.sort((a, b) => b.sets - a.sets)[0].sets)].map((set: unknown, set_idx: number) =>
+                  {[...Array(block.exercises.sort((a: any, b: any) => b.sets - a.sets)[0].sets)].map((set: unknown, set_idx: number) =>
                     <div key={`${block_idx}-${set_idx}`} className="border rounded dark:border-none dark:shadow-sm dark:shadow-border-muted">
                       {block.exercises.sort((a, b) => a.orderInBlock - b.orderInBlock).map((ex_item: any, ex_idx: number) => {
                         const currentSet = set_idx + 1
@@ -799,7 +809,7 @@ export default function ProgramLog() {
                                           </div>
                                           <div className="w-full">
                                             <div className="font-bold mb-2">Cues</div>
-                                            <div className="flex-1">{ex_item.exercise.cues.map((cue, cue_idx) => (
+                                            <div className="flex-1">{ex_item.exercise.cues.map((cue: string, cue_idx: number) => (
                                               <div key={cue_idx} className="flex w-full">
                                                 <div className="flex-none w-5">{cue_idx+1}.</div>
                                                 <div className="flex-1">{cue}</div>

@@ -22,6 +22,12 @@ import { format, setHours, setMinutes } from "date-fns";
 import CustomCarousel from "~/components/CustomCarousel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { generateMuxThumbnailToken } from "~/mux-tokens.server";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip"
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
@@ -447,23 +453,39 @@ export default function WorkoutDetail() {
   return (
     <div
       className={clsx(
-        "px-5 py-6 md:px-7 md:py-8 flex flex-col h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]",
+        "px-2 md:px-3 flex flex-col h-[calc(100vh-5rem)]",
         "gap-y-4 select-none bg-background text-foreground"
       )}
     >
       {/* Header Section */}
       <div className="flex-none">
         {/* Back and Context Menu */}
-        <div className="flex justify-between">
-          <Link to="/app/workouts">
-            <ChevronLeft className="hover:text-primary" />
-          </Link>
+        <div className="flex justify-between mb-2">
+        <Link
+          to="/app/workouts"
+          className={clsx(
+            "flex items-center text-primary-foreground bg-primary",
+            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+            "text-sm"
+          )}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <div className="">Back</div>
+        </Link>
           <Popover>
             {({ open }) => (
               <>
-                <PopoverButton>
-                  <ContextMenuIcon className="hover:text-primary" />
-                </PopoverButton>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger>
+                    <PopoverButton>
+                      <ContextMenuIcon className="hover:text-primary" />
+                    </PopoverButton>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Workout Menu
+                  </TooltipContent>
+                </Tooltip>
+                
                 <AnimatePresence>
                   {open && (
                     <PopoverPanel
@@ -517,7 +539,7 @@ export default function WorkoutDetail() {
           </Popover>
         </div>
         {/* Title */}
-        <div className="font-semibold text-2xl select-none mb-2">{data.workout?.name}</div>
+        {/* <div className="font-semibold text-2xl select-none mb-2">{data.workout?.name}</div> */}
         {/* Workout Image && Description */}
         <Tabs defaultValue="overview" className="w-full lg:hidden">
           <TabsList>
@@ -527,7 +549,7 @@ export default function WorkoutDetail() {
           <TabsContent value="overview">
             <div
               className={clsx(
-                "h-60 lg:h-72 rounded-md shadow-md text-center",
+                "h-72 rounded-md shadow-md text-center",
                 "content-end sm:bg-center lg:flex-none lg:rounded-lg mb-3",
                 "bg-background-muted bg-cover bg-center dark:shadow-border-muted"
               )}
@@ -558,7 +580,7 @@ export default function WorkoutDetail() {
           <TabsContent value="description">
             <div
               className={clsx(
-                "h-60 p-4 bg-slate-50 rounded-md shadow-md mb-3",
+                "h-72 p-4 bg-slate-50 rounded-md shadow-md mb-3",
                 "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
               )}
             >
@@ -570,7 +592,7 @@ export default function WorkoutDetail() {
         <div className="hidden lg:flex gap-4">
           <div
             className={clsx(
-              "flex-1 w-full h-72 shadow-md text-center",
+              "flex-1 w-full h-[336px] shadow-md text-center",
               "content-end bg-center rounded-lg",
               "bg-background-muted bg-cover bg-center dark:shadow-border-muted"
             )}
@@ -599,13 +621,13 @@ export default function WorkoutDetail() {
           </div>
           <div
             className={clsx(
-              "flex-1 w-full h-72 rounded-lg flex flex-col gap-y-2",
+              "flex-1 w-full h-[336px] rounded-lg flex flex-col gap-y-2",
               "dark:shadow-border-muted"
             )}
           >
             <div
               className={clsx(
-                "h-2/3 flex-col py-2 px-4 bg-slate-50 rounded-lg shadow-sm",
+                "h-3/4 flex-col py-2 px-4 bg-slate-50 rounded-lg shadow-sm",
                 "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
               )}
             >
@@ -618,7 +640,6 @@ export default function WorkoutDetail() {
                 "flex h-1/3 items-center justify-center rounded-lg shadow-sm active:scale-95 hover:cursor-pointer",
                 "bg-slate-50 dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
               )}
-              // onClick={() => setStartWorkout(!startWorkout)}
             >
               {/* <div className="size-12"></div> */}
               <div className="select-none font-semibold self-center mr-4">Start Workout</div>
@@ -635,7 +656,6 @@ export default function WorkoutDetail() {
             "dark:border dark:border-border-muted dark:shadow-border-muted",
             "rounded-full"
           )}
-          // onClick={() => setStartWorkout(!startWorkout)}
         >
           <div className="size-12 invisible"></div>
           <div className="select-none font-semibold self-center">Start Workout</div>
@@ -652,7 +672,7 @@ export default function WorkoutDetail() {
           <TabsContent value="exercises">
             <div
               className={clsx(
-                "h-[calc(100vh-35.875rem)] md:h-[calc(100vh-36.875rem)] bg-slate-50 rounded-md shadow-md",
+                "h-[calc(100vh-36.25rem)] bg-slate-50 rounded-md shadow-md",
                 "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted py-4 px-3"
               )}
             >
@@ -665,7 +685,7 @@ export default function WorkoutDetail() {
           <TabsContent value="history">
             <div
               className={clsx(
-                "h-[calc(100vh-35.875rem)] md:h-[calc(100vh-36.875rem)] bg-slate-50 rounded-md shadow-md",
+                "h-[calc(100vh-36.25rem)] bg-slate-50 rounded-md shadow-md",
                 "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted py-4 px-3"
               )}
             >
@@ -701,7 +721,7 @@ export default function WorkoutDetail() {
         <div className="hidden lg:flex gap-4">
           <div
             className={clsx(
-              "flex-1 h-[calc(100vh-31.125rem)] bg-slate-50 rounded-lg shadow-md",
+              "flex-1 h-[calc(100vh-30rem)] bg-slate-50 rounded-lg shadow-md",
               "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted py-4 px-3"
             )}
           >
@@ -712,7 +732,7 @@ export default function WorkoutDetail() {
           </div>
           <div
             className={clsx(
-              "flex-1 h-[calc(100vh-31.125rem)] bg-slate-50 rounded-lg shadow-md",
+              "flex-1 h-[calc(100vh-30rem)] bg-slate-50 rounded-lg shadow-md",
               "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted py-4 px-3"
             )}
           >
@@ -744,60 +764,6 @@ export default function WorkoutDetail() {
             </div>
           </div>
         </div>
-        {/* <CustomCarousel
-          slides={[
-            (
-              <div
-                className={clsx(
-                  "h-full w-full lg:flex-none bg-slate-50 mb-3",
-                  "dark:bg-background-muted dark:border dark:border-border-muted",
-                  "dark:shadow-border-muted rounded-md shadow-md overflow-y-hidden"
-                )}
-              >
-                <div className="py-1 px-4 text-sm/6 font-semibold pt-2">Exercises</div>
-                <div className="h-full flex flex-col mt-2 overflow-y-auto gap-y-2 px-3 pb-1">
-                  <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
-                </div>
-              </div>
-            ),
-            (
-              <div
-                className={clsx(
-                  "h-full w-full lg:flex-none bg-slate-50 mb-3",
-                  "dark:bg-background-muted dark:border dark:border-border-muted",
-                  "dark:shadow-border-muted rounded-md shadow-md overflow-y-hidden"
-                )}
-              >
-                <div className="py-1 px-4 text-sm/6 font-semibold">History</div>
-                <div className="mt-2 h-full px-3 pb-2">
-                  <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
-                    {data.logs.map(log => {
-                      return (
-                        <div key={log.id} className="flex flex-col shadow-md rounded-md *:content-center bg-white snap-start">
-                          <div className="bg-slate-400 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
-                            <label className="text-sm font-medium w-20">Date</label>
-                            <label className="text-sm font-medium w-24">Duration</label>
-                            <label className="text-sm font-medium invisible">View</label>
-                          </div>
-                          <div className="w-full rounded-b-md flex justify-between px-3 py-1">
-                            <p className="text-sm h-5 w-20">{new Date(log.date).toLocaleDateString()}</p>
-                            <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
-                            <Link
-                              to={`/app/workouts/logview?id=${log.id}`}
-                              className="text-sm h-5 underline text-primary hover:text-yellow-500"
-                            >
-                              View
-                            </Link>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            )
-          ]}
-        /> */}
       </div>
     </div>
   );

@@ -374,9 +374,9 @@ export default function Stats() {
   ])
 
   return (
-    <div className="px-6 md:px-8 flex flex-col gap-y-4 bg-background text-foreground h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
+    <div className="px-2 md:px-3 flex flex-col gap-y-4 bg-background text-foreground h-[calc(100vh-4rem)]">
       {/* <h1 className="flex-none text-lg font-semibold md:text-2xl text-foreground">Fitness Statistics</h1> */}
-      <div className="flex flex-col gap-y-4 overflow-y-auto py-6 md:py-8">
+      <div className="flex flex-col gap-y-4 overflow-y-auto xl:grid grid-cols-2 gap-x-2">
         <div className="flex-1 flex flex-col gap-y-2">
           <div className="flex-none text-base font-semibold md:text-lg text-foreground">Workout Statistics</div>
           <div className="flex flex-col sm:flex-row gap-x-3 gap-y-1">
