@@ -321,7 +321,7 @@ export default function ProgramLog() {
   const openDialog = useOpenDialog();
 
   return (
-    <Form method="post" className="px-2 pt-0 md:px-3 md:pt-0 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
+    <Form method="post" className="px-2 pt-0 md:px-3 md:pt-0 flex flex-col gap-y-3 overflow-hidden select-none text-foreground">
       {/* <div className="flex">
         <Link to={`/app/programs/${program?.id}`}>
           <ChevronLeft className="hover:text-primary" />

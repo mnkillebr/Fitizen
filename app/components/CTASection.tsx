@@ -21,7 +21,7 @@ export default function CTASection() {
             Get started
           </Link>
           <Link
-            to="/learn-more"
+            to="/login"
             className="text-primary px-8 py-3 rounded-md text-lg font-medium hover:bg-yellow-50 dark:hover:bg-muted transition duration-200"
           >
             Learn more →

@@ -138,7 +138,7 @@ export default function LogView() {
   const data = useLoaderData<typeof loader>();
 
   return (
-    <div className="px-2 pt-0 md:px-3 md:pt-0 flex flex-col h-[calc(100vh-4rem)] gap-y-3 select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
+    <div className="px-2 pt-0 md:px-3 md:pt-0 flex flex-col h-[calc(100vh-4rem)] gap-y-3 select-none bg-background text-foreground">
       {/* <div className="flex">
         <Link to={`/app/programs/${data.userLog?.programId}`}>
           <ChevronLeft className="hover:text-primary" />

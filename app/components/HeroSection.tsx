@@ -25,7 +25,7 @@ export default function HeroSection() {
                 Get started
               </Link>
               <Link
-                to="/learn-more"
+                to="/login"
                 className="text-primary px-6 py-3 rounded-md text-center font-medium hover:bg-yellow-50 dark:hover:bg-muted transition duration-200"
               >
                 Learn more →

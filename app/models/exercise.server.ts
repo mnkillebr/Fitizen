@@ -20,6 +20,46 @@ export function getAllExercises(query: string | null) {
   });
 };
 
+export async function getAllExercisesPaginated(query: string | null, skip: number | undefined, take: number | undefined) {
+  try {
+    const [exercises, count] = await Promise.all([
+      db.exercise.findMany({
+        where: {
+          name: {
+            contains: query || "",
+            mode: "insensitive",
+          },
+        },
+        orderBy: [
+          { createdAt: "desc" },
+          { name: "desc" },
+        ],
+        skip,
+        take,
+      }),
+      db.exercise.count({
+        where: {
+          name: {
+            contains: query || "",
+            mode: "insensitive",
+          },
+        },
+      })
+    ])
+    return { exercises, count }
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2011") {
+        return error.message
+      }
+      if (error.code === "P2025") {
+        return error.message
+      }
+    }
+    throw error
+  };
+};
+
 export function getExercisesById(exerciseIds: string[]) {
   return db.exercise.findMany({
     where: {

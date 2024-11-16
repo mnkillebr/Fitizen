@@ -200,7 +200,7 @@ export default function WorkoutLog() {
   }, [exerciseDetails])
 
   return (
-    <Form method="post" className="px-2 md:px-3 flex flex-col gap-y-3 overflow-hidden select-none lg:w-3/4 xl:w-2/3 text-foreground">
+    <Form method="post" className="px-2 md:px-3 flex flex-col gap-y-3 overflow-hidden select-none text-foreground">
       {/* <div className="flex">
         <Link to={`/app/workouts/${workout?.id}`}>
           <ChevronLeft className="hover:text-primary" />

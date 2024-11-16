@@ -314,7 +314,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="px-2 md:px-3 flex flex-col h-full select-none lg:w-3/4 xl:w-2/3 bg-background text-foreground">
+    <div className="px-2 md:px-3 flex flex-col h-full select-none bg-background text-foreground">
       <Tabs defaultValue="general" className="w-full">
         <TabsList>
           <TabsTrigger value="general">General Settings</TabsTrigger>
@@ -323,7 +323,7 @@ export default function Profile() {
         <TabsContent value="general" className="flex flex-col gap-y-4">
           <div className="text-muted-foreground">Manage your account settings and user information.</div>
           {/* Profile Photo */}
-          <div className="flex flex-col space-y-4 lg:w-3/4 xl:w-2/3">
+          <div className="flex flex-col space-y-4 items-center">
             <Label className="text-lg">Profile Photo</Label>
             <Avatar
               className="size-48 cursor-pointer hover:opacity-80 transition-opacity"
@@ -368,7 +368,7 @@ export default function Profile() {
             </div>
           </div>
           {/* User Settings */}
-          <Card>
+          <Card className="w-full max-w-3xl self-center">
             <CardHeader>
               <CardTitle>User Settings</CardTitle>
               <CardDescription>

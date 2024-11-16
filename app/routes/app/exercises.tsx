@@ -2,22 +2,24 @@ import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon, } from "@
 import { HeartIcon as HeartSolid, PlusIcon, TrashIcon, ArrowDownTrayIcon, Bars3Icon } from "@heroicons/react/24/solid";
 
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData, useNavigation, useSearchParams } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData, useNavigation, useSearchParams, useLocation, Link } from "@remix-run/react";
 import { DeleteButton, ErrorMessage, PrimaryButton } from "~/components/form";
-import { createExercise, deleteExercise, getAllExercises, updateExerciseName } from "~/models/exercise.server";
+import { createExercise, deleteExercise, getAllExercises, getAllExercisesPaginated, updateExerciseName } from "~/models/exercise.server";
 import { z } from "zod";
 import { validateForm } from "~/utils/validation";
 import { useIsHydrated } from "~/utils/misc";
 import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
-import { Role as RoleType } from "@prisma/client";
+import { Exercise as ExerciseType, Role as RoleType } from "@prisma/client";
 // import { useDrag, useDrop } from "react-dnd";
 import { useOpenDialog } from "~/components/Dialog";
-import { CheckCircleIcon, PlusCircleIcon } from "images/icons";
+import { CheckCircleIcon, ChevronLeft, ChevronRight, PlusCircleIcon } from "images/icons";
 import { darkModeCookie } from "~/cookies";
 import MuxPlayer from '@mux/mux-player-react';
 import { generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
 import { hash } from "~/cryptography.server";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "~/components/ui/pagination";
+import { EXERCISE_ITEMS_PER_PAGE } from "~/utils/magicNumbers";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -36,8 +38,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
-  const exercises = await getAllExercises(query);
-  const tokenMappedExercises = exercises.map(ex_item => {
+  const page = parseInt(url.searchParams.get("page") ?? "1");
+
+  const skip = (page - 1) * EXERCISE_ITEMS_PER_PAGE;
+  // const exercises = await getAllExercises(query);
+  const pageExercises = await getAllExercisesPaginated(query, skip, EXERCISE_ITEMS_PER_PAGE) as { exercises: ExerciseType[]; count: number }
+  const totalPages = Math.ceil(pageExercises.count / EXERCISE_ITEMS_PER_PAGE);
+  const tokenMappedExercises = pageExercises ? pageExercises.exercises.map(ex_item => {
     const smartCrop = () => {
       switch (ex_item.name) {
        case "Lateral Lunge":
@@ -57,12 +64,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
       token: videoToken,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
-  })
+  }) : []
   const exercisesEtag = hash(JSON.stringify(tokenMappedExercises))
   return json(
     {
       exercises: tokenMappedExercises,
-      role
+      exercisesCount: pageExercises.count,
+      page,
+      totalPages,
+      role,
     },
     {
       headers: {
@@ -126,17 +136,41 @@ interface deleteExerciseFetcherType extends ActionFunctionArgs{
 }
 
 export default function ExerciseLibrary() {
-  const { exercises, role } = useLoaderData<typeof loader>();
+  const { exercises, role, exercisesCount, totalPages, page } = useLoaderData<typeof loader>();
   const createExerciseFetcher = useFetcher();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigation = useNavigation();
   const openDialog = useOpenDialog();
-
   const isSearching = navigation.formData?.has("q");
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
+  const location = useLocation();
+
+  const createPageUrl = (pageNum: number) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("page", pageNum.toString());
+    return `${location.pathname}?${newSearchParams.toString()}`;
+  };
+
+  // const handlePageChange = (newPage: number) => {
+  //   if (newPage < 1 || newPage > totalPages) return;
+  //   searchParams.set("page", newPage.toString());
+  //   setSearchParams(searchParams);
+  // };
+
+  const getSiblingPages = () => {
+    const siblings: number[] = [];
+    const show = 2; // Show 2 siblings on each side when possible
+
+    for (let i = Math.max(1, page - show); i <= Math.min(totalPages, page + show); i++) {
+      siblings.push(i);
+    }
+
+    return siblings;
+  };
+
 
   return (
-    <div className="px-1 pt-0 md:px-2 md:pt-0 flex flex-col gap-y-4 bg-background h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-4rem)]">
+    <div className="px-1 pt-0 md:px-2 md:pt-0 pb-3 flex flex-col gap-y-4 bg-background h-[calc(100vh-4rem)]">
       {/* <div className="flex flex-col gap-y-4">
         <h1 className="text-lg font-semibold md:text-2xl text-foreground px-1">Exercises</h1>
         {role === "admin" ? (
@@ -154,7 +188,7 @@ export default function ExerciseLibrary() {
         ) : null}
       </div> */}
       {/* <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1"> */}
-      <div className="flex flex-col gap-y-3 pb-6 overflow-y-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 px-1">
+      <div className="flex flex-col gap-y-3 pb-6 overflow-y-auto md:grid lg:grid-cols-2 xl:grid-cols-3 gap-x-3 px-1">
         {exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={role} onViewExercise={() => {
             openDialog(
@@ -190,6 +224,74 @@ export default function ExerciseLibrary() {
             )
           }} />
         ))}
+      </div>
+      <div className="flex justify-center mt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationLink
+                to={createPageUrl(page - 1)}
+                className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Previous</span>
+              </PaginationLink>
+            </PaginationItem>
+
+            {page > 3 && (
+              <>
+                <PaginationItem>
+                  <PaginationLink to={createPageUrl(1)}>
+                    1
+                  </PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              </>
+            )}
+
+            {getSiblingPages().map((pageNum) => (
+              <PaginationItem key={pageNum}>
+                <PaginationLink
+                  to={createPageUrl(pageNum)}
+                  isActive={pageNum === page}
+                  className={
+                    navigation.state === "loading" && 
+                    pageNum === parseInt(searchParams.get("page") ?? "1")
+                      ? "animate-pulse"
+                      : ""
+                  }
+                >
+                  {pageNum}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            {page < totalPages - 2 && (
+              <>
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink to={createPageUrl(totalPages)}>
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              </>
+            )}
+
+            <PaginationItem>
+              <PaginationLink
+                to={createPageUrl(page + 1)}
+                className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
+              >
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">Next</span>
+              </PaginationLink>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   )
@@ -230,7 +332,8 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
   return isDeletingExercise ? null : (
     <div
       className={clsx(
-        "dark:bg-background-muted text-foreground dark:border dark:border-border-muted rounded-lg flex flex-col snap-start shadow-md dark:shadow-border-muted",
+        "dark:bg-background-muted text-foreground dark:border dark:border-border-muted",
+        "rounded-lg flex flex-col snap-start shadow-md dark:shadow-border-muted",
         selectable ? "bg-background" : "bg-muted hover:shadow-primary"
       )}
       // draggable
@@ -238,7 +341,7 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
       //   e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
       // }}
     >
-      <div className="flex flex-col overflow-hidden justify-between h-full">
+      <div className="flex flex-col overflow-hidden justify-between w-full">
         <img
           src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
           className={clsx("w-full rounded-t-lg flex-1", selectable ? "" : "cursor-pointer")}

@@ -78,7 +78,7 @@ export default function Login() {
           </div>
         ) :
         (
-          <div className="border dark:border-border-muted rounded-md p-6 w-full sm:w-2/3 md:w-[450px]">
+          <div className="border dark:border-border-muted rounded-md p-6 w-full max-w-2xl">
             <h1 className="font-bold text-3xl mb-8">Log In</h1>
             <Form className="mx-auto" method="post">
               <div className="pb-4 text-left">

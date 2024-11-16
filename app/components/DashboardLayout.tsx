@@ -25,7 +25,7 @@ import {
   Table,
 } from "lucide-react"
 import { useMemo, } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 const navLinks = [
   {
@@ -173,15 +173,16 @@ export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutPro
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-          <Tooltip delayDuration={200}>
-            <TooltipTrigger className="*:mr-5 *:hover:text-primary">
-              {darkModeEnabled ? <MoonStar size={20} onClick={toggleDarkMode}/> : <Sun size={20} onClick={toggleDarkMode}/>}
-            </TooltipTrigger>
-            <TooltipContent>
-              {darkModeEnabled ? "Dark Mode Enabled" : "Toggle Dark Mode"}
-            </TooltipContent>
-          </Tooltip>
-          
+          <TooltipProvider>
+            <Tooltip delayDuration={200}>
+              <TooltipTrigger className="*:mr-5 *:hover:text-primary">
+                {darkModeEnabled ? <MoonStar size={20} onClick={toggleDarkMode}/> : <Sun size={20} onClick={toggleDarkMode}/>}
+              </TooltipTrigger>
+              <TooltipContent>
+                {darkModeEnabled ? "Dark Mode Enabled" : "Toggle Dark Mode"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </header>
         <div className="flex flex-1 flex-col gap-4 px-4 pt-0">
           <Outlet />
