@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, Link, useLoaderData, useNavigate } from "@remix-run/react";
+import { Form, Link, useLoaderData, useNavigate, useNavigation } from "@remix-run/react";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { exerciseDetailsMap } from "./edit";
@@ -17,8 +17,7 @@ import { saveUserWorkoutLog } from "~/models/workout.server";
 import { ExerciseTarget, LoadUnit } from "@prisma/client";
 import clsx from "clsx";
 import { generateMuxVideoToken } from "~/mux-tokens.server";
-import { HeaderContext } from "~/components/AppSideBarHeaderContext";
-import { darkModeCookie } from "~/cookies";
+import { darkModeCookie, newSavedWorkoutLogCookie } from "~/cookies";
 
 const loadOptions = [
   "bw",
@@ -71,7 +70,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const workout = await db.routine.findUnique({
     where: { id: workoutId },
     include: {
-      exercises: true,
+      exercises: {
+        include: {
+          exercise: true,
+        }
+      },
     }
   });
   if (workout !== null && workout.userId !== user.id) {
@@ -83,15 +86,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
       { status: 404, statusText: "Workout Not Found" }
     )
   }
-  const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
-  const exercises = await db.exercise.findMany({
-    where: {
-      id: {
-        in: exerciseIds
-      }
-    }
-  });
-  const exerciseDetails = exerciseDetailsMap(workout?.exercises, exercises, false)
+  // const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
+  // const exercises = await db.exercise.findMany({
+  //   where: {
+  //     id: {
+  //       in: exerciseIds
+  //     }
+  //   }
+  // });
+  // console.log("workout log", workout?.exercises)
+  const exerciseDetails = exerciseDetailsMap(workout?.exercises, workout?.exercises.map(ex_item => ex_item.exercise), false)
   const tokenMappedDetails = exerciseDetails.map(detail => {
     if (detail.exercises) {
       return {
@@ -160,8 +164,12 @@ export async function action({ request }: ActionFunctionArgs) {
             }))
           }))
           
-          await saveUserWorkoutLog(user.id, data.workoutId, data.duration, mappedExerciseLogs)
-          return redirect(`/app/workouts/${data.workoutId}`);
+          const savedLog = await saveUserWorkoutLog(user.id, data.workoutId, data.duration, mappedExerciseLogs)
+          return redirect(`/app/workouts/${data.workoutId}`, {
+            headers: {
+              "Set-Cookie": await newSavedWorkoutLogCookie.serialize(savedLog.id, { maxAge: 5 }),
+            }
+          });
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -187,6 +195,13 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function WorkoutLog() {
   const{ workout, exerciseDetails } = useLoaderData<typeof loader>();
   const [showStopwatch, setShowStopwatch] = useState(false);
+  const navigation = useNavigation();
+  const isNavigatingBack =
+    navigation.state === "loading" &&
+    navigation.location.pathname === `/app/workouts/${workout?.id}`
+  const isSavingWorkout =
+    navigation.state === "submitting" ||
+    navigation.state === "loading" && navigation.formMethod === "POST"
 
   const flattenedDetails = useMemo(() => {
     return exerciseDetails.reduce((result, curr) => {
@@ -200,7 +215,11 @@ export default function WorkoutLog() {
   }, [exerciseDetails])
 
   return (
-    <Form method="post" className="px-2 md:px-3 flex flex-col gap-y-3 overflow-hidden select-none text-foreground">
+    <Form
+      method="post"
+      // action={`/app/workouts/${workout?.id}`}
+      className="px-2 md:px-3 flex flex-col gap-y-3 overflow-hidden select-none text-foreground"
+    >
       {/* <div className="flex">
         <Link to={`/app/workouts/${workout?.id}`}>
           <ChevronLeft className="hover:text-primary" />
@@ -211,9 +230,9 @@ export default function WorkoutLog() {
         <Link
           to={`/app/workouts/${workout?.id}`}
           className={clsx(
-            "flex items-center text-primary-foreground bg-primary",
+            "flex items-center text-primary-foreground text-sm bg-primary",
             "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-            "text-sm"
+            isNavigatingBack ? "animate-pulse" : ""
           )}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -288,9 +307,12 @@ export default function WorkoutLog() {
         type="submit"
         name="_action"
         value="saveUserWorkoutLog"
-        className="text-foreground px-4 py-2 rounded w-fit self-end"
-        // disabled={isSavingWorkout}
-        // isLoading={isSavingWorkout}
+        className={clsx(
+          "text-primary-foreground px-4 py-2 rounded w-fit self-end",
+          "disabled:cursor-not-allowed disabled:bg-primary/70 disabled:text-primary-foreground/70",
+        )}
+        disabled={!showStopwatch}
+        isLoading={isSavingWorkout}
       >
         Save
       </PrimaryButton>

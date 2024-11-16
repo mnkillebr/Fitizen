@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { Link, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
+import { Link, useFetcher, useLoaderData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
 import clsx from "clsx";
 import { ArrowLeft, ClockIcon, FireIcon, PlayIcon, BarsIcon, ContextMenuIcon, TrashIcon, PencilIcon, ChevronLeft, CalendarIcon } from "images/icons";
 import db from "~/db.server";
@@ -15,7 +15,7 @@ import { validateForm } from "~/utils/validation";
 import { deleteWorkout, getWorkout, getWorkoutLogsById } from "~/models/workout.server";
 import Stopwatch from "~/components/Stopwatch";
 import { createUserWorkoutSession, getAllCoaches } from "~/models/calendar.server";
-import { useOpenDialog } from "~/components/Dialog";
+import { useCloseDialog, useOpenDialog } from "~/components/Dialog";
 import EventForm from "~/components/EventForm";
 import { convertObjectToFormData } from "~/utils/misc";
 import { format, setHours, setMinutes } from "date-fns";
@@ -28,7 +28,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip"
-import { darkModeCookie } from "~/cookies";
+import { darkModeCookie, newSavedWorkoutLogCookie } from "~/cookies";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { XMarkIcon } from "@heroicons/react/24/solid";
+import { WorkoutCompleted, workoutSuccessDialogOptions } from "~/components/WorkoutCompleted";
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
@@ -47,7 +50,11 @@ interface deleteWorkoutFetcherType extends ActionFunctionArgs{
   }
 }
 
-function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undefined, exerciseDetails: Array<ExerciseType>) {
+interface ExerciseDetailsType extends ExerciseType {
+
+}
+
+function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undefined, exerciseDetails: Array<ExerciseDetailsType>) {
   if (routineExercises) {
     const detailedExercises = routineExercises.map((item) => {
       const itemId = item.exerciseId
@@ -263,25 +270,31 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   const workout = await db.routine.findUnique({
     where: { id: workoutId },
     include: {
-      exercises: true,
-    }
-  });
-  const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
-  const exercises = await db.exercise.findMany({
-    where: {
-      id: {
-        in: exerciseIds
+      exercises: {
+        include: {
+          exercise: true,
+        }
       }
     }
   });
-  const tokenMappedExercises = exercises.map(ex_item => {
-    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId)
+  // const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
+  // const exercises = await db.exercise.findMany({
+  //   where: {
+  //     id: {
+  //       in: exerciseIds
+  //     }
+  //   }
+  // });
+
+  const tokenMappedExercises = workout?.exercises.map(ex_item => {
+    const thumbnailToken = generateMuxThumbnailToken(ex_item.exercise.muxPlaybackId)
     return {
       ...ex_item,
-      thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
+      ...ex_item.exercise,
+      thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.exercise.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
-  })
-  // console.log('loader workout', workout, 'loader exercises', exercises)
+  }) ?? []
+
   const exerciseDetails = exerciseDetailsMap(workout?.exercises, tokenMappedExercises)
   const logs = await getWorkoutLogsById(user.id, workoutId)
   // const exerciseDetailss = {
@@ -289,6 +302,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   //   main: exerciseDetailMap(workout?.exercises, exercises, "main"),
   //   cooldown: exerciseDetailMap(workout?.exercises, exercises, "cooldown"),
   // }
+  const cookieHeader = request.headers.get("cookie");
+	const newlogId = await newSavedWorkoutLogCookie.parse(cookieHeader);
   if (!workout) {
     throw json(
       { message: "The workout you are attempting to view does not exist"},
@@ -302,6 +317,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     },
     exerciseDetails,
     logs,
+    newLogSaved: logs.find(log => log.id === newlogId)
     // exerciseDetailss
   });
 }
@@ -372,13 +388,22 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function WorkoutDetail() {
   const data = useLoaderData<typeof loader>();
   const deleteWorkoutFetcher = useFetcher<deleteWorkoutFetcherType>();
+  const navigation = useNavigation();
+  const isNavigatingWorkouts =
+    navigation.state === "loading" &&
+    navigation.location.pathname === "/app/workouts"
+  const isNavigatingLog =
+    navigation.state === "loading" &&
+    navigation.location.pathname === "/app/workouts/log"
+  const isNavigatingLogView =
+    navigation.state === "loading" &&
+    navigation.location.pathname === "/app/workouts/logview"
+  // const imageDescriptionScrollContainerRef = useRef<HTMLDivElement>(null);
+  // const [imgIndex, setImgIndex] = useState(0);
 
-  const imageDescriptionScrollContainerRef = useRef<HTMLDivElement>(null);
-  const [imgIndex, setImgIndex] = useState(0);
-
-  const panelScrollContainerRef = useRef<HTMLDivElement>(null);
-  const [panelIndex, setPanelIndex] = useState(0);
-
+  // const panelScrollContainerRef = useRef<HTMLDivElement>(null);
+  // const [panelIndex, setPanelIndex] = useState(0);
+ 
   const openDialog = useOpenDialog();
   const submit = useSubmit();
 
@@ -388,25 +413,25 @@ export default function WorkoutDetail() {
     const minutes = Math.floor((duration % 3600000) / 60000);
     return hours > 0 ? `${hours} hr ${minutes} min` : `${minutes} min`
   }
-  const scrollToImg = (index: number) => {
-    const scrollContainer = imageDescriptionScrollContainerRef.current;
-    if (!scrollContainer) return;
+  // const scrollToImg = (index: number) => {
+  //   const scrollContainer = imageDescriptionScrollContainerRef.current;
+  //   if (!scrollContainer) return;
 
-    scrollContainer.scrollTo({
-      left: index * scrollContainer.clientWidth,
-      behavior: 'smooth'
-    });
-  };
+  //   scrollContainer.scrollTo({
+  //     left: index * scrollContainer.clientWidth,
+  //     behavior: 'smooth'
+  //   });
+  // };
 
-  const scrollToPanel = (index: number) => {
-    const scrollContainer = panelScrollContainerRef.current;
-    if (!scrollContainer) return;
+  // const scrollToPanel = (index: number) => {
+  //   const scrollContainer = panelScrollContainerRef.current;
+  //   if (!scrollContainer) return;
 
-    scrollContainer.scrollTo({
-      left: index * scrollContainer.clientWidth,
-      behavior: 'smooth'
-    });
-  };
+  //   scrollContainer.scrollTo({
+  //     left: index * scrollContainer.clientWidth,
+  //     behavior: 'smooth'
+  //   });
+  // };
 
   const handleAddToCalendar = (formObj: any) => {
     const formData = convertObjectToFormData(formObj)
@@ -422,7 +447,7 @@ export default function WorkoutDetail() {
         submitEvent={handleAddToCalendar}
         formOptions={{
           defaults: {
-            defaultTab: 1,
+            defaultTab: "Workout",
             workoutId: data.workout.id,
           },
           userWorkouts: [
@@ -433,45 +458,60 @@ export default function WorkoutDetail() {
           ],
         }}
       />,
-      "Schedule Workout"
+      {
+        title: {
+          text:"Schedule Workout",
+          className: "text-foreground",
+        },
+        closeButton: {
+          show: true,
+        },
+      }
     )
   }
 
+  // useEffect(() => {
+  //   const imgScrollContainer = imageDescriptionScrollContainerRef.current;
+  //   const panelScrollContainer = panelScrollContainerRef.current;
+  //   if (!imgScrollContainer) return;
+  //   if (!panelScrollContainer) return;
+
+
+  //   const handleScrollImg = () => {
+  //     const scrollLeft = imgScrollContainer.scrollLeft;
+  //     const width = imgScrollContainer.clientWidth;
+      
+  //     const newIndex = Math.round(scrollLeft / width);
+  //     setImgIndex(newIndex);
+  //   };
+  //   const handleScrollPanel = () => {
+  //     const scrollLeft = panelScrollContainer.scrollLeft;
+  //     const width = panelScrollContainer.clientWidth;
+      
+  //     const newIndex = Math.round(scrollLeft / width);
+  //     setPanelIndex(newIndex);
+  //   };
+
+  //   imgScrollContainer.addEventListener('scroll', handleScrollImg);
+  //   panelScrollContainer.addEventListener('scroll', handleScrollPanel);
+  //   return () => {
+  //     imgScrollContainer.removeEventListener('scroll', handleScrollImg)
+  //     panelScrollContainer.removeEventListener('scroll', handleScrollPanel)
+  //   };
+  // }, []);
+
   useEffect(() => {
-    const imgScrollContainer = imageDescriptionScrollContainerRef.current;
-    const panelScrollContainer = panelScrollContainerRef.current;
-    if (!imgScrollContainer) return;
-    if (!panelScrollContainer) return;
-
-
-    const handleScrollImg = () => {
-      const scrollLeft = imgScrollContainer.scrollLeft;
-      const width = imgScrollContainer.clientWidth;
-      
-      const newIndex = Math.round(scrollLeft / width);
-      setImgIndex(newIndex);
-    };
-    const handleScrollPanel = () => {
-      const scrollLeft = panelScrollContainer.scrollLeft;
-      const width = panelScrollContainer.clientWidth;
-      
-      const newIndex = Math.round(scrollLeft / width);
-      setPanelIndex(newIndex);
-    };
-
-    imgScrollContainer.addEventListener('scroll', handleScrollImg);
-    panelScrollContainer.addEventListener('scroll', handleScrollPanel);
-    return () => {
-      imgScrollContainer.removeEventListener('scroll', handleScrollImg)
-      panelScrollContainer.removeEventListener('scroll', handleScrollPanel)
-    };
-  }, []);
+    if (data.newLogSaved) {
+      openDialog(<WorkoutCompleted workoutName={data.workout.name} />, workoutSuccessDialogOptions)
+    }
+  }, [])
   
   return (
     <div
       className={clsx(
         "px-2 md:px-3 flex flex-col h-[calc(100vh-5rem)]",
-        "gap-y-4 select-none bg-background text-foreground"
+        "gap-y-4 select-none bg-background text-foreground",
+        // "relative"
       )}
     >
       {/* Header Section */}
@@ -481,9 +521,9 @@ export default function WorkoutDetail() {
         <Link
           to="/app/workouts"
           className={clsx(
-            "flex items-center text-primary-foreground bg-primary",
+            "flex items-center text-primary-foreground text-sm bg-primary",
             "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-            "text-sm"
+            isNavigatingWorkouts ? "animate-pulse" : ""
           )}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -655,7 +695,8 @@ export default function WorkoutDetail() {
               to={`/app/workouts/log?id=${data.workout?.id}`}
               className={clsx(
                 "flex h-1/3 items-center justify-center rounded-lg shadow-sm active:scale-95 hover:cursor-pointer",
-                "bg-slate-50 dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
+                "bg-slate-50 dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted",
+                isNavigatingLog ? "animate-pulse" : ""
               )}
             >
               {/* <div className="size-12"></div> */}
@@ -722,9 +763,12 @@ export default function WorkoutDetail() {
                           <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
                           <Link
                             to={`/app/workouts/logview?id=${log.id}`}
-                            className="text-sm h-5 underline text-primary hover:text-yellow-500"
+                            className={clsx(
+                              "text-sm h-5 underline text-primary hover:text-yellow-500",
+                              isNavigatingLogView && navigation.location.search === `?id=${log.id}` ? "animate-pulse" : ""
+                            )}
                           >
-                            View
+                            View Log
                           </Link>
                         </div>
                       </div>
@@ -769,9 +813,12 @@ export default function WorkoutDetail() {
                         <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
                         <Link
                           to={`/app/workouts/logview?id=${log.id}`}
-                          className="text-sm h-5 underline text-primary hover:text-yellow-500"
+                          className={clsx(
+                            "text-sm h-5 underline text-primary hover:text-yellow-500",
+                            isNavigatingLogView && navigation.location.search === `?id=${log.id}` ? "animate-pulse" : ""
+                          )}
                         >
-                          View
+                          View Log
                         </Link>
                       </div>
                     </div>

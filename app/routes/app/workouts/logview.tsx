@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
 import { z } from "zod";
@@ -140,6 +140,10 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function LogView() {
   const data = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const isNavigatingBack =
+    navigation.state === "loading" &&
+    navigation.location.pathname === `/app/workouts/${data.userLog.routineId}`
   return (
     <div className="px-2 md:px-3 flex flex-col h-[calc(100vh-4rem)] gap-y-3 select-none bg-background text-foreground">
       {/* <div className="flex">
@@ -151,9 +155,9 @@ export default function LogView() {
         <Link
           to={`/app/workouts/${data.userLog.routineId}`}
           className={clsx(
-            "flex items-center text-primary-foreground bg-primary",
+            "flex items-center text-primary-foreground text-sm bg-primary",
             "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-            "text-sm"
+            isNavigatingBack ? "animate-pulse" : ""
           )}
         >
           <ChevronLeft className="h-4 w-4" />

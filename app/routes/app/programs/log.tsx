@@ -1,7 +1,7 @@
 import MuxPlayer from "@mux/mux-player-react";
 import { LoadUnit } from "@prisma/client";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
 import { Video } from "lucide-react";
@@ -15,7 +15,7 @@ import { PrimaryButton } from "~/components/form";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { darkModeCookie } from "~/cookies";
+import { darkModeCookie, newSavedProgramLogCookie } from "~/cookies";
 import db from "~/db.server";
 import { getProgramById, getUserProgramLogsByProgramId, saveUserProgramLog } from "~/models/program.server";
 import { generateMuxVideoToken } from "~/mux-tokens.server";
@@ -282,8 +282,12 @@ export async function action({ request }: ActionFunctionArgs) {
               return resultArr
             }
           }, [])
-          await saveUserProgramLog(user.id, data.programId, parseInt(data.programWeek), parseInt(data.programDay), data.duration, mappedExerciseLogs)
-          return redirect(`/app/programs/${data.programId}`);
+          const savedLog = await saveUserProgramLog(user.id, data.programId, parseInt(data.programWeek), parseInt(data.programDay), data.duration, mappedExerciseLogs)
+          return redirect(`/app/programs/${data.programId}`, {
+            headers: {
+              "Set-Cookie": await newSavedProgramLogCookie.serialize(savedLog.id, { maxAge: 5 }),
+            }
+          });
         },
         (errors) => json({ errors }, { status: 400 })
       )
@@ -319,6 +323,13 @@ export default function ProgramLog() {
   } = useLoaderData<typeof loader>();
   const [showStopwatch, setShowStopwatch] = useState(false);
   const openDialog = useOpenDialog();
+  const navigation = useNavigation();
+  const isNavigatingBack =
+    navigation.state === "loading" &&
+    navigation.location.pathname === `/app/programs/${program?.id}`
+  const isSavingWorkout =
+    navigation.state === "submitting" ||
+    navigation.state === "loading" && navigation.formMethod === "POST"
 
   return (
     <Form method="post" className="px-2 pt-0 md:px-3 md:pt-0 flex flex-col gap-y-3 overflow-hidden select-none text-foreground">
@@ -332,9 +343,9 @@ export default function ProgramLog() {
         <Link
           to={`/app/programs/${program?.id}`}
           className={clsx(
-            "flex items-center text-primary-foreground bg-primary",
+            "flex items-center text-primary-foreground bg-primary text-sm",
             "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-            "text-sm"
+            isNavigatingBack ? "animate-pulse" : ""
           )}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -421,7 +432,15 @@ export default function ProgramLog() {
                                     </div>
                                   ))}</div>
                                 </div>
-                              </div>, roll.exercise.name
+                              </div>, {
+                                title: {
+                                  text: roll.exercise.name,
+                                  className: "text-foreground",
+                                },
+                                closeButton: {
+                                  show: true,
+                                },
+                              }
                             )}
                           />
                         </div>
@@ -485,7 +504,15 @@ export default function ProgramLog() {
                                     </div>
                                   ))}</div>
                                 </div>
-                              </div>, roll.exercise.name
+                              </div>, {
+                                title: {
+                                  text: roll.exercise.name,
+                                  className: "text-foreground",
+                                },
+                                closeButton: {
+                                  show: true,
+                                },
+                              }
                             )}
                           />
                         </div>
@@ -549,7 +576,15 @@ export default function ProgramLog() {
                                     </div>
                                   ))}</div>
                                 </div>
-                              </div>, roll.exercise.name
+                              </div>, {
+                                title: {
+                                  text: roll.exercise.name,
+                                  className: "text-foreground",
+                                },
+                                closeButton: {
+                                  show: true,
+                                },
+                              }
                             )}
                           />
                         </div>
@@ -627,7 +662,15 @@ export default function ProgramLog() {
                                     </div>
                                   ))}</div>
                                 </div>
-                              </div>, drill.exercise.name
+                              </div>, {
+                                title: {
+                                  text: drill.exercise.name,
+                                  className: "text-foreground",
+                                },
+                                closeButton: {
+                                  show: true,
+                                },
+                              }
                             )}
                           />
                         </div>
@@ -685,7 +728,15 @@ export default function ProgramLog() {
                                     </div>
                                   ))}</div>
                                 </div>
-                              </div>, ladder.exercise.name
+                              </div>, {
+                                title: {
+                                  text: ladder.exercise.name,
+                                  className: "text-foreground",
+                                },
+                                closeButton: {
+                                  show: true,
+                                },
+                              }
                             )}
                           />
                         </div>
@@ -743,7 +794,15 @@ export default function ProgramLog() {
                                     </div>
                                   ))}</div>
                                 </div>
-                              </div>, power.exercise.name
+                              </div>, {
+                                title: {
+                                  text: power.exercise.name,
+                                  className: "text-foreground",
+                                },
+                                closeButton: {
+                                  show: true,
+                                },
+                              }
                             )}
                           />
                         </div>
@@ -835,7 +894,15 @@ export default function ProgramLog() {
                                               </div>
                                             ))}</div>
                                           </div>
-                                        </div>, ex_item.exercise.name
+                                        </div>, {
+                                          title: {
+                                            text: ex_item.exercise.name,
+                                            className: "text-foreground",
+                                          },
+                                          closeButton: {
+                                            show: true,
+                                          },
+                                        }
                                       )}
                                     />
                                   </div>
@@ -969,7 +1036,15 @@ export default function ProgramLog() {
                                     </div>
                                   ))}</div>
                                 </div>
-                              </div>, cldwn.exercise.name
+                              </div>, {
+                                title: {
+                                  text: cldwn.exercise.name,
+                                  className: "text-foreground",
+                                },
+                                closeButton: {
+                                  show: true,
+                                },
+                              }
                             )}
                           />
                         </div>
@@ -998,9 +1073,12 @@ export default function ProgramLog() {
         type="submit"
         name="_action"
         value="saveUserProgramLog"
-        className="text-foreground px-4 py-2 rounded w-fit self-end"
-        // disabled={isSavingWorkout}
-        // isLoading={isSavingWorkout}
+        className={clsx(
+          "text-primary-foreground px-4 py-2 rounded w-fit self-end",
+          "disabled:cursor-not-allowed disabled:bg-primary/70 disabled:text-primary-foreground/70"
+        )}
+        disabled={!showStopwatch}
+        isLoading={isSavingWorkout}
       >
         Save
       </PrimaryButton>

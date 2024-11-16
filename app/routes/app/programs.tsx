@@ -1,5 +1,6 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { Outlet, useLoaderData, useMatches, useNavigate } from "@remix-run/react";
+import { Outlet, useLoaderData, useMatches, useNavigate, useNavigation } from "@remix-run/react";
+import clsx from "clsx";
 // import boxDude from "images/boxer_dude.jpeg"
 // import squatGirl from "images/squat_lady.jpeg"
 import { z } from "zod";
@@ -36,6 +37,7 @@ const themeSchema = z.object({
 })
 
 export async function action({ request }: ActionFunctionArgs) {
+  console.log("action", request.headers)
   const formData = await request.formData()
   switch (formData.get("_action")) {
     case "toggleDarkMode": {
@@ -60,6 +62,7 @@ export default function Programs() {
   const { programs } = useLoaderData<typeof loader>();
   const matches = useMatches();
   const navigate = useNavigate();
+  const navigation = useNavigation();
   const inProgramDetailRoute = matches.map(m => m.id).includes("routes/app/programs/$programId");
   const inLogSubRoute = matches.map(m => m.id).includes("routes/app/programs/log");
   const inLogViewSubRoute = matches.map(m => m.id).includes("routes/app/programs/logview");
@@ -78,7 +81,12 @@ export default function Programs() {
       {programs.map((program: any, program_idx: number) => (
         <div
           key={program_idx}
-          className="relative flex-1 shadow-md dark:shadow-border-muted dark:border dark:border-border-muted cursor-pointer rounded-lg hover:shadow-primary transition duration-150 bg-cover bg-top snap-start text-center"
+          className={clsx(
+            "relative flex-1 shadow-md cursor-pointer rounded-lg hover:shadow-primary",
+            "dark:border-border-muted dark:shadow-border-muted dark:border",
+            "transition duration-150 bg-cover bg-top snap-start text-center",
+            navigation.state === "loading" && navigation.location.pathname.includes(program.id) ? "animate-pulse duration-1000" : ""
+          )}
           style={{backgroundImage: `url(${program.s3ImageKey})`}}
           onClick={() => navigate(program.id)}
         >

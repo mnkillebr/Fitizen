@@ -117,7 +117,15 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
         submitEvent={submitEvent}
         formOptions={formOptions}
       />,
-      "Add Event"
+      {
+        title: {
+          text: "Add Event",
+          className: "text-foreground",
+        },
+        closeButton: {
+          show: true,
+        },
+      }
     )
   };
 
@@ -129,7 +137,15 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
         submitEvent={submitEvent}
         formOptions={formOptions}
       />,
-      "Add Event"
+      {
+        title: {
+          text: "Add Event",
+          className: "text-foreground",
+        },
+        closeButton: {
+          show: true,
+        },
+      }
     )
   }
 
@@ -146,7 +162,15 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
         submitEvent={submitEvent}
         formOptions={formOptions}
       />,
-      "Add Event"
+      {
+        title: {
+          text: "Add Event",
+          className: "text-foreground",
+        },
+        closeButton: {
+          show: true,
+        },
+      }
     )
   };
 
@@ -191,7 +215,15 @@ const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submi
           defaults: eventDefaults,
         }}
       />,
-      dialogTitle,
+      {
+        title: {
+          text: dialogTitle,
+          className: "text-foreground",
+        },
+        closeButton: {
+          show: true,
+        },
+      }
     )
   }
 

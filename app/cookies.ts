@@ -17,3 +17,13 @@ export const testCookie = createCookie("fitizen__testCookie", {
 });
 
 export const darkModeCookie = createCookie("fitizen__darkModeCookie");
+
+export const newSavedWorkoutLogCookie = createCookie("fitizen__newSavedWorkoutLog", {
+  httpOnly: true,
+  secure: true,
+})
+
+export const newSavedProgramLogCookie = createCookie("fitizen__newSavedWorkoutLog", {
+  httpOnly: true,
+  secure: true,
+})

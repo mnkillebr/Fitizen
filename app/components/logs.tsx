@@ -144,7 +144,15 @@ export function CircuitLog({ item, index, unitOptions, exerciseDetails, flatDeta
                                   </div>
                                 ))}</div>
                               </div>
-                            </div>, ex_item.name
+                            </div>, {
+                              title: {
+                                text: ex_item.name,
+                                className: "text-foreground",
+                              },
+                              closeButton: {
+                                show: true,
+                              },
+                            }
                           )}
                         />
                       </div>
@@ -210,6 +218,7 @@ export function CircuitLog({ item, index, unitOptions, exerciseDetails, flatDeta
                       <label className="text-xs font-semibold text-muted-foreground">Notes</label>
                       <Input
                         type="text"
+                        autoComplete="off"
                         className="w-36 text-sm px-2 h-5 self-end bg-background dark:border-border-muted"
                         placeholder="Optional"
                         name={`exercises[${exerciseIndex}].sets[${idx}].notes`}
@@ -264,7 +273,15 @@ export function ExerciseLog({ item, index, unitOptions, exerciseDetails, flatDet
                   </div>
                 ))}</div>
               </div>
-            </div>, item.name
+            </div>, {
+              title: {
+                text: item.name,
+                className: "text-foreground",
+              },
+              closeButton: {
+                show: true,
+              },
+            }
           )}
         />
       </div>
@@ -341,6 +358,7 @@ export function ExerciseLog({ item, index, unitOptions, exerciseDetails, flatDet
                 <label className="text-xs font-semibold text-muted-foreground">Notes</label>
                 <Input
                   type="text"
+                  autoComplete="off"
                   className="w-36 text-sm px-2 h-5 self-end bg-background dark:border-border-muted"
                   placeholder="Optional"
                   name={`exercises[${exerciseIndex}].sets[${idx}].notes`}

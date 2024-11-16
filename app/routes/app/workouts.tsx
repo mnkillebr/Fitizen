@@ -10,12 +10,8 @@ import { Role as RoleType } from "@prisma/client";
 import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { ArrowRight, ChevronLeft } from "images/icons";
-import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { darkModeCookie } from "~/cookies";
-
-const createSubRoutes = ["routes/app/workouts/create"]
-const createPathnames = ["/app/workouts/create"]
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
@@ -149,9 +145,9 @@ export default function Workouts() {
   const inEditSubRoute = matches.map(m => m.id).includes("routes/app/workouts/edit");
   const inLogSubRoute = matches.map(m => m.id).includes("routes/app/workouts/log");
   const inLogViewSubRoute = matches.map(m => m.id).includes("routes/app/workouts/logview");
-  const isNavigatingSubRoute =
+  const isNavigatingCreate =
     navigation.state === "loading" &&
-    createPathnames.includes(navigation.location.pathname) &&
+    navigation.location.pathname === "/app/workouts/create" &&
     navigation.formData === undefined;
 
   if (inCreateSubRoute || inWorkoutDetailRoute || inEditSubRoute || inLogSubRoute || inLogViewSubRoute) {
@@ -209,7 +205,7 @@ export default function Workouts() {
           className={clsx(
             "w-full sm:w-1/2 xl:w-1/3 md:active:scale-95 md:px-3 font-medium",
             "text-foreground bg-primary hover:bg-yellow-300 rounded-md text-center py-2",
-            isNavigatingSubRoute ? "animate-pulse" : ""
+            isNavigatingCreate ? "animate-pulse" : ""
           )}
           // onClick={() => setOpenPanel(!openPanel)}
         >
@@ -218,60 +214,14 @@ export default function Workouts() {
       </div>
       <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2 pb-6">
         {data.workouts.map((workout) => (
-          <Workout key={workout.id} workout={workout} role={data.role} />
+          <Workout
+            key={workout.id}
+            workout={workout}
+            role={data.role}
+            loading={navigation.state === "loading" && navigation.location.pathname.includes(workout.id)}
+          />
         ))}
       </div>
-      {/* <AnimatePresence>
-        {openPanel && (
-          <motion.div
-            className="absolute bottom-0 left-0 md:left-80 md:max-w-[calc(100vw-20rem)] flex flex-col gap-y-2 h-1/3 bg-slate-400 w-screen rounded-t-lg text-white px-8 py-6"
-            initial={{ translateY: "100%" }}
-            animate={{ translateY: "0%" }}
-            exit={{ translateY: "100%" }}
-            transition={{ ease: [0, 0.71, 0.2, 1.01], }}
-          >
-            <div className="flex justify-between *:text-white">
-              <p className="font-medium">Exercises</p>
-              <button onClick={(event) => setOpenPanel(false)}>
-                <XMarkIcon className="size-6 hover:text-primary"/>
-              </button>
-            </div>
-            <Link
-              to="classic"
-              className={clsx(
-                "border border-white shadow-md text-white py-2 px-3 rounded-md",
-                "hover:bg-white hover:text-black transition duration-200",
-                isNavigatingSubRoute ? "animate-pulse hover:animate-pulse" : ""
-              )}
-              onClick={(event) => setOpenPanel(false)}
-            >
-              <div>Classic</div>
-            </Link>
-            <Link
-              to="circuit"
-              className={clsx(
-                "border border-white shadow-md text-white py-2 px-3 rounded-md",
-                "hover:bg-white hover:text-black transition duration-200",
-                isNavigatingSubRoute ? "animate-pulse hover:animate-pulse" : ""
-              )}
-              onClick={(event) => setOpenPanel(false)}
-            >
-              <div>Circuit</div>
-            </Link>
-            <Link
-              to="interval"
-              className={clsx(
-                "border border-white shadow-md text-white py-2 px-3 rounded-md",
-                "hover:bg-white hover:text-black transition duration-200",
-                isNavigatingSubRoute ? "animate-pulse hover:animate-pulse" : ""
-              )}
-              onClick={(event) => setOpenPanel(false)}
-            >
-              <div>Interval</div>
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence> */}
     </div>
   )
 }
@@ -284,15 +234,18 @@ type WorkoutProps = {
     userId: string | null;
   };
   role?: RoleType;
+  loading?: boolean;
 }
 
-function Workout({ workout, role }: WorkoutProps) {
+function Workout({ workout, role, loading }: WorkoutProps) {
   const deleteWorkoutFetcher = useFetcher<deleteWorkoutFetcherType>();
   return (
     <Link
       to={workout.id}
       className={clsx(
-        "bg-muted dark:bg-background-muted text-foreground hover:shadow-primary dark:border dark:border-border-muted rounded-lg flex flex-col snap-start shadow-md dark:shadow-border-muted"
+        "bg-muted text-foreground hover:shadow-primary rounded-lg flex flex-col snap-start shadow-md",
+        "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted",
+        loading ? "animate-pulse" : ""
       )}
     >
       <div className="flex flex-col overflow-hidden">

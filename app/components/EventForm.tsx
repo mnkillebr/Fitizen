@@ -72,7 +72,7 @@ const EventForm = ({ selectedDateTime, submitEvent, formOptions }: EventFormProp
         })}
       </TabsList>
       {eventTypes.map(({ name, form }) => (
-        <TabsContent key={name} value={name} className="w-full">
+        <TabsContent key={name} value={name} className="w-full min-w-72 md:min-w-[400px]">
           {form}
         </TabsContent>
       ))}

@@ -1,12 +1,27 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Dialog, DialogPanel, DialogTitle, } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
+
+// Enhanced interface for dialog options
+interface DialogOptions {
+  title?: {
+    text: string;
+    className?: string;
+  };
+  closeButton?: {
+    show?: boolean;
+    className?: string;
+    icon?: ReactNode;
+  };
+  panelClassName?: string;
+  allowOverflow?: boolean; // New option
+}
 
 // Define the shape of our context
 interface DialogContextType {
   isOpen: boolean;
-  openDialog: (content: ReactNode, title: string) => void;
+  openDialog: (content: ReactNode, options?: DialogOptions) => void;
   closeDialog: () => void;
   dialogContent: ReactNode | null;
 }
@@ -18,18 +33,50 @@ const DialogContext = createContext<DialogContextType | undefined>(undefined);
 export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<ReactNode | null>(null);
-  const [dialogTitle, setDialogTitle] = useState<string | null>(null);
+  const [dialogOptions, setDialogOptions] = useState<DialogOptions | null>(null);
 
-  const openDialog = (content: ReactNode, title: string) => {
+  const openDialog = (content: ReactNode, options?: DialogOptions) => {
     setDialogContent(content);
-    setDialogTitle(title);
+    setDialogOptions(options || null);
     setIsOpen(true);
   };
 
   const closeDialog = () => {
     setIsOpen(false);
     setDialogContent(null);
-    setDialogTitle(null);
+    setDialogOptions(null);
+  };
+
+  const renderHeader = () => {
+    if (!dialogOptions?.title && !dialogOptions?.closeButton?.show) {
+      return null;
+    }
+
+    return (
+      <div className="flex justify-between mb-3">
+        {dialogOptions?.title && (
+          <DialogTitle 
+            className={clsx(
+              "font-bold",
+              dialogOptions.title.className
+            )}
+          >
+            {dialogOptions.title.text}
+          </DialogTitle>
+        )}
+        {dialogOptions?.closeButton?.show && (
+          <button
+            onClick={closeDialog}
+            className={clsx(
+              "size-6 text-gray-400 hover:text-gray-500",
+              dialogOptions.closeButton.className
+            )}
+          >
+            {dialogOptions.closeButton.icon || <XMarkIcon />}
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -40,20 +87,15 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <DialogPanel
             className={clsx(
-              "w-full max-w-[408px] md:max-w-[784px] transform overflow-hidden rounded-lg",
+              "w-fit max-w-[408px] md:max-w-[784px] transform rounded-lg",
               "bg-background text-foreground dark:border dark:border-border-muted",
-              "p-6 text-left align-middle shadow-xl transition-all"
+              "p-6 text-left align-middle shadow-xl transition-all",
+              // Only apply overflow-hidden if allowOverflow is false
+              !dialogOptions?.allowOverflow && "overflow-hidden",
+              dialogOptions?.panelClassName
             )}
           >
-            <div className="flex justify-between mb-3">
-              <DialogTitle className="font-bold">{dialogTitle}</DialogTitle>
-              <button
-                onClick={closeDialog}
-                className="size-6 text-gray-400 hover:text-gray-500"
-              >
-                <XMarkIcon />
-              </button>
-            </div>
+            {renderHeader()}
             {dialogContent}
           </DialogPanel>
         </div>

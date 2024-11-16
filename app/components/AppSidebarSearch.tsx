@@ -21,11 +21,11 @@ export function SidebarSearchForm({ ...props }: React.ComponentProps<"form">) {
     location.pathname === "/app/exercises" ||
     location.pathname === "/app/programs"
 
-    useEffect(() => {
-      if (location.search === '') {
-        setHeaderSearch('')
-      }
-    }, [location.search])
+  useEffect(() => {
+    if (location.search === '') {
+      setHeaderSearch('')
+    }
+  }, [location.search])
   if (open) {
     return (
       <form {...props}>

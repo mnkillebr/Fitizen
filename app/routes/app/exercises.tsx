@@ -220,7 +220,15 @@ export default function ExerciseLibrary() {
                     </div>
                   ))}</div>
                 </div>
-              </div>, ex_item.name
+              </div>, {
+                title: {
+                  text: ex_item.name,
+                  className: "text-foreground",
+                },
+                closeButton: {
+                  show: true,
+                },
+              }
             )
           }} />
         ))}

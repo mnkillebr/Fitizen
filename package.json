@@ -16,6 +16,7 @@
     "@cloudinary/url-gen": "^1.20.0",
     "@headlessui/react": "^2.0.4",
     "@heroicons/react": "^2.1.4",
+    "@lottiefiles/dotlottie-react": "^0.9.3",
     "@mux/mux-player-react": "^3.0.0",
     "@prisma/client": "^5.15.1",
     "@radix-ui/react-accordion": "^1.2.1",
