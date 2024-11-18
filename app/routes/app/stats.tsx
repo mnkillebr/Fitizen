@@ -4,10 +4,12 @@ import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { LineChartComponent } from "~/components/LineChartComponent";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectTrigger, SelectValue, SelectItem } from "~/components/ui/select";
 import { darkModeCookie } from "~/cookies";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
+import { calculateAverageEntriesPerWeek, calculateWeeklyStreak } from "~/utils/misc";
 import { validateForm } from "~/utils/validation";
 
 const metricOptions = [
@@ -305,12 +307,21 @@ export default function Stats() {
     allUserWorkoutOptions,
     allExerciseOptions,
   } = useLoaderData<typeof loader>();
-  const [selectedProgram, setSelectedProgram] = useState<string | undefined>(undefined)
-  const [selectedWorkout, setSelectedWorkout] = useState<string | undefined>(undefined)
-  const [selectedWorkoutExercise, setSelectedWorkoutExercise] = useState<string | undefined>(undefined)
-  const [selectedProgramExercise, setSelectedProgramExercise] = useState<string | undefined>(undefined)
-  const [selectedWorkoutMetric, setSelectedWorkoutMetric] = useState<string | undefined>(undefined)
-  const [selectedProgramMetric, setSelectedProgramMetric] = useState<string | undefined>(undefined)
+  const mostRecentWorkoutLog = userWorkoutLogs.sort((a,b) => b.date - a.date)[0]
+  const defaultWorkout = mostRecentWorkoutLog ? allUserWorkoutOptions.find(workout => workout.label === mostRecentWorkoutLog.routine.name)?.value : undefined
+  const defaultWorkoutExercise = mostRecentWorkoutLog ? mostRecentWorkoutLog.exerciseLogs[0].exerciseId : undefined
+  const defaultWorkoutMetric = mostRecentWorkoutLog && mostRecentWorkoutLog.exerciseLogs[0].volumeLoad ? "volumeLoad" : "timeLoad"
+  const mostRecentProgramLog = userProgramLogs.sort((a,b) => b.date - a.date)[0]
+  const defaultProgram = mostRecentProgramLog ? allProgramOptions.find(program => program.label === mostRecentProgramLog.program.name)?.value : undefined
+  const defaultProgramExercise = mostRecentProgramLog ? mostRecentProgramLog.exerciseLogs[0].blockExercise.exerciseId : undefined
+  const defaultProgramMetric = mostRecentProgramLog && mostRecentProgramLog.exerciseLogs[0].volumeLoad ? "volumeLoad" : "timeLoad"
+
+  const [selectedProgram, setSelectedProgram] = useState<string | undefined>(defaultProgram ?? undefined)
+  const [selectedWorkout, setSelectedWorkout] = useState<string | undefined>(defaultWorkout ?? undefined)
+  const [selectedWorkoutExercise, setSelectedWorkoutExercise] = useState<string | undefined>(defaultWorkoutExercise ?? undefined)
+  const [selectedProgramExercise, setSelectedProgramExercise] = useState<string | undefined>(defaultProgramExercise ?? undefined)
+  const [selectedWorkoutMetric, setSelectedWorkoutMetric] = useState<string | undefined>(defaultWorkoutMetric ?? undefined)
+  const [selectedProgramMetric, setSelectedProgramMetric] = useState<string | undefined>(defaultProgramMetric ?? undefined)
 
   const uniqueWorkoutExerciseIds = useMemo(() => {
     const uniqueExerciseIds = new Set();
@@ -343,7 +354,7 @@ export default function Stats() {
         return {
           date: wl.date,
           formattedDate: format(wl.date, "M/d/yy"),
-          [selectedWorkoutMetric]: selectedWorkoutMetric ? Math.round(currentExercise[selectedWorkoutMetric]) : undefined
+          [selectedWorkoutMetric]: selectedWorkoutMetric && currentExercise[selectedWorkoutMetric] ? Math.round(currentExercise[selectedWorkoutMetric]) : null
         }
       })
     } else {
@@ -361,7 +372,7 @@ export default function Stats() {
         return {
           date: pl.date,
           formattedDate: format(pl.date, "M/d/yy"),
-          [selectedProgramMetric]: selectedProgramMetric ? Math.round(currentExercise[selectedProgramMetric]) : undefined
+          [selectedProgramMetric]: selectedProgramMetric && currentExercise[selectedProgramMetric] ? Math.round(currentExercise[selectedProgramMetric]) : null
         }
       })
     } else {
@@ -375,8 +386,36 @@ export default function Stats() {
 
   return (
     <div className="px-2 md:px-3 flex flex-col gap-y-4 bg-background text-foreground h-[calc(100vh-4rem)]">
-      {/* <h1 className="flex-none text-lg font-semibold md:text-2xl text-foreground">Fitness Statistics</h1> */}
-      <div className="flex flex-col gap-y-4 overflow-y-auto xl:grid grid-cols-2 gap-x-2">
+      <div className="flex flex-col">
+        <div className="flex-none text-base font-semibold md:text-lg text-foreground mb-2">Current Streaks</div>
+        <div className="grid grid-cols-3 gap-2 w-full">
+          <Card>
+            <CardContent className="flex flex-col items-center">
+              <div className="flex justify-center font-bold text-[64px] sm:text-[80px] md:text-[96px]">{calculateAverageEntriesPerWeek([...userProgramLogs, ...userWorkoutLogs])}</div>
+              <div className="font-semibold leading-none tracking-tight">Weekly Average</div>
+              <div className="text-muted-foreground text-sm mt-1.5">Average number of workouts completed per week</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex flex-col items-center">
+              <div className="relative">
+                <div className="flex justify-center font-bold text-[64px] sm:text-[80px] md:text-[96px]">{calculateWeeklyStreak([...userProgramLogs, ...userWorkoutLogs])}</div>
+                {/* <div className="absolute inset-[90px] inset-x-2/3 text-sm">weeks</div> */}
+              </div>
+              <div className="font-semibold leading-none tracking-tight">Weekly Streak</div>
+              <div className="text-muted-foreground text-sm mt-1.5">Complete at least one workout per week to keep your streak</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex flex-col items-center">
+              <div className="flex justify-center font-bold text-[64px] sm:text-[80px] md:text-[96px]">{userProgramLogs.length + userWorkoutLogs.length}</div>
+              <div className="font-semibold leading-none tracking-tight">Total Workouts Completed</div>
+              <div className="text-muted-foreground text-sm mt-1.5">Tracks all-time workouts completed</div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      <div className="flex flex-col gap-y-4 xl:grid grid-cols-2 gap-x-2">
         <div className="flex-1 flex flex-col gap-y-2">
           <div className="flex-none text-base font-semibold md:text-lg text-foreground">Workout Statistics</div>
           <div className="flex flex-col sm:flex-row gap-x-3 gap-y-1">
