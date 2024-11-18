@@ -3,6 +3,7 @@ import { Video } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
 import { useOpenDialog } from './Dialog';
+import { ExerciseDialog, exerciseDialogOptions } from './ExerciseDialog';
 
 type ExerciseItemType = {
   id: string;
@@ -116,43 +117,8 @@ export function CircuitLog({ item, index, unitOptions, exerciseDetails, flatDeta
                         <Video
                           className="hover:cursor-pointer min-w-6"
                           onClick={() => openDialog(
-                            <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                              <div className="w-full">
-                                <MuxPlayer
-                                  streamType="on-demand"
-                                  playbackId={ex_item.muxPlaybackId ? ex_item.muxPlaybackId : undefined}
-                                  tokens={{ playback: ex_item.videoToken, thumbnail: ex_item.videoToken }}
-                                  metadataVideoTitle="Placeholder (optional)"
-                                  metadataViewerUserId="Placeholder (optional)"
-                                  primaryColor="#FFFFFF"
-                                  secondaryColor="#000000"
-                                  style={{
-                                    aspectRatio: 9/16,
-                                    width: "100%",
-                                    height: "100%",
-                                    maxHeight: 640,
-                                    maxWidth: 360,
-                                  }}
-                                />
-                              </div>
-                              <div className="w-full">
-                                <div className="font-bold mb-2">Cues</div>
-                                <div className="flex-1">{ex_item.cues.map((cue, cue_idx) => (
-                                  <div key={cue_idx} className="flex w-full">
-                                    <div className="flex-none w-5">{cue_idx+1}.</div>
-                                    <div className="flex-1">{cue}</div>
-                                  </div>
-                                ))}</div>
-                              </div>
-                            </div>, {
-                              title: {
-                                text: ex_item.name,
-                                className: "text-foreground",
-                              },
-                              closeButton: {
-                                show: true,
-                              },
-                            }
+                            <ExerciseDialog exercise={ex_item} />,
+                              exerciseDialogOptions(ex_item.name)
                           )}
                         />
                       </div>
@@ -245,43 +211,8 @@ export function ExerciseLog({ item, index, unitOptions, exerciseDetails, flatDet
         <Video
           className="hover:cursor-pointer min-w-6 ml-4"
           onClick={() => openDialog(
-            <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-              <div className="w-full">
-                <MuxPlayer
-                  streamType="on-demand"
-                  playbackId={item.muxPlaybackId ? item.muxPlaybackId : undefined}
-                  tokens={{ playback: item.videoToken, thumbnail: item.videoToken }}
-                  metadataVideoTitle="Placeholder (optional)"
-                  metadataViewerUserId="Placeholder (optional)"
-                  primaryColor="#FFFFFF"
-                  secondaryColor="#000000"
-                  style={{
-                    aspectRatio: 9/16,
-                    width: "100%",
-                    height: "100%",
-                    maxHeight: 640,
-                    maxWidth: 360,
-                  }}
-                />
-              </div>
-              <div className="w-full">
-                <div className="font-bold mb-2">Cues</div>
-                <div className="flex-1">{item.cues.map((cue, cue_idx) => (
-                  <div key={cue_idx} className="flex w-full">
-                    <div className="flex-none w-5">{cue_idx+1}.</div>
-                    <div className="flex-1">{cue}</div>
-                  </div>
-                ))}</div>
-              </div>
-            </div>, {
-              title: {
-                text: item.name,
-                className: "text-foreground",
-              },
-              closeButton: {
-                show: true,
-              },
-            }
+            <ExerciseDialog exercise={item} />,
+            exerciseDialogOptions(item.name)
           )}
         />
       </div>

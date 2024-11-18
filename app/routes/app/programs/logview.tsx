@@ -148,17 +148,20 @@ export default function LogView() {
         </Link>
       </div> */}
       <div className="flex justify-between items-center">
-        <Link
-          to={`/app/programs/${data.userLog?.programId}`}
-          className={clsx(
-            "flex items-center text-primary-foreground text-sm bg-primary",
-            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-            isNavigatingBack ? "animate-pulse" : ""
-          )}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <div className="">Back</div>
-        </Link>
+        <div className="flex gap-4 items-center">
+          <Link
+            to={`/app/programs/${data.userLog?.programId}`}
+            className={clsx(
+              "flex items-center text-primary-foreground text-sm bg-primary",
+              "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+              isNavigatingBack ? "animate-pulse" : ""
+            )}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <div className="">Back</div>
+          </Link>
+          <div className="flex-none font-semibold">{`Program Log - Week ${data.userLog?.programWeek} - Day ${data.userLog?.programDay}`}</div>
+        </div>
         <div className="*:text-sm"><CurrentDate incomingDate={data.userLog?.date} /></div>
       </div>
       {/* <div className="flex flex-col">

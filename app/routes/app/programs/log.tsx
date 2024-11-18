@@ -1,4 +1,3 @@
-import MuxPlayer from "@mux/mux-player-react";
 import { LoadUnit } from "@prisma/client";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, Link, useLoaderData, useNavigation } from "@remix-run/react";
@@ -10,6 +9,7 @@ import { z } from "zod";
 import CountdownTimer from "~/components/CountdownTimer";
 import CurrentDate from "~/components/CurrentDate";
 import { useOpenDialog } from "~/components/Dialog";
+import { ExerciseDialog, exerciseDialogOptions } from "~/components/ExerciseDialog";
 import Stopwatch from "~/components/Stopwatch";
 import { PrimaryButton } from "~/components/form";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
@@ -340,17 +340,20 @@ export default function ProgramLog() {
       </div> */}
       {/* Title */}
       <div className="flex justify-between items-center">
-        <Link
-          to={`/app/programs/${program?.id}`}
-          className={clsx(
-            "flex items-center text-primary-foreground bg-primary text-sm",
-            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-            isNavigatingBack ? "animate-pulse" : ""
-          )}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <div className="">Back</div>
-        </Link>
+        <div className="flex gap-4 items-center">
+          <Link
+            to={`/app/programs/${program?.id}`}
+            className={clsx(
+              "flex items-center text-primary-foreground bg-primary text-sm",
+              "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+              isNavigatingBack ? "animate-pulse" : ""
+            )}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <div className="">Back</div>
+          </Link>
+          <div className="flex-none font-semibold">{`New Program Log - Week ${programWeek} - Day ${programDay}`}</div>
+        </div>
         <div className="*:text-sm"><CurrentDate /></div>
         <input type="hidden" name="date" value={new Date().toISOString()} />
         <input type="hidden" name="programId" value={program.id} />
@@ -387,7 +390,7 @@ export default function ProgramLog() {
                 "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
               )}
             >
-              {movementPrep.foamRolling ? (
+              {movementPrep.foamRolling && movementPrep.foamRolling.length ? (
                 <div className="bg-slate-100 dark:bg-background px-2 py-1 rounded">
                   <div className="tex-base font-semibold mb-1">Foam Rolling</div>
                   <div className="flex flex-col gap-1">
@@ -404,43 +407,8 @@ export default function ProgramLog() {
                           <Video
                             className="hover:cursor-pointer min-w-6"
                             onClick={() => openDialog(
-                              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                                <div className="w-full">
-                                  <MuxPlayer
-                                    streamType="on-demand"
-                                    playbackId={roll.exercise.muxPlaybackId ? roll.exercise.muxPlaybackId : undefined}
-                                    tokens={{ playback: roll.exercise.videoToken, thumbnail: roll.exercise.videoToken }}
-                                    metadataVideoTitle="Placeholder (optional)"
-                                    metadataViewerUserId="Placeholder (optional)"
-                                    primaryColor="#FFFFFF"
-                                    secondaryColor="#000000"
-                                    style={{
-                                      aspectRatio: 9/16,
-                                      width: "100%",
-                                      height: "100%",
-                                      maxHeight: 640,
-                                      maxWidth: 360,
-                                    }}
-                                  />
-                                </div>
-                                <div className="w-full">
-                                  <div className="font-bold mb-2">Cues</div>
-                                  <div className="flex-1">{roll.exercise.cues.map((cue, cue_idx) => (
-                                    <div key={cue_idx} className="flex w-full">
-                                      <div className="flex-none w-5">{cue_idx+1}.</div>
-                                      <div className="flex-1">{cue}</div>
-                                    </div>
-                                  ))}</div>
-                                </div>
-                              </div>, {
-                                title: {
-                                  text: roll.exercise.name,
-                                  className: "text-foreground",
-                                },
-                                closeButton: {
-                                  show: true,
-                                },
-                              }
+                              <ExerciseDialog exercise={roll.exercise} />,
+                              exerciseDialogOptions(roll.exercise.name)
                             )}
                           />
                         </div>
@@ -459,16 +427,16 @@ export default function ProgramLog() {
                   </div>
                 </div>
               ) : null}
-              {movementPrep.mobility ? (
+              {movementPrep.mobility && movementPrep.mobility.length ? (
                 <div className="bg-slate-100 dark:bg-background px-2 py-1 rounded">
                   <div className="tex-base font-semibold mb-1">Mobility</div>
                   <div className="flex flex-col gap-1">
-                    {movementPrep.mobility.map((roll, roll_idx) => (
-                      <div key={roll_idx} className="flex flex-wrap gap-x-3">
+                    {movementPrep.mobility.map((mob, mob_idx) => (
+                      <div key={mob_idx} className="flex flex-wrap gap-x-3">
                         <div className="flex flex-col w-full sm:w-56">
                           <label className="text-xs font-semibold text-muted-foreground">Name</label>
                           <div className="flex gap-2 w-full">
-                            <div className="truncate">{roll.exercise.name}</div>
+                            <div className="truncate">{mob.exercise.name}</div>
                           </div>
                         </div>
                         <div className="flex flex-col">
@@ -476,54 +444,19 @@ export default function ProgramLog() {
                           <Video
                             className="hover:cursor-pointer min-w-6"
                             onClick={() => openDialog(
-                              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                                <div className="w-full">
-                                  <MuxPlayer
-                                    streamType="on-demand"
-                                    playbackId={roll.exercise.muxPlaybackId ? roll.exercise.muxPlaybackId : undefined}
-                                    tokens={{ playback: roll.exercise.videoToken, thumbnail: roll.exercise.videoToken }}
-                                    metadataVideoTitle="Placeholder (optional)"
-                                    metadataViewerUserId="Placeholder (optional)"
-                                    primaryColor="#FFFFFF"
-                                    secondaryColor="#000000"
-                                    style={{
-                                      aspectRatio: 9/16,
-                                      width: "100%",
-                                      height: "100%",
-                                      maxHeight: 640,
-                                      maxWidth: 360,
-                                    }}
-                                  />
-                                </div>
-                                <div className="w-full">
-                                  <div className="font-bold mb-2">Cues</div>
-                                  <div className="flex-1">{roll.exercise.cues.map((cue, cue_idx) => (
-                                    <div key={cue_idx} className="flex w-full">
-                                      <div className="flex-none w-5">{cue_idx+1}.</div>
-                                      <div className="flex-1">{cue}</div>
-                                    </div>
-                                  ))}</div>
-                                </div>
-                              </div>, {
-                                title: {
-                                  text: roll.exercise.name,
-                                  className: "text-foreground",
-                                },
-                                closeButton: {
-                                  show: true,
-                                },
-                              }
+                              <ExerciseDialog exercise={mob.exercise} />,
+                              exerciseDialogOptions(mob.exercise.name)
                             )}
                           />
                         </div>
                         <div className="flex flex-col">
                           <label className="text-xs font-semibold text-muted-foreground">Reps</label>
-                          <div className="text-start text-sm">{roll.reps}</div>
+                          <div className="text-start text-sm">{mob.reps}</div>
                         </div>
-                        {roll.time ? (
+                        {mob.time ? (
                           <div className="flex flex-col w-11">
                             <label className="text-xs font-semibold text-muted-foreground">Time</label>
-                            <div className="text-start text-sm">{roll.time} sec</div>
+                            <div className="text-start text-sm">{mob.time} sec</div>
                           </div>
                         ) : null}
                       </div>
@@ -531,16 +464,16 @@ export default function ProgramLog() {
                   </div>
                 </div>
               ) : null}
-              {movementPrep.activation ? (
+              {movementPrep.activation && movementPrep.activation.length ? (
                 <div className="bg-slate-100 dark:bg-background px-2 py-1 rounded">
                   <div className="tex-base font-semibold mb-1">Activation</div>
                   <div className="flex flex-col gap-1">
-                    {movementPrep.activation.map((roll, roll_idx) => (
-                      <div key={roll_idx} className="flex flex-wrap gap-x-3">
+                    {movementPrep.activation.map((act, act_idx) => (
+                      <div key={act_idx} className="flex flex-wrap gap-x-3">
                         <div className="flex flex-col w-full sm:w-56">
                           <label className="text-xs font-semibold text-muted-foreground">Name</label>
                           <div className="flex gap-2 w-full">
-                            <div className="truncate">{roll.exercise.name}</div>
+                            <div className="truncate">{act.exercise.name}</div>
                           </div>
                         </div>
                         <div className="flex flex-col">
@@ -548,54 +481,19 @@ export default function ProgramLog() {
                           <Video
                             className="hover:cursor-pointer min-w-6"
                             onClick={() => openDialog(
-                              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                                <div className="w-full">
-                                  <MuxPlayer
-                                    streamType="on-demand"
-                                    playbackId={roll.exercise.muxPlaybackId ? roll.exercise.muxPlaybackId : undefined}
-                                    tokens={{ playback: roll.exercise.videoToken, thumbnail: roll.exercise.videoToken }}
-                                    metadataVideoTitle="Placeholder (optional)"
-                                    metadataViewerUserId="Placeholder (optional)"
-                                    primaryColor="#FFFFFF"
-                                    secondaryColor="#000000"
-                                    style={{
-                                      aspectRatio: 9/16,
-                                      width: "100%",
-                                      height: "100%",
-                                      maxHeight: 640,
-                                      maxWidth: 360,
-                                    }}
-                                  />
-                                </div>
-                                <div className="w-full">
-                                  <div className="font-bold mb-2">Cues</div>
-                                  <div className="flex-1">{roll.exercise.cues.map((cue, cue_idx) => (
-                                    <div key={cue_idx} className="flex w-full">
-                                      <div className="flex-none w-5">{cue_idx+1}.</div>
-                                      <div className="flex-1">{cue}</div>
-                                    </div>
-                                  ))}</div>
-                                </div>
-                              </div>, {
-                                title: {
-                                  text: roll.exercise.name,
-                                  className: "text-foreground",
-                                },
-                                closeButton: {
-                                  show: true,
-                                },
-                              }
+                              <ExerciseDialog exercise={act.exercise} />,
+                              exerciseDialogOptions(act.exercise.name)
                             )}
                           />
                         </div>
                         <div className="flex flex-col">
                           <label className="text-xs font-semibold text-muted-foreground">Reps</label>
-                          <div className="text-start text-sm">{roll.reps}</div>
+                          <div className="text-start text-sm">{act.reps}</div>
                         </div>
-                        {roll.time ? (
+                        {act.time ? (
                           <div className="flex flex-col w-11">
                             <label className="text-xs font-semibold text-muted-foreground">Time</label>
-                            <div className="text-start text-sm">{roll.time} sec</div>
+                            <div className="text-start text-sm">{act.time} sec</div>
                           </div>
                         ) : null}
                       </div>
@@ -617,7 +515,7 @@ export default function ProgramLog() {
                 "dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted"
               )}
             >
-              {warmup.dynamic ? (
+              {warmup.dynamic && warmup.dynamic.length ? (
                 <div className="bg-slate-100 dark:bg-background px-2 py-1 rounded">
                   <div className="tex-base font-semibold mb-1">Dynamic Drills</div>
                   <div className="flex flex-col gap-1">
@@ -634,43 +532,8 @@ export default function ProgramLog() {
                           <Video
                             className="hover:cursor-pointer min-w-6"
                             onClick={() => openDialog(
-                              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                                <div className="w-full">
-                                  <MuxPlayer
-                                    streamType="on-demand"
-                                    playbackId={drill.exercise.muxPlaybackId ? drill.exercise.muxPlaybackId : undefined}
-                                    tokens={{ playback: drill.exercise.videoToken, thumbnail: drill.exercise.videoToken }}
-                                    metadataVideoTitle="Placeholder (optional)"
-                                    metadataViewerUserId="Placeholder (optional)"
-                                    primaryColor="#FFFFFF"
-                                    secondaryColor="#000000"
-                                    style={{
-                                      aspectRatio: 9/16,
-                                      width: "100%",
-                                      height: "100%",
-                                      maxHeight: 640,
-                                      maxWidth: 360,
-                                    }}
-                                  />
-                                </div>
-                                <div className="w-full">
-                                  <div className="font-bold mb-2">Cues</div>
-                                  <div className="flex-1">{drill.exercise.cues.map((cue, cue_idx) => (
-                                    <div key={cue_idx} className="flex w-full">
-                                      <div className="flex-none w-5">{cue_idx+1}.</div>
-                                      <div className="flex-1">{cue}</div>
-                                    </div>
-                                  ))}</div>
-                                </div>
-                              </div>, {
-                                title: {
-                                  text: drill.exercise.name,
-                                  className: "text-foreground",
-                                },
-                                closeButton: {
-                                  show: true,
-                                },
-                              }
+                              <ExerciseDialog exercise={drill.exercise} />,
+                              exerciseDialogOptions(drill.exercise.name)
                             )}
                           />
                         </div>
@@ -683,9 +546,9 @@ export default function ProgramLog() {
                   </div>
                 </div>
               ) : null}
-              {warmup.ladder ? (
+              {warmup.ladder && warmup.ladder.length ? (
                 <div className="bg-slate-100 dark:bg-background px-2 py-1 rounded">
-                  <div className="tex-base font-semibold mb-1">Mobility</div>
+                  <div className="tex-base font-semibold mb-1">Ladder</div>
                   <div className="flex flex-col gap-1">
                     {warmup.ladder.map((ladder, ladder_idx) => (
                       <div key={ladder_idx} className="flex flex-wrap gap-x-3">
@@ -700,43 +563,8 @@ export default function ProgramLog() {
                           <Video
                             className="hover:cursor-pointer min-w-6"
                             onClick={() => openDialog(
-                              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                                <div className="w-full">
-                                  <MuxPlayer
-                                    streamType="on-demand"
-                                    playbackId={ladder.exercise.muxPlaybackId ? ladder.exercise.muxPlaybackId : undefined}
-                                    tokens={{ playback: ladder.exercise.videoToken, thumbnail: ladder.exercise.videoToken }}
-                                    metadataVideoTitle="Placeholder (optional)"
-                                    metadataViewerUserId="Placeholder (optional)"
-                                    primaryColor="#FFFFFF"
-                                    secondaryColor="#000000"
-                                    style={{
-                                      aspectRatio: 9/16,
-                                      width: "100%",
-                                      height: "100%",
-                                      maxHeight: 640,
-                                      maxWidth: 360,
-                                    }}
-                                  />
-                                </div>
-                                <div className="w-full">
-                                  <div className="font-bold mb-2">Cues</div>
-                                  <div className="flex-1">{ladder.exercise.cues.map((cue, cue_idx) => (
-                                    <div key={cue_idx} className="flex w-full">
-                                      <div className="flex-none w-5">{cue_idx+1}.</div>
-                                      <div className="flex-1">{cue}</div>
-                                    </div>
-                                  ))}</div>
-                                </div>
-                              </div>, {
-                                title: {
-                                  text: ladder.exercise.name,
-                                  className: "text-foreground",
-                                },
-                                closeButton: {
-                                  show: true,
-                                },
-                              }
+                              <ExerciseDialog exercise={ladder.exercise} />,
+                              exerciseDialogOptions(ladder.exercise.name)
                             )}
                           />
                         </div>
@@ -749,7 +577,7 @@ export default function ProgramLog() {
                   </div>
                 </div>
               ) : null}
-              {warmup.power ? (
+              {warmup.power && warmup.power.length ? (
                 <div className="bg-slate-100 dark:bg-background px-2 py-1 rounded">
                   <div className="tex-base font-semibold mb-1">Activation</div>
                   <div className="flex flex-col gap-1">
@@ -766,43 +594,8 @@ export default function ProgramLog() {
                           <Video
                             className="hover:cursor-pointer min-w-6"
                             onClick={() => openDialog(
-                              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                                <div className="w-full">
-                                  <MuxPlayer
-                                    streamType="on-demand"
-                                    playbackId={power.exercise.muxPlaybackId ? power.exercise.muxPlaybackId : undefined}
-                                    tokens={{ playback: power.exercise.videoToken, thumbnail: power.exercise.videoToken }}
-                                    metadataVideoTitle="Placeholder (optional)"
-                                    metadataViewerUserId="Placeholder (optional)"
-                                    primaryColor="#FFFFFF"
-                                    secondaryColor="#000000"
-                                    style={{
-                                      aspectRatio: 9/16,
-                                      width: "100%",
-                                      height: "100%",
-                                      maxHeight: 640,
-                                      maxWidth: 360,
-                                    }}
-                                  />
-                                </div>
-                                <div className="w-full">
-                                  <div className="font-bold mb-2">Cues</div>
-                                  <div className="flex-1">{power.exercise.cues.map((cue, cue_idx) => (
-                                    <div key={cue_idx} className="flex w-full">
-                                      <div className="flex-none w-5">{cue_idx+1}.</div>
-                                      <div className="flex-1">{cue}</div>
-                                    </div>
-                                  ))}</div>
-                                </div>
-                              </div>, {
-                                title: {
-                                  text: power.exercise.name,
-                                  className: "text-foreground",
-                                },
-                                closeButton: {
-                                  show: true,
-                                },
-                              }
+                              <ExerciseDialog exercise={power.exercise} />,
+                              exerciseDialogOptions(power.exercise.name)
                             )}
                           />
                         </div>
@@ -866,43 +659,8 @@ export default function ProgramLog() {
                                     <Video
                                       className="hover:cursor-pointer min-w-6"
                                       onClick={() => openDialog(
-                                        <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                                          <div className="w-full">
-                                            <MuxPlayer
-                                              streamType="on-demand"
-                                              playbackId={ex_item.exercise.muxPlaybackId ? ex_item.exercise.muxPlaybackId : undefined}
-                                              tokens={{ playback: ex_item.exercise.videoToken, thumbnail: ex_item.exercise.videoToken }}
-                                              metadataVideoTitle="Placeholder (optional)"
-                                              metadataViewerUserId="Placeholder (optional)"
-                                              primaryColor="#FFFFFF"
-                                              secondaryColor="#000000"
-                                              style={{
-                                                aspectRatio: 9/16,
-                                                width: "100%",
-                                                height: "100%",
-                                                maxHeight: 640,
-                                                maxWidth: 360,
-                                              }}
-                                            />
-                                          </div>
-                                          <div className="w-full">
-                                            <div className="font-bold mb-2">Cues</div>
-                                            <div className="flex-1">{ex_item.exercise.cues.map((cue: string, cue_idx: number) => (
-                                              <div key={cue_idx} className="flex w-full">
-                                                <div className="flex-none w-5">{cue_idx+1}.</div>
-                                                <div className="flex-1">{cue}</div>
-                                              </div>
-                                            ))}</div>
-                                          </div>
-                                        </div>, {
-                                          title: {
-                                            text: ex_item.exercise.name,
-                                            className: "text-foreground",
-                                          },
-                                          closeButton: {
-                                            show: true,
-                                          },
-                                        }
+                                        <ExerciseDialog exercise={ex_item.exercise} />,
+                                        exerciseDialogOptions(ex_item.exercise.name)
                                       )}
                                     />
                                   </div>
@@ -1008,43 +766,8 @@ export default function ProgramLog() {
                           <Video
                             className="hover:cursor-pointer min-w-6"
                             onClick={() => openDialog(
-                              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                                <div className="w-full">
-                                  <MuxPlayer
-                                    streamType="on-demand"
-                                    playbackId={cldwn.exercise.muxPlaybackId ? cldwn.exercise.muxPlaybackId : undefined}
-                                    tokens={{ playback: cldwn.exercise.videoToken, thumbnail: cldwn.exercise.videoToken }}
-                                    metadataVideoTitle="Placeholder (optional)"
-                                    metadataViewerUserId="Placeholder (optional)"
-                                    primaryColor="#FFFFFF"
-                                    secondaryColor="#000000"
-                                    style={{
-                                      aspectRatio: 9/16,
-                                      width: "100%",
-                                      height: "100%",
-                                      maxHeight: 640,
-                                      maxWidth: 360,
-                                    }}
-                                  />
-                                </div>
-                                <div className="w-full">
-                                  <div className="font-bold mb-2">Cues</div>
-                                  <div className="flex-1">{cldwn.exercise.cues.map((cue, cue_idx) => (
-                                    <div key={cue_idx} className="flex w-full">
-                                      <div className="flex-none w-5">{cue_idx+1}.</div>
-                                      <div className="flex-1">{cue}</div>
-                                    </div>
-                                  ))}</div>
-                                </div>
-                              </div>, {
-                                title: {
-                                  text: cldwn.exercise.name,
-                                  className: "text-foreground",
-                                },
-                                closeButton: {
-                                  show: true,
-                                },
-                              }
+                              <ExerciseDialog exercise={cldwn.exercise} />,
+                              exerciseDialogOptions(cldwn.exercise.name)
                             )}
                           />
                         </div>

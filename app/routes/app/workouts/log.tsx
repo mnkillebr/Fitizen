@@ -227,17 +227,20 @@ export default function WorkoutLog() {
       </div> */}
       {/* Title */}
       <div className="flex justify-between items-center">
-        <Link
-          to={`/app/workouts/${workout?.id}`}
-          className={clsx(
-            "flex items-center text-primary-foreground text-sm bg-primary",
-            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-            isNavigatingBack ? "animate-pulse" : ""
-          )}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <div className="">Back</div>
-        </Link>
+        <div className="flex gap-4 items-center">
+          <Link
+            to={`/app/workouts/${workout?.id}`}
+            className={clsx(
+              "flex items-center text-primary-foreground text-sm bg-primary",
+              "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+              isNavigatingBack ? "animate-pulse" : ""
+            )}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <div className="">Back</div>
+          </Link>
+          <div className="flex-none font-semibold">New Workout Log</div>
+        </div>
         <div className="*:text-sm"><CurrentDate /></div>
         <input
           type="hidden"

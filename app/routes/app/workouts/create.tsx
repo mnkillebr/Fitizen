@@ -1,5 +1,5 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { Form, Link, useFetcher, useLoaderData, useMatches, useNavigation, useSearchParams, } from '@remix-run/react';
+import { Form, Link, useFetcher, useLoaderData, useLocation, useMatches, useNavigation, useSearchParams, useSubmit, } from '@remix-run/react';
 import { z } from 'zod';
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/node';
@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { workoutFormDataToObject, } from '~/utils/misc';
 import { ChevronDownIcon, PlusCircleIcon, XMarkIcon, Bars3Icon, TrashIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon as SearchIcon } from "@heroicons/react/24/outline";
-import { validateObject } from '~/utils/validation';
+import { validateForm, validateObject } from '~/utils/validation';
 import clsx from 'clsx';
 import { PrimaryButton } from '~/components/form';
 import Tooltip from '~/components/Tooltip';
@@ -22,6 +22,8 @@ import { Search } from 'lucide-react';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
 import { generateMuxThumbnailToken } from '~/mux-tokens.server';
+import { darkModeCookie } from '~/cookies';
+import { useSidebar } from '~/components/ui/sidebar';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -79,6 +81,10 @@ const workoutSchema = z.object({
   })).min(1, "You must add at least one exercise"),
 });
 
+const themeSchema = z.object({
+  darkMode: z.string(),
+})
+
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const formData = await request.formData();
@@ -100,6 +106,21 @@ export async function action({ request }: ActionFunctionArgs) {
         },
         (errors) => json({ errors }, { status: 400 })
       )
+    }
+    case "toggleDarkMode": {
+      return validateForm(
+        formData,
+        themeSchema,
+        async ({ darkMode }) => json("ok", {
+          headers: {
+            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+          }
+        }),
+        (errors) => json({ errors }, { status: 400 })
+      )
+    }
+    default: {
+      return null;
     }
   }
 }
@@ -145,7 +166,10 @@ const StrictModeDroppable = ({ children, ...props }: any) => {
 
 export default function WorkoutBuilderForm() {
   const { exercises } = useLoaderData<typeof loader>();
+  const submit = useSubmit();
+  const location = useLocation();
   const navigation = useNavigation();
+  const { open } = useSidebar();
   const createWorkoutFetcher = useFetcher<createWorkoutFetcherType>();
   const [searchParams, setSearchParams] = useSearchParams();
   const isSearching = navigation.formData?.has("q");
@@ -328,9 +352,9 @@ export default function WorkoutBuilderForm() {
   return (
     <>
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.75rem)]">
+        <div className="flex h-[calc(100vh-4rem)]">
           {/* Create Workout Form */}
-          <createWorkoutFetcher.Form method="post" className="flex flex-col h-full w-full lg:w-1/2 p-8 sm:p-6 bg-background-muted text-foreground">
+          <createWorkoutFetcher.Form method="post" className="flex flex-col h-full w-full xl:w-1/2 p-6 bg-background-muted text-foreground">
             <h2 className="mb-2 text-lg font-semibold">Create Workout</h2>
             <fieldset className="space-y-4 rounded-xl">
               <div className="flex flex-col">
@@ -342,7 +366,7 @@ export default function WorkoutBuilderForm() {
                   autoComplete="off"
                   required
                   className={clsx(
-                    "p-2 rounded-md border /*lg:w-2/3 xl:w-1/2*/ text-sm/6",
+                    "p-2 rounded-md border text-sm/6",
                     createWorkoutFetcher.data?.errors?.workoutName ? "border-red-500" : "",
                     "bg-background placeholder:text-muted-foreground dark:border-border-muted dark:focus:border-ring"
                   )}
@@ -352,7 +376,7 @@ export default function WorkoutBuilderForm() {
               </div>
               <div className="flex flex-col">
               <button
-                className="w-full flex justify-between items-center focus:outline-none /*lg:w-2/3 xl:w-1/2*/"
+                className="w-full flex justify-between items-center focus:outline-none"
                 onClick={(event) => {
                   event.preventDefault();
                   setOpenDescription(!openDescription);
@@ -779,11 +803,11 @@ export default function WorkoutBuilderForm() {
                     </Draggable>
                   ))}
                   {provided.placeholder}
-                  <p className="hidden lg:flex h-full text-sm text-slate-400 dark:text-muted-foreground justify-center items-center p-4 border-2 bg-white dark:bg-background-muted border-dashed border-gray-300 rounded-md select-none">
+                  <p className="hidden xl:flex h-full text-sm text-slate-400 dark:text-muted-foreground justify-center items-center p-4 border-2 bg-white dark:bg-background-muted border-dashed border-gray-300 rounded-md select-none">
                     Drag 'n' drop exercise(s) here
                   </p>
                   <div
-                    className="lg:hidden h-full border-2 border-dashed bg-white dark:bg-background-muted rounded-md px-3 py-2 flex flex-col justify-center items-center my-1 cursor-pointer"
+                    className="xl:hidden h-full border-2 border-dashed border-gray-300 bg-white dark:bg-background-muted rounded-md px-3 py-2 flex flex-col justify-center items-center my-1 cursor-pointer"
                     onClick={toggleExercisesPanel}
                   >
                     <p className="text-sm text-slate-400 dark:text-muted-foreground select-none">Add exercise (s)</p>
@@ -817,7 +841,12 @@ export default function WorkoutBuilderForm() {
             )} */}
           </createWorkoutFetcher.Form>
           {/* Available Exercises */}
-          <div className="hidden h-full lg:flex flex-col lg:w-1/2 p-8 sm:p-6 bg-gray-200 dark:bg-background text-foreground dark:border-l dark:border-border-muted">
+          <div
+            className={clsx(
+              "hidden h-full xl:flex flex-col xl:w-1/2 px-6 pt-6 bg-gray-200",
+              "dark:bg-background text-foreground dark:border-l dark:border-border-muted",
+            )}
+          >
             <h2 className="mb-2 text-lg font-semibold">Available Exercises</h2>
             <Form
               className={clsx("mb-2", isSearching ? "animate-pulse" : "",
@@ -828,11 +857,14 @@ export default function WorkoutBuilderForm() {
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground dark:text-muted-foreground peer-focus:text-foreground" />
                 <Input
-                  type="text"
+                  type="search"
                   defaultValue={searchParams.get("q") ?? ""}
                   name="q"
                   placeholder="Search available exercises ..."
                   autoComplete="off"
+                  onChange={(e) => {
+                    !e.target.value && submit({}, { action: location?.pathname })
+                  }}
                   className={clsx(
                     "w-full appearance-none border bg-background pl-8 shadow-none",
                     "dark:bg-background-muted dark:text-muted-foreground dark:focus:text-foreground",
@@ -846,7 +878,7 @@ export default function WorkoutBuilderForm() {
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-y-3 gap-x-3  overflow-y-auto"
+                  className="flex flex-col gap-y-2 2xl:grid 2xl:grid-cols-2 2xl:gap-y-3 gap-x-3 overflow-y-auto pb-6 snap-y snap-mandatory"
                 >
                   {exercises.map((card, index) => (
                     <Draggable key={card.id} draggableId={card.id} index={index}>
@@ -855,7 +887,7 @@ export default function WorkoutBuilderForm() {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className="flex flex-col bg-background rounded shadow dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted *:select-none"
+                          className="flex flex-col bg-background snap-start rounded shadow dark:bg-background-muted dark:border dark:border-border-muted dark:shadow-border-muted *:select-none"
                           style={{
                             ...provided.draggableProps.style,
                             transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'translate(0px, 0px)',
@@ -890,9 +922,9 @@ export default function WorkoutBuilderForm() {
         {openExercisesPanel && (
           <motion.div
             className={clsx(
-              "lg:hidden absolute bottom-0 left-0 md:left-[219px] md:max-w-[calc(100vw-13.6875rem)]",
-              "flex flex-col gap-y-2 h-3/5 bg-gray-200 w-screen rounded-t-lg p-8 sm:p-6",
-              "dark:bg-border-muted"
+              "xl:hidden absolute bottom-0 left-0 dark:bg-border-muted transition ease-linear",
+              "flex flex-col gap-y-2 h-3/5 bg-gray-200 w-screen rounded-t-lg px-6 pt-6",
+              open ? "md:max-w-[calc(100vw-16rem)]" : "md:max-w-[calc(100vw-3rem)]"
             )}
             initial={{ translateY: "100%" }}
             animate={{ translateY: "0%" }}
@@ -919,11 +951,14 @@ export default function WorkoutBuilderForm() {
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground dark:text-muted-foreground peer-focus:text-foreground" />
                 <Input
-                  type="text"
+                  type="search"
                   defaultValue={searchParams.get("q") ?? ""}
                   name="q"
                   placeholder="Search available exercises ..."
                   autoComplete="off"
+                  onChange={(e) => {
+                    !e.target.value && submit({}, { action: location?.pathname })
+                  }}
                   className={clsx(
                     "w-full appearance-none border bg-background pl-8 shadow-none",
                     "dark:bg-background dark:text-muted-foreground dark:focus:text-foreground",
@@ -932,7 +967,7 @@ export default function WorkoutBuilderForm() {
                 />
               </div>
             </Form>
-            <div className="flex flex-col gap-y-2 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-0.5 pb-1 text-slate-900">
+            <div className="flex flex-col gap-y-2 lg:grid lg:grid-cols-2 lg:gap-4 snap-y snap-mandatory overflow-y-auto px-0.5 text-slate-900 pb-4">
               {exercises.map((ex_item) => (
                 <Exercise
                   key={ex_item.id}

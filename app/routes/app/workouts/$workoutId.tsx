@@ -518,17 +518,22 @@ export default function WorkoutDetail() {
       <div className="flex-none">
         {/* Back and Context Menu */}
         <div className="flex justify-between mb-2">
-        <Link
-          to="/app/workouts"
-          className={clsx(
-            "flex items-center text-primary-foreground text-sm bg-primary",
-            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-            isNavigatingWorkouts ? "animate-pulse" : ""
-          )}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <div className="">Back</div>
-        </Link>
+          <div className="flex gap-4 items-center">
+            <Link
+              to="/app/workouts"
+              className={clsx(
+                "flex items-center text-primary-foreground text-sm bg-primary",
+                "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+                isNavigatingWorkouts ? "animate-pulse" : ""
+              )}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <div className="">Back</div>
+            </Link>
+            <div className="flex-none font-semibold">
+              {data.workout.name}
+            </div>
+          </div>
           <Popover>
             {({ open }) => (
               <>

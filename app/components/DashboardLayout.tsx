@@ -88,9 +88,15 @@ export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutPro
         }
       }
       case "Workouts": {
-        const subTitle = matchData.workout ? matchData.workout.name : matchData.userLog ? matchData.userLog.routine.name : ""
+        const subTitle = location.pathname === "/app/workouts/create" ? "Create Workout" : matchData.workout ? matchData.workout.name : matchData.userLog ? matchData.userLog.routine.name : ""
         const subId = matchData.workout ? matchData.workout.id : matchData.userLog ? matchData.userLog.routineId : ""
-        const nestedSubTitle = matchData.workout && location.search ? "New Workout Log" : matchData.userLog && location.search ? "Workout Log" : ""
+        const nestedSubTitle =
+          matchData.workout && location.search && location.pathname === "/app/workouts/edit" ?
+            "Edit Workout" :
+            matchData.workout && location.search ?
+              "New Workout Log" :
+              matchData.userLog && location.search ?
+                "Workout Log" : ""
         return {
           title: route,
           link: location.pathname.split("/").slice(0,3).join("/"),

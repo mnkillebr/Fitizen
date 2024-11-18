@@ -84,7 +84,7 @@ export default function ProgramDetail() {
   const openDialog = useOpenDialog();
   useEffect(() => {
     if (newLogSaved) {
-      openDialog(<WorkoutCompleted workoutName={`Week ${programWeek} - Day ${programDay}`} />, workoutSuccessDialogOptions)
+      openDialog(<WorkoutCompleted workoutName={`Week ${newLogSaved.programWeek} - Day ${newLogSaved.programDay}`} />, workoutSuccessDialogOptions)
     }
   }, [])
 
@@ -98,20 +98,22 @@ export default function ProgramDetail() {
       {/* <Link className="flex-none" to="/app/programs">
         <ChevronLeft className="hover:text-primary" />
       </Link> */}
-      <Link
-        to="/app/programs"
-        className={clsx(
-          "flex items-center text-primary-foreground bg-primary text-sm w-fit",
-          "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
-          isNavigatingPrograms ? "animate-pulse" : ""
-        )}
-      >
-        <ChevronLeft className="h-4 w-4" />
-        <div className="">Back</div>
-      </Link>
-      {/* <div className="flex-none font-semibold">
-        {program.name}
-      </div> */}
+      <div className="flex gap-4 items-center">
+        <Link
+          to="/app/programs"
+          className={clsx(
+            "flex items-center text-primary-foreground bg-primary text-sm w-fit",
+            "py-2 pl-2 pr-3 rounded-md hover:bg-primary/90 shadow",
+            isNavigatingPrograms ? "animate-pulse" : ""
+          )}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <div className="">Back</div>
+        </Link>
+        <div className="flex-none font-semibold">
+          {program.name}
+        </div>
+      </div>
       <div className="flex-none h-1/4 md:h-1/3 flex flex-col lg:flex-row gap-3">
         <div className="relative h-full group lg:hidden">
           <div
