@@ -1,5 +1,6 @@
 import { Link, Form } from "@remix-run/react";
 import { FacebookIcon, InstagramIcon, TwitterIcon, GithubIcon, YoutubeIcon } from "images/icons";
+import { toast } from "sonner";
 
 export default function FooterSection() {
   return (
@@ -35,7 +36,7 @@ export default function FooterSection() {
             <p className="mt-4 text-base text-gray-500 dark:text-muted-foreground">
               The latest news, articles, and resources, sent to your inbox weekly.
             </p>
-            <Form className="mt-4 sm:flex sm:max-w-md" method="post">
+            <div className="mt-4 sm:flex sm:max-w-md">
               <input
                 type="email"
                 name="email"
@@ -47,13 +48,14 @@ export default function FooterSection() {
               />
               <div className="mt-3 rounded-md sm:mt-0 sm:ml-3 sm:flex-shrink-0">
                 <button
-                  type="submit"
+                  // type="submit"
+                  onClick={() => alert("Subscriptions coming soon")}
                   className="w-full bg-primary flex items-center justify-center border border-transparent rounded-md py-2 px-4 text-base font-medium text-white hover:bg-yellow-300 focus:ring-2 focus:ring-offset-2 focus:ring-yellow-300 transition duration-200"
                 >
                   Subscribe
                 </button>
               </div>
-            </Form>
+            </div>
           </div>
         </div>
         <div className="mt-12 border-t border-gray-200 dark:border-border-muted pt-8 md:flex md:justify-between">

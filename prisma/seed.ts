@@ -5,9 +5,9 @@ function createUser() {
   return db.user.create({
     data: {
       role: Role.user,
-      email: "test@email.com",
-      firstName: "Marikusu",
-      lastName: "Kiriburu"
+      email: "testuser@email.com",
+      firstName: "Test",
+      lastName: "User"
     }
   })
 }
