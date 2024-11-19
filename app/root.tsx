@@ -20,20 +20,17 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ArrowLeftEndOnRectangleIcon, Bars3Icon, BookOpenIcon, CalendarIcon, FireIcon, TableCellsIcon } from "@heroicons/react/24/solid";
 import logo from "images/fitizen_logo.svg?url";
-import { AppNavLink, MobileNavLink, RootNavLink } from "./components/AppNavLink";
 import { getCurrentUser } from "./utils/auth.server";
 import { destroySession, getSession } from "./sessions";
 import clsx from "clsx";
 import { DialogProvider } from "./components/Dialog";
 import { Toaster } from "~/components/ui/sonner"
-import { DashboardLayout } from "./components/layout";
 import { darkModeCookie } from "./cookies";
 import { ChartIcon, ChevronRight } from "images/icons";
 import { AppDashboardLayout } from "./components/DashboardLayout";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/ui/tooltip";
-import { MoonStar, Sun } from "lucide-react";
 import { validateForm } from "./utils/validation";
 import { z } from "zod";
+import { DarkModeToggle } from "./components/DarkModeToggle";
 
 const navigation = [
   { name: "Settings", href: "settings" },
@@ -91,7 +88,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("cookie");
 	const darkModeCookieValue = await darkModeCookie.parse(cookieHeader);
   const darkMode = darkModeCookieValue === "true" ? true : false
-  return json({ user, isLoggedIn: user !== null, darkMode, avatar: user?.profilePhotoUrl, initials: `${user?.firstName[0]}${user?.lastName[0]}` })
+  return json({ user, isLoggedIn: user !== null, darkMode })
 }
 
 const themeSchema = z.object({
@@ -115,11 +112,14 @@ export async function action({ request }: ActionFunctionArgs) {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json("ok", {
-          headers: {
-            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+        async ({ darkMode }) => json(
+          { success: true },
+          {
+            headers: {
+              "Set-Cookie": `fitizen__darkMode=${darkMode}; SameSite=Strict`,
+            },
           }
-        }),
+        ),
         (errors) => json({ errors }, { status: 400 })
       )
     }
@@ -129,39 +129,35 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-const DarkModeScript = ({ darkMode }: { darkMode: boolean }) => {
+const DarkModeScript = () => {
   const script = `
-  ;(() => {
-    const darkMode = ${JSON.stringify(darkMode)};
-    // we're running in the server
-    if (typeof window === 'undefined') {
-      if (darkMode) {
+    (function() {
+      let cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split('=');
+        acc[key] = value;
+        return acc;
+      }, {});
+
+      if (cookies['fitizen__darkMode'] === 'true') {
         document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
       }
-      return;
-    }
-    // we're running in the browser
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  })()
+    })();
   `;
 
   return <script dangerouslySetInnerHTML={{ __html: script }} />;
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { darkMode } = useLoaderData<typeof loader>();
   return (
-    <html lang="en" className={darkMode ? "dark" : ""}>
+    <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
-        <DarkModeScript darkMode={darkMode} />
+        <DarkModeScript />
       </head>
       <body className="bg-background">
         <DialogProvider>
@@ -177,7 +173,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { avatar, darkMode, initials, user } = useLoaderData<typeof loader>();
+  const { darkMode, user } = useLoaderData<typeof loader>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const matches = useMatches();
   const inAppRoute = matches.map(m => m.id).includes("routes/app");
@@ -185,21 +181,9 @@ export default function App() {
   const handleLogout = () => {
     return submit({ "_action": "logout" }, { method: "post" })
   }
-  const toggleDarkMode = () => {
-    return submit(
-      {
-        "_action": "toggleDarkMode",
-        darkMode: !darkMode,
-      },
-      {
-        method: "post",
-      }
-    )
-  }
 
   if (inAppRoute) {
     return <AppDashboardLayout darkModeEnabled={darkMode} user={user} />
-    // return <DashboardLayout navLinks={dashNavigation} darkModeEnabled={darkMode} avatar={avatar ?? undefined} initials={initials} />
   }
 
   return (
@@ -246,16 +230,7 @@ export default function App() {
               </button>
             ) : (
               <>
-                <TooltipProvider>
-                  <Tooltip delayDuration={200}>
-                    <TooltipTrigger className="*:mr-5 *:hover:text-primary">
-                      {darkMode ? <MoonStar size={20} onClick={toggleDarkMode}/> : <Sun size={20} onClick={toggleDarkMode}/>}
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {darkMode ? "Dark Mode Enabled" : "Toggle Dark Mode"}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <DarkModeToggle />
                 <Link
                   to="login"
                   className={clsx(

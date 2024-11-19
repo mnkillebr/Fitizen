@@ -9,13 +9,11 @@ export default function HeroSection() {
         <div className="flex flex-col md:flex-row gap-x-6 lg:gap-x-16 items-center justify-between">
           <div className="md:w-1/2 mb-10 md:mb-0">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 dark:text-foreground">
-              We're changing the way people connect.
+              Accessible Custom Coaching for All
             </h1>
             <p className="text-gray-600 dark:text-muted-foreground mb-8">
-              Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui
-              lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat
-              fugiat aliqua. Anim aute id magna aliqua ad ad non deserunt sunt.
-              Qui irure qui lorem cupidatat commodo.
+              Fitizen delivers science-backed workout insights in seconds,
+              empowering you to train smarter and live strong.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Link

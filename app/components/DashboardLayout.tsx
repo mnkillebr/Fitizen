@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { useMemo, } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { DarkModeToggle } from "./DarkModeToggle";
 
 const navLinks = [
   {
@@ -117,18 +118,6 @@ export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutPro
     navLinks,
     matches,
   ])
-  const toggleDarkMode = () => {
-    return submit(
-      {
-        "_action": "toggleDarkMode",
-        darkMode: !darkModeEnabled,
-      },
-      {
-        method: "post",
-        action: location?.pathname + location?.search,
-      }
-    )
-  }
 
   return (
     <SidebarProvider>
@@ -179,16 +168,7 @@ export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutPro
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-          <TooltipProvider>
-            <Tooltip delayDuration={200}>
-              <TooltipTrigger className="*:mr-5 *:hover:text-primary">
-                {darkModeEnabled ? <MoonStar size={20} onClick={toggleDarkMode}/> : <Sun size={20} onClick={toggleDarkMode}/>}
-              </TooltipTrigger>
-              <TooltipContent>
-                {darkModeEnabled ? "Dark Mode Enabled" : "Toggle Dark Mode"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <DarkModeToggle />
         </header>
         <div className="flex flex-1 flex-col gap-4 px-4 pt-0">
           <Outlet />

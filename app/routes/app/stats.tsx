@@ -286,11 +286,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json("ok", {
-          headers: {
-            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+        async ({ darkMode }) => json(
+          { success: true },
+          {
+            headers: {
+              "Set-Cookie": `fitizen__darkMode=${darkMode}; SameSite=Strict`,
+            },
           }
-        }),
+        ),
         (errors) => json({ errors }, { status: 400 })
       )
     }

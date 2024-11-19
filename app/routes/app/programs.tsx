@@ -37,18 +37,20 @@ const themeSchema = z.object({
 })
 
 export async function action({ request }: ActionFunctionArgs) {
-  console.log("action", request.headers)
   const formData = await request.formData()
   switch (formData.get("_action")) {
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json("ok", {
-          headers: {
-            "Set-Cookie": await darkModeCookie.serialize(darkMode),
+        async ({ darkMode }) => json(
+          { success: true },
+          {
+            headers: {
+              "Set-Cookie": `fitizen__darkMode=${darkMode}; SameSite=Strict`,
+            },
           }
-        }),
+        ),
         (errors) => json({ errors }, { status: 400 })
       )
     }
