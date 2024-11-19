@@ -119,16 +119,6 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-// export function shouldRevalidate({ nextUrl, currentUrl }: ShouldRevalidateFunctionArgs) {
-//   // Always revalidate if we're coming from the workouts create route
-//   console.log('current url', currentUrl)
-//   if (currentUrl.pathname === "/app/workouts/create") {
-//     return true;
-//   }
-//   // Otherwise, use the default behavior
-//   return false;
-// };
-
 export default function Workouts() {
   const data = useLoaderData<typeof loader>();
   const createWorkoutFetcher = useFetcher();
