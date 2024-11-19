@@ -15,7 +15,7 @@ import { PrimaryButton } from "~/components/form";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { darkModeCookie, newSavedProgramLogCookie } from "~/cookies";
+import { newSavedProgramLogCookie } from "~/cookies";
 import db from "~/db.server";
 import { getProgramById, getUserProgramLogsByProgramId, saveUserProgramLog } from "~/models/program.server";
 import { generateMuxVideoToken } from "~/mux-tokens.server";

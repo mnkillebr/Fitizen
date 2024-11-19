@@ -25,7 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip"
-import { darkModeCookie, newSavedWorkoutLogCookie } from "~/cookies";
+import { newSavedWorkoutLogCookie } from "~/cookies";
 import { WorkoutCompleted, workoutSuccessDialogOptions } from "~/components/WorkoutCompleted";
 
 const deleteWorkoutSchema = z.object({

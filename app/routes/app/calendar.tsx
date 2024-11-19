@@ -10,7 +10,6 @@ import { convertObjectToFormData } from "~/utils/misc";
 import { validateForm, } from "~/utils/validation";
 import { toast } from "sonner";
 import { useEffect } from "react";
-import { darkModeCookie } from "~/cookies";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);

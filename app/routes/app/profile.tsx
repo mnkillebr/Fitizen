@@ -19,7 +19,6 @@ import { FitnessSettings } from "~/components/FitnessSettings";
 import { LoadUnit } from "@prisma/client";
 import db from "~/db.server";
 import { getSession } from "~/sessions";
-import { darkModeCookie } from "~/cookies";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("cookie");

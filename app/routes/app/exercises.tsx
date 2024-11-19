@@ -13,12 +13,11 @@ import { requireLoggedInUser } from "~/utils/auth.server";
 import { Exercise as ExerciseType, Role as RoleType } from "@prisma/client";
 import { useOpenDialog } from "~/components/Dialog";
 import { CheckCircleIcon, ChevronLeft, ChevronRight, PlusCircleIcon } from "images/icons";
-import { darkModeCookie } from "~/cookies";
-import MuxPlayer from '@mux/mux-player-react';
 import { generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
 import { hash } from "~/cryptography.server";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "~/components/ui/pagination";
 import { EXERCISE_ITEMS_PER_PAGE } from "~/utils/magicNumbers";
+import { ExerciseDialog, exerciseDialogOptions } from "~/components/ExerciseDialog";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -67,7 +66,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId, smartCrop(), heightAdjust())
     return {
       ...ex_item,
-      token: videoToken,
+      videoToken,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
   }) : []
@@ -195,43 +194,8 @@ export default function ExerciseLibrary() {
         {exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={role} onViewExercise={() => {
             openDialog(
-              <div className="flex flex-col md:flex-row gap-y-3 gap-x-4">
-                <div className="w-full">
-                  <MuxPlayer
-                    streamType="on-demand"
-                    playbackId={ex_item.muxPlaybackId ? ex_item.muxPlaybackId : undefined}
-                    tokens={{ playback: ex_item.token, thumbnail: ex_item.token }}
-                    metadataVideoTitle="Placeholder (optional)"
-                    metadataViewerUserId="Placeholder (optional)"
-                    primaryColor="#FFFFFF"
-                    secondaryColor="#000000"
-                    style={{
-                      aspectRatio: 9/16,
-                      width: "100%",
-                      height: "100%",
-                      maxHeight: 640,
-                      maxWidth: 360,
-                    }}
-                  />
-                </div>
-                <div className="w-full">
-                  <div className="font-bold mb-2">Cues</div>
-                  <div className="flex-1">{ex_item.cues.map((cue, cue_idx) => (
-                    <div key={cue_idx} className="flex w-full">
-                      <div className="flex-none w-5">{cue_idx+1}.</div>
-                      <div className="flex-1">{cue}</div>
-                    </div>
-                  ))}</div>
-                </div>
-              </div>, {
-                title: {
-                  text: ex_item.name,
-                  className: "text-foreground",
-                },
-                closeButton: {
-                  show: true,
-                },
-              }
+              <ExerciseDialog exercise={ex_item} />,
+              exerciseDialogOptions(ex_item.name)
             )
           }} />
         ))}

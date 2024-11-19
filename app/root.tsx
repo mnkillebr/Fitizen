@@ -25,7 +25,6 @@ import { destroySession, getSession } from "./sessions";
 import clsx from "clsx";
 import { DialogProvider } from "./components/Dialog";
 import { Toaster } from "~/components/ui/sonner"
-import { darkModeCookie } from "./cookies";
 import { ChartIcon, ChevronRight } from "images/icons";
 import { AppDashboardLayout } from "./components/DashboardLayout";
 import { validateForm } from "./utils/validation";
@@ -85,10 +84,7 @@ export const links: LinksFunction = () => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getCurrentUser(request);
-  const cookieHeader = request.headers.get("cookie");
-	const darkModeCookieValue = await darkModeCookie.parse(cookieHeader);
-  const darkMode = darkModeCookieValue === "true" ? true : false
-  return json({ user, isLoggedIn: user !== null, darkMode })
+  return json({ user, isLoggedIn: user !== null })
 }
 
 const themeSchema = z.object({
@@ -173,7 +169,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { darkMode, user } = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const matches = useMatches();
   const inAppRoute = matches.map(m => m.id).includes("routes/app");
@@ -183,7 +179,7 @@ export default function App() {
   }
 
   if (inAppRoute) {
-    return <AppDashboardLayout darkModeEnabled={darkMode} user={user} />
+    return <AppDashboardLayout user={user} />
   }
 
   return (
@@ -320,6 +316,7 @@ export function ErrorBoundary() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <DarkModeScript />
       </head>
       <body>
         <div className="p-4">
@@ -336,7 +333,7 @@ export function ErrorBoundary() {
               {error instanceof Error ? <p className="my-2 font-bold">{error.message}</p> : null}
             </>
           )}
-          <Link to="app" className="text-primary">Home Page</Link>
+          <a href="/app" className="text-primary">Home Page</a>
         </div>
       </body>
     </html>

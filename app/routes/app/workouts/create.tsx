@@ -22,7 +22,6 @@ import { Search } from 'lucide-react';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
 import { generateMuxThumbnailToken } from '~/mux-tokens.server';
-import { darkModeCookie } from '~/cookies';
 import { useSidebar } from '~/components/ui/sidebar';
 
 const targetOptions = [
@@ -55,7 +54,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const query = url.searchParams.get("q");
   const exercises = await getAllExercises(query);
   const tokenMappedExercises = exercises.map(ex_item => {
-    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId)
+    const smartCrop = () => {
+      let crop = ["Lateral Lunge", "Band Assisted Leg Lowering", "Ankle Mobility", "Kettlebell Swing", "Half Kneel Kettlebell Press"]
+      if (crop.includes(ex_item.name)) {
+        return "smartcrop"
+      } else {
+        return undefined
+      }
+    }
+    const heightAdjust = () => {
+      let adjustments = ["Pushup", "Kettlebell Swing", "Kettlebell Renegade Row", "Half Kneel Kettlebell Press"]
+      let expand = ["Lateral Bound", "Mini Band Walks"]
+      if (adjustments.includes(ex_item.name)) {
+        return "481"
+      } else if (expand.includes(ex_item.name)) {
+        return "1369"
+      } else {
+        return undefined
+      }
+    }
+    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId, smartCrop(), heightAdjust())
     return {
       ...ex_item,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,

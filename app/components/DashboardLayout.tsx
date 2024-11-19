@@ -58,12 +58,10 @@ const navLinks = [
 
 interface DashboardLayoutProps {
   user: User;
-  darkModeEnabled: boolean;
 }
-export function AppDashboardLayout({ user, darkModeEnabled }: DashboardLayoutProps) {
+export function AppDashboardLayout({ user }: DashboardLayoutProps) {
   const location = useLocation();
   const matches = useMatches();
-  const submit = useSubmit();
   const headerTitle = useMemo(() => {
     if (location.pathname === "/app/profile") {
       return {

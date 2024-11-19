@@ -17,7 +17,7 @@ import { saveUserWorkoutLog } from "~/models/workout.server";
 import { ExerciseTarget, LoadUnit } from "@prisma/client";
 import clsx from "clsx";
 import { generateMuxVideoToken } from "~/mux-tokens.server";
-import { darkModeCookie, newSavedWorkoutLogCookie } from "~/cookies";
+import { newSavedWorkoutLogCookie } from "~/cookies";
 
 const loadOptions = [
   "bw",

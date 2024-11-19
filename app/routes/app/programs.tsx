@@ -1,10 +1,7 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { Outlet, useLoaderData, useMatches, useNavigate, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
-// import boxDude from "images/boxer_dude.jpeg"
-// import squatGirl from "images/squat_lady.jpeg"
 import { z } from "zod";
-import { darkModeCookie } from "~/cookies";
 import { hash } from "~/cryptography.server";
 import { getAllPrograms } from "~/models/program.server";
 import { requireLoggedInUser } from "~/utils/auth.server";

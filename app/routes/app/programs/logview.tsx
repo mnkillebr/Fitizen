@@ -4,7 +4,6 @@ import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
 import { z } from "zod";
 import CurrentDate from "~/components/CurrentDate";
-import { darkModeCookie } from "~/cookies";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { validateForm } from "~/utils/validation";

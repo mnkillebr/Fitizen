@@ -8,7 +8,7 @@ import { createIntroProgram, getProgramById, getUserProgramLogsByProgramId } fro
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { ProgramLog } from "@prisma/client";
 import { validateForm } from "~/utils/validation";
-import { darkModeCookie, newSavedProgramLogCookie } from "~/cookies";
+import { newSavedProgramLogCookie } from "~/cookies";
 import { z } from "zod";
 import { useEffect } from "react";
 import { useOpenDialog } from "~/components/Dialog";

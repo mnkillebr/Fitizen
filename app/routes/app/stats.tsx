@@ -7,7 +7,6 @@ import { LineChartComponent } from "~/components/LineChartComponent";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "~/components/ui/carousel";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectTrigger, SelectValue, SelectItem } from "~/components/ui/select";
-import { darkModeCookie } from "~/cookies";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { calculateAverageEntriesPerWeek, calculateWeeklyStreak } from "~/utils/misc";

@@ -11,7 +11,6 @@ import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { ArrowRight, ChevronLeft } from "images/icons";
 import { useState } from "react";
-import { darkModeCookie } from "~/cookies";
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
