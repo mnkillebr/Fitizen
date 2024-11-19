@@ -28,7 +28,7 @@ export function generateMuxVideoToken(playbackId: string | null) {
   }
 }
 
-export function generateMuxThumbnailToken(playbackId: string | null, fit: string | undefined = "crop") {
+export function generateMuxThumbnailToken(playbackId: string | null, fit: string | undefined = "crop", defaultHeight: string = "770") {
   if (playbackId) {
     const secretKey = Buffer.from(MUX_SIGNING_KEY_SECRET, 'base64').toString("ascii")
     const token = jwt.sign(
@@ -37,7 +37,7 @@ export function generateMuxThumbnailToken(playbackId: string | null, fit: string
         aud: "t",
         exp: Math.floor(Date.now() / 1000) + (60 * 60),
         kid: MUX_SIGNING_KEY_ID,
-        height: "770",
+        height: defaultHeight,
         fit_mode: fit
       },
       secretKey,

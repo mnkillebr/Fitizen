@@ -99,6 +99,7 @@ function getKettlebellExercises() {
       muscles: [MuscleGroup.shoulders, MuscleGroup.triceps, MuscleGroup.serratus],
       pattern: [MovementPattern.push],
       plane: [MovementPlane.sagittal, MovementPlane.frontal],
+      muxPlaybackId: "TU4XmFZXrsRuP5pI4kPLFV7rGuOijeFqZF2vt01983O8",
     },
     {
       name: "Kettlebell Single Leg Deadlift",
@@ -147,6 +148,7 @@ function getKettlebellExercises() {
       muscles: [MuscleGroup.serratus, MuscleGroup.obliques, MuscleGroup.lats, MuscleGroup.erectors, MuscleGroup.abs],
       pattern: [MovementPattern.pull, MovementPattern.rotational],
       plane: [MovementPlane.sagittal, MovementPlane.transverse],
+      muxPlaybackId: "qXmm5l2CxN2thr6tMujWLajg34eThU00p5y01lVfm2vXg",
     },
     {
       name: "Kettlebell Swing",
@@ -172,6 +174,7 @@ function getKettlebellExercises() {
       muscles: [MuscleGroup.glutes, MuscleGroup.hamstrings, MuscleGroup.lats, MuscleGroup.erectors, MuscleGroup.abs],
       pattern: [MovementPattern.hinge, MovementPattern.core],
       plane: [MovementPlane.sagittal],
+      muxPlaybackId: "qXmm5l2CxN2thr6tMujWLajg34eThU00p5y01lVfm2vXg"
     },
   ];
 };
@@ -1143,6 +1146,27 @@ function getAthleticConditioningExercises() {
       pattern: [MovementPattern.pull],
       plane: [MovementPlane.frontal],
       muxPlaybackId: "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo",
+    },
+    {
+      name: "Pushup",
+      description: "An full body strength exercise that targets chest and core",
+      tags: ["chest", "core", "calisthenics"],
+      cues: [
+        "Start in a high plank position with your hands slightly wider than shoulder-width apart. Your body should form a straight line from your head to your heels, with your core engaged and your glutes tight. Keep your shoulders directly above your wrists, and your feet together or hip-width apart, depending on your stability.",
+        "Lower your body by bending your elbows, keeping them at a 45-degree angle from your body (not flaring out to the sides). Your chest should lower toward the floor while maintaining a straight line from your head to your heels. Keep your core braced to prevent your hips from sagging or rising too high.",
+        "Push through your hands to return to the starting position, fully extending your arms. You should feel this in your chest, shoulders, triceps, and core. Focus on maintaining a tight plank throughout the movement, avoiding any arching in your lower back or letting your hips drop. Maintain control on the way down and up."
+      ],
+      balance: BalanceType.bilateral,
+      balanceLevel: BalanceLevel.static,
+      body: [BodyFocus.upper, BodyFocus.core],
+      contraction: ContractionType.isotonic,
+      equipment: [Equipment.bodyweight],
+      joint: [Joint.ankle, Joint.shoulder, Joint.wrist, Joint.elbow],
+      lift: LiftType.compound,
+      muscles: [MuscleGroup.pecs, MuscleGroup.triceps, MuscleGroup.shoulders, MuscleGroup.abs, MuscleGroup.erectors],
+      pattern: [MovementPattern.push, MovementPattern.core],
+      plane: [MovementPlane.sagittal],
+      muxPlaybackId: "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE",
     },
   ]
 }

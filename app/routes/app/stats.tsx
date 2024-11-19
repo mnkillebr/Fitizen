@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 import { LineChartComponent } from "~/components/LineChartComponent";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "~/components/ui/carousel";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectTrigger, SelectValue, SelectItem } from "~/components/ui/select";
 import { darkModeCookie } from "~/cookies";
 import db from "~/db.server";
@@ -313,8 +314,8 @@ export default function Stats() {
   const defaultWorkoutMetric = mostRecentWorkoutLog && mostRecentWorkoutLog.exerciseLogs[0].volumeLoad ? "volumeLoad" : "timeLoad"
   const mostRecentProgramLog = userProgramLogs.sort((a,b) => b.date - a.date)[0]
   const defaultProgram = mostRecentProgramLog ? allProgramOptions.find(program => program.label === mostRecentProgramLog.program.name)?.value : undefined
-  const defaultProgramExercise = mostRecentProgramLog ? mostRecentProgramLog.exerciseLogs[0].blockExercise.exerciseId : undefined
-  const defaultProgramMetric = mostRecentProgramLog && mostRecentProgramLog.exerciseLogs[0].volumeLoad ? "volumeLoad" : "timeLoad"
+  const defaultProgramExercise = mostRecentProgramLog ? mostRecentProgramLog.exerciseLogs[2].blockExercise.exerciseId : undefined
+  const defaultProgramMetric = mostRecentProgramLog && mostRecentProgramLog.exerciseLogs[2].volumeLoad ? "volumeLoad" : "timeLoad"
 
   const [selectedProgram, setSelectedProgram] = useState<string | undefined>(defaultProgram ?? undefined)
   const [selectedWorkout, setSelectedWorkout] = useState<string | undefined>(defaultWorkout ?? undefined)
@@ -388,7 +389,43 @@ export default function Stats() {
     <div className="px-2 md:px-3 flex flex-col gap-y-4 bg-background text-foreground h-[calc(100vh-4rem)]">
       <div className="flex flex-col">
         <div className="flex-none text-base font-semibold md:text-lg text-foreground mb-2">Current Streaks</div>
-        <div className="grid grid-cols-3 gap-2 w-full">
+        <Carousel className="w-full max-w-xs self-center md:hidden">
+          <CarouselContent>
+            <CarouselItem>
+              <Card>
+                <CardContent className="flex flex-col items-center">
+                  <div className="flex justify-center font-bold text-[64px] sm:text-[80px] md:text-[96px]">{calculateAverageEntriesPerWeek([...userProgramLogs, ...userWorkoutLogs])}</div>
+                  <div className="font-semibold leading-none tracking-tight">Weekly Average</div>
+                  <div className="text-muted-foreground text-sm mt-1.5">Average number of workouts completed per week</div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+            <CarouselItem>
+              <Card>
+                <CardContent className="flex flex-col items-center">
+                  <div className="relative">
+                    <div className="flex justify-center font-bold text-[64px] sm:text-[80px] md:text-[96px]">{calculateWeeklyStreak([...userProgramLogs, ...userWorkoutLogs])}</div>
+                    {/* <div className="absolute inset-[90px] inset-x-2/3 text-sm">weeks</div> */}
+                  </div>
+                  <div className="font-semibold leading-none tracking-tight">Weekly Streak</div>
+                  <div className="text-muted-foreground text-sm mt-1.5">Complete at least one workout per week to keep your streak</div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+            <CarouselItem>
+              <Card>
+                <CardContent className="flex flex-col items-center">
+                  <div className="flex justify-center font-bold text-[64px] sm:text-[80px] md:text-[96px]">{userProgramLogs.length + userWorkoutLogs.length}</div>
+                  <div className="font-semibold leading-none tracking-tight">Total Workouts Completed</div>
+                  <div className="text-muted-foreground text-sm mt-1.5">Tracks all-time workouts completed</div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+        <div className="hidden md:grid grid-cols-3 gap-2 w-full">
           <Card>
             <CardContent className="flex flex-col items-center">
               <div className="flex justify-center font-bold text-[64px] sm:text-[80px] md:text-[96px]">{calculateAverageEntriesPerWeek([...userProgramLogs, ...userWorkoutLogs])}</div>

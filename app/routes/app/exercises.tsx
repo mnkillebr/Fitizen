@@ -53,12 +53,27 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return "smartcrop"
       case "Ankle Mobility":
         return "smartcrop"
+      case "Kettlebell Swing":
+        return "smartcrop"
+      case "Half Kneel Kettlebell Press":
+        return "smartcrop"
        default:
         return undefined
       }
     }
+    const heightAdjust = () => {
+      let adjustments = ["Pushup", "Kettlebell Swing", "Kettlebell Renegade Row", "Half Kneel Kettlebell Press"]
+      let expand = ["Lateral Bound", "Mini Band Walks"]
+      if (adjustments.includes(ex_item.name)) {
+        return "481"
+      } else if (expand.includes(ex_item.name)) {
+        return "1369"
+      } else {
+        return undefined
+      }
+    }
     const videoToken = generateMuxVideoToken(ex_item.muxPlaybackId)
-    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId, smartCrop())
+    const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId, smartCrop(), heightAdjust())
     return {
       ...ex_item,
       token: videoToken,
@@ -188,7 +203,7 @@ export default function ExerciseLibrary() {
         ) : null}
       </div> */}
       {/* <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1"> */}
-      <div className="flex flex-col gap-y-3 pb-6 overflow-y-auto md:grid lg:grid-cols-2 xl:grid-cols-3 gap-x-3 px-1">
+      <div className="flex flex-col gap-y-3 pb-6 overflow-y-auto md:grid lg:grid-cols-2 xl:grid-cols-3 gap-x-3 auto-rows-max px-1">
         {exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={role} onViewExercise={() => {
             openDialog(

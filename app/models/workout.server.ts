@@ -98,7 +98,15 @@ export function getAllUserWorkouts(userId: string, query: string | null) {
       ],
     },
     include: {
-      exercises: true,
+      exercises: {
+        include: {
+          exercise: {
+            select: {
+              muxPlaybackId: true,
+            }
+          }
+        }
+      },
     },
     orderBy: [
       {
