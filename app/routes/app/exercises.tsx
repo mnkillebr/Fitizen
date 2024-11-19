@@ -2,16 +2,15 @@ import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon, } from "@
 import { HeartIcon as HeartSolid, PlusIcon, TrashIcon, ArrowDownTrayIcon, Bars3Icon } from "@heroicons/react/24/solid";
 
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData, useNavigation, useSearchParams, useLocation, Link } from "@remix-run/react";
-import { DeleteButton, ErrorMessage, PrimaryButton } from "~/components/form";
-import { createExercise, deleteExercise, getAllExercises, getAllExercisesPaginated, updateExerciseName } from "~/models/exercise.server";
+import { useFetcher, useLoaderData, useNavigation, useSearchParams, useLocation, } from "@remix-run/react";
+import { DeleteButton, ErrorMessage, } from "~/components/form";
+import { createExercise, deleteExercise, getAllExercisesPaginated, updateExerciseName } from "~/models/exercise.server";
 import { z } from "zod";
 import { validateForm } from "~/utils/validation";
 import { useIsHydrated } from "~/utils/misc";
 import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { Exercise as ExerciseType, Role as RoleType } from "@prisma/client";
-// import { useDrag, useDrop } from "react-dnd";
 import { useOpenDialog } from "~/components/Dialog";
 import { CheckCircleIcon, ChevronLeft, ChevronRight, PlusCircleIcon } from "images/icons";
 import { darkModeCookie } from "~/cookies";
@@ -46,18 +45,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const totalPages = Math.ceil(pageExercises.count / EXERCISE_ITEMS_PER_PAGE);
   const tokenMappedExercises = pageExercises ? pageExercises.exercises.map(ex_item => {
     const smartCrop = () => {
-      switch (ex_item.name) {
-       case "Lateral Lunge":
+      let crop = ["Lateral Lunge", "Band Assisted Leg Lowering", "Ankle Mobility", "Kettlebell Swing", "Half Kneel Kettlebell Press"]
+      if (crop.includes(ex_item.name)) {
         return "smartcrop"
-      case "Band Assisted Leg Lowering":
-        return "smartcrop"
-      case "Ankle Mobility":
-        return "smartcrop"
-      case "Kettlebell Swing":
-        return "smartcrop"
-      case "Half Kneel Kettlebell Press":
-        return "smartcrop"
-       default:
+      } else {
         return undefined
       }
     }
@@ -166,12 +157,6 @@ export default function ExerciseLibrary() {
     return `${location.pathname}?${newSearchParams.toString()}`;
   };
 
-  // const handlePageChange = (newPage: number) => {
-  //   if (newPage < 1 || newPage > totalPages) return;
-  //   searchParams.set("page", newPage.toString());
-  //   setSearchParams(searchParams);
-  // };
-
   const getSiblingPages = () => {
     const siblings: number[] = [];
     const show = 2; // Show 2 siblings on each side when possible
@@ -203,7 +188,7 @@ export default function ExerciseLibrary() {
         ) : null}
       </div> */}
       {/* <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-1 pb-1"> */}
-      <div className="flex flex-col gap-y-3 pb-6 overflow-y-auto md:grid lg:grid-cols-2 xl:grid-cols-3 gap-x-3 auto-rows-max px-1">
+      <div className="flex flex-col gap-y-3 pb-6 snap-y snap-mandatory overflow-y-auto md:grid lg:grid-cols-2 xl:grid-cols-3 gap-x-3 px-1">
         {exercises.map((ex_item) => (
           <Exercise key={ex_item.id} exercise={ex_item} role={role} onViewExercise={() => {
             openDialog(
@@ -346,12 +331,6 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
     deleteExerciseFetcher.formData?.get("_action") === "deleteExercise" &&
     deleteExerciseFetcher.formData?.get("exerciseId") === exercise.id
 
-  // const [, drop] = useDrop({
-  //   accept: 'exerciseItem',
-  //   drop: (item: ExerciseItemProps) => onDragExercise(item),
-  // });
-
-
   return isDeletingExercise ? null : (
     <div
       className={clsx(
@@ -359,10 +338,6 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
         "rounded-lg flex flex-col snap-start shadow-md dark:shadow-border-muted",
         selectable ? "bg-background" : "bg-muted hover:shadow-primary"
       )}
-      // draggable
-      // onDragStart={(e) => {
-      //   e.dataTransfer.setData('exerciseItem', JSON.stringify(exercise));
-      // }}
     >
       <div className="flex flex-col overflow-hidden justify-between w-full">
         <img

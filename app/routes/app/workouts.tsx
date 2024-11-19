@@ -239,7 +239,7 @@ type WorkoutProps = {
 
 function Workout({ workout, role, loading }: WorkoutProps) {
   const deleteWorkoutFetcher = useFetcher<deleteWorkoutFetcherType>();
-  console.log(workout)
+
   return (
     <Link
       to={workout.id}

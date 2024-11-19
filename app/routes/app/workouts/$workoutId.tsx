@@ -1,25 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, } from "react";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { Link, useFetcher, useLoaderData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
+import { Link, useFetcher, useLoaderData, useNavigation, useSubmit } from "@remix-run/react";
 import clsx from "clsx";
-import { ArrowLeft, ClockIcon, FireIcon, PlayIcon, BarsIcon, ContextMenuIcon, TrashIcon, PencilIcon, ChevronLeft, CalendarIcon } from "images/icons";
+import { ClockIcon, FireIcon, PlayIcon, BarsIcon, ContextMenuIcon, TrashIcon, PencilIcon, ChevronLeft, CalendarIcon } from "images/icons";
 import db from "~/db.server";
-// import crunchGirl from "images/jonathan-borba-lrQPTQs7nQQ-unsplash copy.jpg";
 import { Popover, PopoverButton, PopoverPanel, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { Exercise as ExerciseType, Recurrence, RoutineExercise as RoutineExerciseType } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { z } from "zod";
-import { Button, ErrorMessage } from "~/components/form";
+import { ErrorMessage } from "~/components/form";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { validateForm } from "~/utils/validation";
 import { deleteWorkout, getWorkout, getWorkoutLogsById } from "~/models/workout.server";
-import Stopwatch from "~/components/Stopwatch";
-import { createUserWorkoutSession, getAllCoaches } from "~/models/calendar.server";
-import { useCloseDialog, useOpenDialog } from "~/components/Dialog";
+import { createUserWorkoutSession } from "~/models/calendar.server";
+import { useOpenDialog } from "~/components/Dialog";
 import EventForm from "~/components/EventForm";
 import { convertObjectToFormData } from "~/utils/misc";
 import { format, setHours, setMinutes } from "date-fns";
-import CustomCarousel from "~/components/CustomCarousel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { generateMuxThumbnailToken } from "~/mux-tokens.server";
 import {
@@ -29,8 +26,6 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip"
 import { darkModeCookie, newSavedWorkoutLogCookie } from "~/cookies";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { XMarkIcon } from "@heroicons/react/24/solid";
 import { WorkoutCompleted, workoutSuccessDialogOptions } from "~/components/WorkoutCompleted";
 
 const deleteWorkoutSchema = z.object({
@@ -97,21 +92,6 @@ function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undef
   }
 }
 
-// function exerciseDetailMap(exercises: Array<RoutineExerciseType> | undefined, detailsArray: Array<ExerciseType>, section: string) {
-//   if (exercises) {
-//     return exercises.filter((workoutExercise) => workoutExercise.section === section).map((item) => {
-//       const itemId = item.exerciseId
-//       const exerciseDetail = detailsArray.find(detail => detail.id === itemId)
-//       return {
-//         ...item,
-//         ...exerciseDetail,
-//       }
-//     })
-//   } else {
-//     return []
-//   }
-// }
-
 type ExerciseDetailProps = {
   routineId?: string;
   id?: string;
@@ -130,7 +110,6 @@ type ExercisesPanelProps = {
 
 function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
   if (exerciseDetailsArray.length) {
-    // console.log(exerciseDetailsArray)
     return (
       <div className="h-full flex flex-col gap-y-2 content-center snap-y snap-mandatory px-1 pb-1">
         {exerciseDetailsArray.map((exercise: any, idx) => {
@@ -240,29 +219,6 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
   }
 }
 
-function ExercisePanel({ exerciseDetailsArray, section}: ExercisePanelProps) {
-  if (exerciseDetailsArray.length) {
-    return (
-      <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.625rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
-        {exerciseDetailsArray.map((exercise, idx) => {
-          return (
-            <div
-              key={`${exercise.routineId}-${exercise.id}-${idx}`}
-              className="flex shadow-md rounded-md *:content-center bg-white snap-start"
-            >
-              <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div>
-              <div className="py-2 px-3 text-sm/6 font-medium max-w-[100%-6rem] truncate">{exercise.name}</div>
-            </div>
-          )
-        })}
-      </div>
-    )
-  } else {
-    return (
-      <div className="text-center text-sm/6 mt-2">{`No ${section} Exercises`}</div>
-    )
-  }
-}
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
@@ -277,17 +233,28 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
       }
     }
   });
-  // const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
-  // const exercises = await db.exercise.findMany({
-  //   where: {
-  //     id: {
-  //       in: exerciseIds
-  //     }
-  //   }
-  // });
 
   const tokenMappedExercises = workout?.exercises.map(ex_item => {
-    const thumbnailToken = generateMuxThumbnailToken(ex_item.exercise.muxPlaybackId)
+    const smartCrop = () => {
+      let crop = ["Lateral Lunge", "Band Assisted Leg Lowering", "Ankle Mobility", "Kettlebell Swing", "Half Kneel Kettlebell Press"]
+      if (crop.includes(ex_item.exercise.name)) {
+        return "smartcrop"
+      } else {
+        return undefined
+      }
+    }
+    const heightAdjust = () => {
+      let adjustments = ["Pushup", "Kettlebell Swing", "Kettlebell Renegade Row", "Half Kneel Kettlebell Press"]
+      let expand = ["Lateral Bound", "Mini Band Walks"]
+      if (adjustments.includes(ex_item.exercise.name)) {
+        return "481"
+      } else if (expand.includes(ex_item.exercise.name)) {
+        return "1369"
+      } else {
+        return undefined
+      }
+    }
+    const thumbnailToken = generateMuxThumbnailToken(ex_item.exercise.muxPlaybackId, smartCrop(), heightAdjust())
     return {
       ...ex_item,
       ...ex_item.exercise,
@@ -297,11 +264,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   const exerciseDetails = exerciseDetailsMap(workout?.exercises, tokenMappedExercises)
   const logs = await getWorkoutLogsById(user.id, workoutId)
-  // const exerciseDetailss = {
-  //   warmup: exerciseDetailMap(workout?.exercises, exercises, "warmup"),
-  //   main: exerciseDetailMap(workout?.exercises, exercises, "main"),
-  //   cooldown: exerciseDetailMap(workout?.exercises, exercises, "cooldown"),
-  // }
   const cookieHeader = request.headers.get("cookie");
 	const newlogId = await newSavedWorkoutLogCookie.parse(cookieHeader);
   if (!workout) {
@@ -470,36 +432,6 @@ export default function WorkoutDetail() {
     )
   }
 
-  // useEffect(() => {
-  //   const imgScrollContainer = imageDescriptionScrollContainerRef.current;
-  //   const panelScrollContainer = panelScrollContainerRef.current;
-  //   if (!imgScrollContainer) return;
-  //   if (!panelScrollContainer) return;
-
-
-  //   const handleScrollImg = () => {
-  //     const scrollLeft = imgScrollContainer.scrollLeft;
-  //     const width = imgScrollContainer.clientWidth;
-      
-  //     const newIndex = Math.round(scrollLeft / width);
-  //     setImgIndex(newIndex);
-  //   };
-  //   const handleScrollPanel = () => {
-  //     const scrollLeft = panelScrollContainer.scrollLeft;
-  //     const width = panelScrollContainer.clientWidth;
-      
-  //     const newIndex = Math.round(scrollLeft / width);
-  //     setPanelIndex(newIndex);
-  //   };
-
-  //   imgScrollContainer.addEventListener('scroll', handleScrollImg);
-  //   panelScrollContainer.addEventListener('scroll', handleScrollPanel);
-  //   return () => {
-  //     imgScrollContainer.removeEventListener('scroll', handleScrollImg)
-  //     panelScrollContainer.removeEventListener('scroll', handleScrollPanel)
-  //   };
-  // }, []);
-
   useEffect(() => {
     if (data.newLogSaved) {
       openDialog(<WorkoutCompleted workoutName={data.workout.name} />, workoutSuccessDialogOptions)
@@ -603,7 +535,7 @@ export default function WorkoutDetail() {
         {/* Title */}
         {/* <div className="font-semibold text-2xl select-none mb-2">{data.workout?.name}</div> */}
         {/* Workout Image && Description */}
-        <Tabs defaultValue="overview" className="w-full lg:hidden">
+        {/* <Tabs defaultValue="overview" className="w-full lg:hidden">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="description">Description</TabsTrigger>
@@ -650,7 +582,42 @@ export default function WorkoutDetail() {
               <div>{data.workout.description}</div>
             </div>
           </TabsContent>
-        </Tabs>
+        </Tabs> */}
+        <div className="relative h-[332px] mb-3 group lg:hidden">
+          <div
+            className={clsx(
+              "absolute inset-0 transition-opacity duration-300 group-hover:opacity-30",
+              "h-full w-full shadow-md lg:shadow-none rounded-md text-center content-end",
+              "dark:border dark:border-border-muted dark:shadow-border-muted bg-cover bg-center"
+            )}
+            style={{backgroundImage: `url(https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/v1/fitizen/tfvpajxu5dj9s5xcac7t)`}}
+          >
+            <div className={clsx(
+              "flex justify-around mb-6 *:font-semibold *:flex *:flex-col *:leading-5",
+              "text-lg text-white *:drop-shadow-[0_2.2px_2.2px_rgba(0,0,0,0.8)] *:items-center"
+            )}>
+              <div>
+                <ClockIcon />
+                <div>40</div>
+                <div>min</div>
+              </div>
+              <div>
+                <FireIcon />
+                <div>200</div>
+                <div>kcal</div>
+              </div>
+              <div>
+                <BarsIcon />
+                <div>6</div>
+                <div>level</div>
+              </div>
+            </div>
+          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="font-semibold mb-2">Description</div>
+            <div className="text-muted-foreground text-sm">{data.workout.description}</div>
+          </div>
+        </div>
         <div className="hidden lg:flex gap-4">
           <div
             className={clsx(
