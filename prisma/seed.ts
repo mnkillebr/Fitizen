@@ -25,56 +25,56 @@ function getCoaches() {
 
 function getKettlebellExercises() {
   return [
-    {
-      name: "Kettlebell Goblet Squat",
-      description: "A lower body compound squat exercise that uses a single kettlebell as the load",
-      tags: ["deep squat", "goblet", "functional"],
-      cues: [
-        "Hold the kettlebell to your chest with your elbows in",
-        "Stand with feet about hip width apart with toes slightly pointed outwards",
-        "Lower like you are sitting on a small chair below you, then drive through the feet to stand"
-      ],
-      tips: [
-        "Breath in as you descend, exhale as you ascend",
-        "Keep your elbows pinned to your sides throughout the descent and ascent",
-        "Keep knees pushed out and chest up throughout the movement"
-      ],
-      balance: BalanceType.bilateral,
-      balanceLevel: BalanceLevel.static,
-      body: [BodyFocus.lower],
-      contraction: ContractionType.isotonic,
-      equipment: [Equipment.kettlebell],
-      joint: [Joint.ankle, Joint.knee, Joint.hip],
-      lift: LiftType.compound,
-      muscles: [MuscleGroup.glutes, MuscleGroup.hamstrings, MuscleGroup.quads, MuscleGroup.erectors],
-      pattern: [MovementPattern.squat],
-      plane: [MovementPlane.sagittal],
-    },
-    {
-      name: "Kettlebell Sumo Deadlift",
-      description: "A lower body compound hinge exercise that uses a single kettlebell as the load",
-      tags: ["functional", "booty"],
-      cues: [
-        "Stand with feet slightly wider than hip width directly over kettlebell",
-        "Lower by pushing your hips back and grip the kettlebell tight",
-        "Drive through the feet to stand, push hips back to lower"
-      ],
-      tips: [
-        "Breath in as you descend, exhale as you ascend",
-        "Keep good posture throughout the movement: think shoulders back and chest out",
-        "Keep knees pushed out and chest up throughout the movement"
-      ],
-      balance: BalanceType.bilateral,
-      balanceLevel: BalanceLevel.static,
-      body: [BodyFocus.lower],
-      contraction: ContractionType.isotonic,
-      equipment: [Equipment.kettlebell],
-      joint: [Joint.ankle, Joint.knee, Joint.hip],
-      lift: LiftType.compound,
-      muscles: [MuscleGroup.glutes, MuscleGroup.hamstrings, MuscleGroup.erectors, MuscleGroup.lats],
-      pattern: [MovementPattern.hinge],
-      plane: [MovementPlane.sagittal],
-    },
+    // {
+    //   name: "Kettlebell Goblet Squat",
+    //   description: "A lower body compound squat exercise that uses a single kettlebell as the load",
+    //   tags: ["deep squat", "goblet", "functional"],
+    //   cues: [
+    //     "Hold the kettlebell to your chest with your elbows in",
+    //     "Stand with feet about hip width apart with toes slightly pointed outwards",
+    //     "Lower like you are sitting on a small chair below you, then drive through the feet to stand"
+    //   ],
+    //   tips: [
+    //     "Breath in as you descend, exhale as you ascend",
+    //     "Keep your elbows pinned to your sides throughout the descent and ascent",
+    //     "Keep knees pushed out and chest up throughout the movement"
+    //   ],
+    //   balance: BalanceType.bilateral,
+    //   balanceLevel: BalanceLevel.static,
+    //   body: [BodyFocus.lower],
+    //   contraction: ContractionType.isotonic,
+    //   equipment: [Equipment.kettlebell],
+    //   joint: [Joint.ankle, Joint.knee, Joint.hip],
+    //   lift: LiftType.compound,
+    //   muscles: [MuscleGroup.glutes, MuscleGroup.hamstrings, MuscleGroup.quads, MuscleGroup.erectors],
+    //   pattern: [MovementPattern.squat],
+    //   plane: [MovementPlane.sagittal],
+    // },
+    // {
+    //   name: "Kettlebell Sumo Deadlift",
+    //   description: "A lower body compound hinge exercise that uses a single kettlebell as the load",
+    //   tags: ["functional", "booty"],
+    //   cues: [
+    //     "Stand with feet slightly wider than hip width directly over kettlebell",
+    //     "Lower by pushing your hips back and grip the kettlebell tight",
+    //     "Drive through the feet to stand, push hips back to lower"
+    //   ],
+    //   tips: [
+    //     "Breath in as you descend, exhale as you ascend",
+    //     "Keep good posture throughout the movement: think shoulders back and chest out",
+    //     "Keep knees pushed out and chest up throughout the movement"
+    //   ],
+    //   balance: BalanceType.bilateral,
+    //   balanceLevel: BalanceLevel.static,
+    //   body: [BodyFocus.lower],
+    //   contraction: ContractionType.isotonic,
+    //   equipment: [Equipment.kettlebell],
+    //   joint: [Joint.ankle, Joint.knee, Joint.hip],
+    //   lift: LiftType.compound,
+    //   muscles: [MuscleGroup.glutes, MuscleGroup.hamstrings, MuscleGroup.erectors, MuscleGroup.lats],
+    //   pattern: [MovementPattern.hinge],
+    //   plane: [MovementPlane.sagittal],
+    // },
     {
       name: "Half Kneel Kettlebell Press",
       description: "An upper body compound press exercise that uses a single kettlebell as the load",
@@ -101,30 +101,30 @@ function getKettlebellExercises() {
       plane: [MovementPlane.sagittal, MovementPlane.frontal],
       muxPlaybackId: "TU4XmFZXrsRuP5pI4kPLFV7rGuOijeFqZF2vt01983O8",
     },
-    {
-      name: "Kettlebell Single Leg Deadlift",
-      description: "A lower body compound hinge exercise that requires single leg balance",
-      tags: ["functional", "stability", "sldl", "balance"],
-      cues: [
-        "Hold the kettlebell in one hand and stand with a staggered stance",
-        "Lower the kettlebell and hinge your hips",
-        "Drive through the floor to return to starting position"
-      ],
-      tips: [
-        "Maintain a lengthened spine",
-        "Breathe in as you lower and exhale as you stand",
-      ],
-      balance: BalanceType.unilateral,
-      balanceLevel: BalanceLevel.dynamic,
-      body: [BodyFocus.lower, BodyFocus.core],
-      contraction: ContractionType.isotonic,
-      equipment: [Equipment.kettlebell],
-      joint: [Joint.ankle, Joint.knee, Joint.hip],
-      lift: LiftType.compound,
-      muscles: [MuscleGroup.glutes, MuscleGroup.hamstrings, MuscleGroup.adductors, MuscleGroup.obliques, MuscleGroup.lats],
-      pattern: [MovementPattern.hinge, MovementPattern.rotational],
-      plane: [MovementPlane.sagittal, MovementPlane.frontal],
-    },
+    // {
+    //   name: "Kettlebell Single Leg Deadlift",
+    //   description: "A lower body compound hinge exercise that requires single leg balance",
+    //   tags: ["functional", "stability", "sldl", "balance"],
+    //   cues: [
+    //     "Hold the kettlebell in one hand and stand with a staggered stance",
+    //     "Lower the kettlebell and hinge your hips",
+    //     "Drive through the floor to return to starting position"
+    //   ],
+    //   tips: [
+    //     "Maintain a lengthened spine",
+    //     "Breathe in as you lower and exhale as you stand",
+    //   ],
+    //   balance: BalanceType.unilateral,
+    //   balanceLevel: BalanceLevel.dynamic,
+    //   body: [BodyFocus.lower, BodyFocus.core],
+    //   contraction: ContractionType.isotonic,
+    //   equipment: [Equipment.kettlebell],
+    //   joint: [Joint.ankle, Joint.knee, Joint.hip],
+    //   lift: LiftType.compound,
+    //   muscles: [MuscleGroup.glutes, MuscleGroup.hamstrings, MuscleGroup.adductors, MuscleGroup.obliques, MuscleGroup.lats],
+    //   pattern: [MovementPattern.hinge, MovementPattern.rotational],
+    //   plane: [MovementPlane.sagittal, MovementPlane.frontal],
+    // },
     {
       name: "Kettlebell Renegade Row",
       description: "A full body stability and strength exercise that combines the plank and row",
