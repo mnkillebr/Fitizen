@@ -1,4 +1,5 @@
 import { CircleStackIcon, LockClosedIcon, CloudArrowUpIcon } from "@heroicons/react/24/solid";
+import { ChartLine, ClipboardList, Dumbbell } from "lucide-react";
 
 interface FeatureItemProps {
   icon: React.ReactNode;
@@ -31,26 +32,26 @@ export default function FeaturesSection() {
             />
           </div>
           <div className="lg:w-1/2 lg:pl-16">
-            <h2 className="text-primary font-semibold mb-2 dark:text-primary">Deploy faster</h2>
-            <h3 className="text-3xl font-bold mb-6 dark:text-foreground">A better workflow</h3>
+            <h2 className="text-primary font-semibold mb-2 dark:text-primary">Train smarter</h2>
+            <h3 className="text-3xl font-bold mb-6 dark:text-foreground">Your fitness journey, simplified</h3>
             <p className="text-gray-600 dark:text-muted-foreground mb-8">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.
+              Transform your workout routine with personalized training that adapts to your goals and progress. Whether you're just starting or advancing your fitness, we've got your path covered.
             </p>
             <ul className="space-y-6">
               <FeatureItem
-                icon={<CloudArrowUpIcon className="size-6 text-primary" />}
-                title="Push to deploy"
-                description="Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione."
+                icon={<Dumbbell className="size-6 text-primary" />}
+                title="Create custom workouts"
+                description="Access our extensive exercise library to build personalized routines that target strength, mobility, and balance. Choose from hundreds of proven movements."
               />
               <FeatureItem
-                icon={<LockClosedIcon className="size-6 text-primary" />}
-                title="SSL certificates"
-                description="Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo."
+                icon={<ClipboardList className="size-6 text-primary" />}
+                title="Expert guidance"
+                description="Follow coach-designed programs tailored to your skill level and goals. From beginners to athletes, find your perfect training plan."
               />
               <FeatureItem
-                icon={<CircleStackIcon className="size-6 text-primary" />}
-                title="Database backups"
-                description="Ac tincidunt sapien vehicula erat auctor pellentesque rhoncus. Et magna sit morbi lobortis."
+                icon={<ChartLine className="size-6 text-primary" />}
+                title="Track and improve"
+                description="Schedule workouts easily and monitor your progress with detailed stats. Watch your achievements stack up as you reach new fitness milestones."
               />
             </ul>
           </div>
