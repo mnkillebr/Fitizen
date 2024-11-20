@@ -196,6 +196,7 @@ export default function App() {
                 alt=""
               />
             </a>
+            <div className="ml-2 self-center font-bold text-lg">Fitizen</div>
           </div>
           <div className="flex md:hidden">
             <button
