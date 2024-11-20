@@ -2,7 +2,7 @@ import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon, } from "@
 import { HeartIcon as HeartSolid, PlusIcon, TrashIcon, ArrowDownTrayIcon, Bars3Icon } from "@heroicons/react/24/solid";
 
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { useFetcher, useLoaderData, useNavigation, useSearchParams, useLocation, } from "@remix-run/react";
+import { useFetcher, useLoaderData, useNavigation } from "@remix-run/react";
 import { DeleteButton, ErrorMessage, } from "~/components/form";
 import { createExercise, deleteExercise, getAllExercisesPaginated, updateExerciseName } from "~/models/exercise.server";
 import { z } from "zod";
@@ -18,6 +18,7 @@ import { hash } from "~/cryptography.server";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "~/components/ui/pagination";
 import { EXERCISE_ITEMS_PER_PAGE } from "~/utils/magicNumbers";
 import { ExerciseDialog, exerciseDialogOptions } from "~/components/ExerciseDialog";
+import { AppPagination } from "~/components/AppPagination";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -37,7 +38,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const page = parseInt(url.searchParams.get("page") ?? "1");
-
   const skip = (page - 1) * EXERCISE_ITEMS_PER_PAGE;
   // const exercises = await getAllExercises(query);
   const pageExercises = await getAllExercisesPaginated(query, skip, EXERCISE_ITEMS_PER_PAGE) as { exercises: ExerciseType[]; count: number }
@@ -146,30 +146,10 @@ interface deleteExerciseFetcherType extends ActionFunctionArgs{
 export default function ExerciseLibrary() {
   const { exercises, role, exercisesCount, totalPages, page } = useLoaderData<typeof loader>();
   const createExerciseFetcher = useFetcher();
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigation = useNavigation();
   const openDialog = useOpenDialog();
   const isSearching = navigation.formData?.has("q");
   const isCreatingExercise = createExerciseFetcher.formData?.get("_action") === "createExercise";
-  const location = useLocation();
-
-  const createPageUrl = (pageNum: number) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set("page", pageNum.toString());
-    return `${location.pathname}?${newSearchParams.toString()}`;
-  };
-
-  const getSiblingPages = () => {
-    const siblings: number[] = [];
-    const show = 2; // Show 2 siblings on each side when possible
-
-    for (let i = Math.max(1, page - show); i <= Math.min(totalPages, page + show); i++) {
-      siblings.push(i);
-    }
-
-    return siblings;
-  };
-
 
   return (
     <div className="px-1 pt-0 md:px-2 md:pt-0 pb-3 flex flex-col gap-y-4 bg-background h-[calc(100vh-4rem)]">
@@ -200,74 +180,7 @@ export default function ExerciseLibrary() {
           }} />
         ))}
       </div>
-      <div className="flex justify-center mt-4">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationLink
-                to={createPageUrl(page - 1)}
-                className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span className="sr-only">Previous</span>
-              </PaginationLink>
-            </PaginationItem>
-
-            {page > 3 && (
-              <>
-                <PaginationItem>
-                  <PaginationLink to={createPageUrl(1)}>
-                    1
-                  </PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              </>
-            )}
-
-            {getSiblingPages().map((pageNum) => (
-              <PaginationItem key={pageNum}>
-                <PaginationLink
-                  to={createPageUrl(pageNum)}
-                  isActive={pageNum === page}
-                  className={
-                    navigation.state === "loading" && 
-                    pageNum === parseInt(searchParams.get("page") ?? "1")
-                      ? "animate-pulse"
-                      : ""
-                  }
-                >
-                  {pageNum}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            {page < totalPages - 2 && (
-              <>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink to={createPageUrl(totalPages)}>
-                    {totalPages}
-                  </PaginationLink>
-                </PaginationItem>
-              </>
-            )}
-
-            <PaginationItem>
-              <PaginationLink
-                to={createPageUrl(page + 1)}
-                className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
-              >
-                <ChevronRight className="h-4 w-4" />
-                <span className="sr-only">Next</span>
-              </PaginationLink>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+      <AppPagination page={page} totalPages={totalPages} />
     </div>
   )
 }

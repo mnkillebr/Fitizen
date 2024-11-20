@@ -3,7 +3,7 @@ import { Form, Link, useFetcher, useLoaderData, useLocation, useMatches, useNavi
 import { z } from 'zod';
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/node';
-import { getAllExercises } from '~/models/exercise.server';
+import { getAllExercises, getAllExercisesPaginated } from '~/models/exercise.server';
 import { AnimatePresence, motion } from "framer-motion";
 import { workoutFormDataToObject, } from '~/utils/misc';
 import { ChevronDownIcon, PlusCircleIcon, XMarkIcon, Bars3Icon, TrashIcon } from "@heroicons/react/24/solid";
@@ -23,6 +23,9 @@ import { Checkbox } from '~/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
 import { generateMuxThumbnailToken } from '~/mux-tokens.server';
 import { useSidebar } from '~/components/ui/sidebar';
+import { AppPagination } from '~/components/AppPagination';
+import { EXERCISE_ITEMS_PER_PAGE } from '~/utils/magicNumbers';
+import { hash } from '~/cryptography.server';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -52,8 +55,12 @@ const restOptions = [
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
-  const exercises = await getAllExercises(query);
-  const tokenMappedExercises = exercises.map(ex_item => {
+  const page = parseInt(url.searchParams.get("page") ?? "1");
+  const skip = (page - 1) * EXERCISE_ITEMS_PER_PAGE;
+  // const exercises = await getAllExercises(query);
+  const pageExercises = await getAllExercisesPaginated(query, skip, EXERCISE_ITEMS_PER_PAGE) as { exercises: ExerciseType[]; count: number }
+  const totalPages = Math.ceil(pageExercises.count / EXERCISE_ITEMS_PER_PAGE);
+  const tokenMappedExercises = pageExercises ? pageExercises.exercises.map(ex_item => {
     const smartCrop = () => {
       let crop = ["Lateral Lunge", "Band Assisted Leg Lowering", "Ankle Mobility", "Kettlebell Swing", "Half Kneel Kettlebell Press"]
       if (crop.includes(ex_item.name)) {
@@ -78,8 +85,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
       ...ex_item,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
-  })
-  return json({ exercises: tokenMappedExercises })
+  }) : []
+  const exercisesEtag = hash(JSON.stringify(tokenMappedExercises))
+  return json(
+    {
+      exercises: tokenMappedExercises,
+      page,
+      totalPages,
+    },
+    {
+      headers: {
+        exercisesEtag,
+        "Cache-control": "max-age=600, stale-while-revalidate=3600"
+      }
+    }
+  )
 }
 
 // Define Zod schema for form validation
@@ -186,7 +206,7 @@ const StrictModeDroppable = ({ children, ...props }: any) => {
 };
 
 export default function WorkoutBuilderForm() {
-  const { exercises } = useLoaderData<typeof loader>();
+  const { exercises, page, totalPages } = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const location = useLocation();
   const navigation = useNavigation();
@@ -935,6 +955,7 @@ export default function WorkoutBuilderForm() {
                 </div>
               )}
             </StrictModeDroppable>
+            <AppPagination page={page} totalPages={totalPages} />
           </div>
         </div>
       </DragDropContext>
@@ -1000,6 +1021,7 @@ export default function WorkoutBuilderForm() {
                 />
               ))}
             </div>
+            <AppPagination page={page} totalPages={totalPages} />
           </motion.div>
         )}
       </AnimatePresence>

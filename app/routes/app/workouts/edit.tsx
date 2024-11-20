@@ -3,7 +3,7 @@ import { Form, Link, useFetcher, useLoaderData, useLocation, useNavigation, useS
 import { z } from 'zod';
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/node';
-import { getAllExercises, getExercisesById } from '~/models/exercise.server';
+import { getAllExercises, getAllExercisesPaginated, getExercisesById } from '~/models/exercise.server';
 import { AnimatePresence, motion } from "framer-motion";
 import { workoutFormDataToObject, } from '~/utils/misc';
 import { ChevronDownIcon, PlusCircleIcon, XMarkIcon, Bars3Icon, TrashIcon } from "@heroicons/react/24/solid";
@@ -23,6 +23,9 @@ import { Checkbox } from '~/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
 import { generateMuxThumbnailToken } from '~/mux-tokens.server';
 import { useSidebar } from '~/components/ui/sidebar';
+import { EXERCISE_ITEMS_PER_PAGE } from '~/utils/magicNumbers';
+import { AppPagination } from '~/components/AppPagination';
+import { hash } from '~/cryptography.server';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -99,7 +102,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
+  const page = parseInt(url.searchParams.get("page") ?? "1");
+  const skip = (page - 1) * EXERCISE_ITEMS_PER_PAGE;
   const allExercises = await getAllExercises(query);
+  const pageExercises = await getAllExercisesPaginated(query, skip, EXERCISE_ITEMS_PER_PAGE) as { exercises: ExerciseType[]; count: number }
+  const totalPages = Math.ceil(pageExercises.count / EXERCISE_ITEMS_PER_PAGE);
   const workoutId = url.searchParams.get("id") as string;
   const workout = await getWorkoutWithExercises(workoutId);
   if (workout !== null && workout.userId !== user.id) {
@@ -111,9 +118,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       { status: 404, statusText: "Workout Not Found" }
     )
   }
-  const exerciseIds = workout?.exercises?.map(item => item.exerciseId)
-  const exercises = await getExercisesById(exerciseIds);
-  const tokenMappedExercises = allExercises.map(ex_item => {
+  const tokenMappedExercises = pageExercises ? pageExercises.exercises.map(ex_item => {
     const smartCrop = () => {
       let crop = ["Lateral Lunge", "Band Assisted Leg Lowering", "Ankle Mobility", "Kettlebell Swing", "Half Kneel Kettlebell Press"]
       if (crop.includes(ex_item.name)) {
@@ -138,9 +143,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
       ...ex_item,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
-  })
-  const exerciseDetails = exerciseDetailsMap(workout?.exercises, exercises, true)
-  return json({ workout, exerciseDetails, allExercises: tokenMappedExercises })
+  }) : []
+  const exerciseDetails = exerciseDetailsMap(workout?.exercises, allExercises, true)
+  const exercisesEtag = hash(JSON.stringify(tokenMappedExercises))
+  return json(
+    {
+      workout,
+      exerciseDetails,
+      allExercises: tokenMappedExercises,
+      page,
+      totalPages
+    },
+    {
+      headers: {
+        exercisesEtag,
+        "Cache-control": "max-age=600, stale-while-revalidate=3600"
+      }
+    }
+  )
 }
 
 // Define Zod schema for form validation
@@ -264,7 +284,7 @@ const StrictModeDroppable = ({ children, ...props }: any) => {
 };
 
 export default function Edit() {
-  const { allExercises, exerciseDetails, workout } = useLoaderData<typeof loader>();
+  const { allExercises, exerciseDetails, workout, page, totalPages } = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const location = useLocation();
   const { open } = useSidebar();
@@ -376,7 +396,7 @@ export default function Edit() {
   const handleUngroup = useCallback((circuitId: string) => {
     setWorkoutCards((prev: Array<WorkoutCard | ComplexCard>) => {
       const filteredDeck = prev.filter(card => card.id !== circuitId)
-      const circuitExercises = prev.find(card => card.id === circuitId)?.exercises
+      const circuitExercises = prev.find(card => card.id === circuitId)?.exercises.map((ex_item: {}) => ({ ...ex_item, circuitId: null }))
       return [...filteredDeck, ...circuitExercises]
     })
   }, [workoutCards, setWorkoutCards])
@@ -581,7 +601,7 @@ export default function Edit() {
                                   <Input
                                     type="number"
                                     className="w-12 text-sm h-5 pr-1 bg-background dark:border-border-muted"
-                                    defaultValue={card.exercises.find((ex_item: any) => ex_item.sets) ? card.exercises.find((ex_item: any) => ex_item.sets).sets : 3}
+                                    defaultValue={card.exercises && card.exercises.find((ex_item: any) => ex_item.sets) ? card.exercises.find((ex_item: any) => ex_item.sets).sets : 3}
                                     min={1}
                                     max={10}
                                     onChange={(event) => {
@@ -601,7 +621,7 @@ export default function Edit() {
                                     onCheckedChange={() => handleCardSelect(card.id)}
                                   />
                                   <div className="flex flex-col gap-2 divide-y-4">
-                                    {card.exercises.map((ex_item: any, ex_item_idx: number) => {
+                                    {card.exercises && card.exercises.map((ex_item: any, ex_item_idx: number) => {
                                       const exerciseIndex = flattenedWorkoutCards.findIndex((workoutCard: any) => workoutCard.id === ex_item.id)
                                       return (
                                         <div className="flex flex-col gap-1 last:pt-1" key={`${ex_item.name}-${ex_item_idx}`}>
@@ -725,7 +745,7 @@ export default function Edit() {
                                   {restOptions.map((rest, rest_idx) => <option key={rest_idx}>{rest}</option>)}
                                 </select> */}
                                 <Select
-                                  defaultValue={card.exercises.find((ex_item: any) => ex_item.rest) ? card.exercises.find((ex_item: any) => ex_item.rest).rest : "60 sec"}
+                                  defaultValue={card.exercises && card.exercises.find((ex_item: any) => ex_item.rest) ? card.exercises.find((ex_item: any) => ex_item.rest).rest : "60 sec"}
                                   onValueChange={(val) => onChangeCircuitRest(card.id, val)}
                                 >
                                   <SelectTrigger className="text-xs h-5 bg-background dark:border-border-muted self-center w-fit">
@@ -1006,6 +1026,7 @@ export default function Edit() {
                 </div>
               )}
             </StrictModeDroppable>
+            <AppPagination page={page} totalPages={totalPages} />
           </div>
         </div>
       </DragDropContext>
@@ -1071,6 +1092,7 @@ export default function Edit() {
                 />
               ))}
             </div>
+            <AppPagination page={page} totalPages={totalPages} />
           </motion.div>
         )}
       </AnimatePresence>
