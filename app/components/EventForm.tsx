@@ -17,6 +17,21 @@ const EventForm = ({ selectedDateTime, submitEvent, formOptions }: EventFormProp
   const closeDialog = useCloseDialog();
   const eventTypes = [
     {
+      name: "Workout",
+      form: <SessionForm
+        selectedDateTime={selectedDateTime}
+        onCancel={() => {
+          closeDialog()
+        }}
+        onSubmit={(args) => {
+          submitEvent(args)
+          closeDialog()
+        }}
+        defaults={formOptions.defaults}
+        workouts={formOptions.userWorkouts}
+      />
+    },
+    {
       name: "Appointment",
       form: <AppointmentForm
         selectedDateTime={selectedDateTime}
@@ -31,25 +46,10 @@ const EventForm = ({ selectedDateTime, submitEvent, formOptions }: EventFormProp
         coaches={formOptions.coaches}
       />
     },
-    {
-      name: "Workout",
-      form: <SessionForm
-        selectedDateTime={selectedDateTime}
-        onCancel={() => {
-          closeDialog()
-        }}
-        onSubmit={(args) => {
-          submitEvent(args)
-          closeDialog()
-        }}
-        defaults={formOptions.defaults}
-        workouts={formOptions.userWorkouts}
-      />
-    }, 
   ]
 
   return (
-    <Tabs className="w-full" defaultValue={formOptions.defaults?.defaultTab ?? "Appointment"}>
+    <Tabs className="w-full" defaultValue={formOptions.defaults?.defaultTab ?? "Workout"}>
       <TabsList>
         {eventTypes.map(({ name }, index) => {
           const defaultTab = formOptions.defaults?.defaultTab !== undefined ? formOptions.defaults?.defaultTab : undefined

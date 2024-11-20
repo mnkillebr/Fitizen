@@ -61,7 +61,7 @@ interface CalendarProps {
 const Calendar: React.FC<CalendarProps> = ({ currentTimeLineColor = 'red', submitEvent, formOptions, schedule }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [view, setView] = useState<ViewType>('monthly');
+  const [view, setView] = useState<ViewType>('daily');
   // const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   // const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   // const [selectedTime, setSelectedTime] = useState<string | null>(null);
