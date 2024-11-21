@@ -1171,13 +1171,32 @@ function getAthleticConditioningExercises() {
   ]
 }
 
-async function seed() {
+async function deleteAll() {
+  await db.user.deleteMany();
+  await db.exercise.deleteMany();
+  await db.coach.deleteMany();
+}
+
+async function createAll() {
   await createUser();
   await Promise.all([
     ...getKettlebellExercises().map((exercise) => db.exercise.create({ data: exercise })),
     ...getAthleticConditioningExercises().map((exercise) => db.exercise.create({ data: exercise })),
     ...getCoaches().map((coach) => db.coach.create({ data: coach })),
   ]);
+}
+
+async function seed() {
+  console.log('Start seeding ...');
+  try {
+    await deleteAll();
+    console.log('Deleted all previous data ...');
+    await createAll();
+    console.log('Seed completed successfully');
+  } catch (error) {
+    console.error('Seed failed:', error);
+    throw error;
+  }
 };
 
 seed();

@@ -300,7 +300,7 @@ export async function action({ request }: ActionFunctionArgs) {
           { success: true },
           {
             headers: {
-              "Set-Cookie": `fitizen__darkMode=${darkMode}; SameSite=Strict`,
+              "Set-Cookie": `fitizen__darkMode=${darkMode}; SameSite=Strict; Path=/`,
             },
           }
         ),

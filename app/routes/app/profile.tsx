@@ -221,7 +221,7 @@ export async function action({ request }: ActionFunctionArgs) {
           { success: true },
           {
             headers: {
-              "Set-Cookie": `fitizen__darkMode=${darkMode}; SameSite=Strict`,
+              "Set-Cookie": `fitizen__darkMode=${darkMode}; SameSite=Strict; Path=/`,
             },
           }
         ),
@@ -451,7 +451,7 @@ export default function Profile() {
           <fitnessProfileFetcher.Form method="post" className="flex flex-col gap-y-4">
             <div className="text-muted-foreground -mt-2">Keep your fitness profile up to date.</div>
             <ScrollArea className="h-[calc(100vh-16rem)] lg:h-[calc(100vh-12.5rem)]">
-              <FitnessSettings fitnessProfile={user.fitnessProfile} />
+              <FitnessSettings fitnessProfile={user.fitnessProfile ?? {}} />
             </ScrollArea>
             <div className="flex justify-end">
               <Button
