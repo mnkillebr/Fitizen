@@ -40,7 +40,7 @@ model User {
 
 model FitnessProfile {
   id                                  String        @id @default(cuid())
-  user                                User          @relation(fields: [userId], references: [id])
+  user                                User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId                              String        @unique
   unit                                LoadUnit      @default(pound)
   currentWeight                       Int?
@@ -354,7 +354,7 @@ model Exercise {
 model RoutineExercise {
   routine           Routine          @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   routineId         String
-  exercise          Exercise         @relation(fields: [exerciseId], references: [id])
+  exercise          Exercise         @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId        String
   orderInRoutine    Int
   circuitId         String?
@@ -460,7 +460,7 @@ model ExerciseLogSet {
 model WorkoutSession {
   id         String       @id @default(cuid())
   userId     String
-  user       User         @relation(fields: [userId], references: [id])
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   routineId  String
   routine    Routine      @relation(fields: [routineId], references: [id])
   startTime  DateTime
