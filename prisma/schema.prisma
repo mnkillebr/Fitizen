@@ -169,7 +169,7 @@ model Routine {
 
 model ProgramWeek {
   id          String             @id @default(cuid())
-  program     Program            @relation(fields: [programId], references: [id])
+  program     Program            @relation(fields: [programId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   programId   String
 
   weekNumber  Int
@@ -178,7 +178,7 @@ model ProgramWeek {
 
 model ProgramDay {
   id               String         @id @default(cuid())
-  programWeek      ProgramWeek    @relation(fields: [programWeekId], references: [id])
+  programWeek      ProgramWeek    @relation(fields: [programWeekId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   programWeekId    String
 
   dayNumber        Int
@@ -193,7 +193,7 @@ model ProgramDay {
 
 model ProgramBlock {
   id             String         @id @default(cuid())
-  programDay     ProgramDay    @relation(fields: [programDayId], references: [id])
+  programDay     ProgramDay    @relation(fields: [programDayId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   programDayId   String
 
   blockNumber    Int
@@ -222,7 +222,7 @@ model MovementPrep {
 model FoamRollingExercise {
   movementPrep      MovementPrep     @relation(fields: [movementPrepId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   movementPrepId    String
-  exercise          Exercise         @relation(fields: [exerciseId], references: [id])
+  exercise          Exercise         @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId        String
   reps              Int
   time              Int?
@@ -233,7 +233,7 @@ model FoamRollingExercise {
 model MobilityExercise {
   movementPrep      MovementPrep     @relation(fields: [movementPrepId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   movementPrepId    String
-  exercise          Exercise         @relation(fields: [exerciseId], references: [id])
+  exercise          Exercise         @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId        String
   reps              Int
   time              Int?
@@ -244,7 +244,7 @@ model MobilityExercise {
 model ActivationExercise {
   movementPrep      MovementPrep     @relation(fields: [movementPrepId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   movementPrepId    String
-  exercise          Exercise         @relation(fields: [exerciseId], references: [id])
+  exercise          Exercise         @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId        String
   reps              Int
   time              Int?
@@ -265,7 +265,7 @@ model Warmup {
 model DynamicExercise {
   warmup      Warmup     @relation(fields: [warmupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   warmupId    String
-  exercise    Exercise         @relation(fields: [exerciseId], references: [id])
+  exercise    Exercise         @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId  String
   reps        Int
 
@@ -275,7 +275,7 @@ model DynamicExercise {
 model LadderExercise {
   warmup      Warmup     @relation(fields: [warmupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   warmupId    String
-  exercise    Exercise         @relation(fields: [exerciseId], references: [id])
+  exercise    Exercise         @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId  String
   reps        Int
 
@@ -285,7 +285,7 @@ model LadderExercise {
 model PowerExercise {
   warmup      Warmup     @relation(fields: [warmupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   warmupId    String
-  exercise    Exercise         @relation(fields: [exerciseId], references: [id])
+  exercise    Exercise         @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId  String
   reps        Int
 
@@ -303,7 +303,7 @@ model Cooldown {
 model CooldownExercise {
   cooldown    Cooldown     @relation(fields: [cooldownId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   cooldownId  String
-  exercise    Exercise     @relation(fields: [exerciseId], references: [id])
+  exercise    Exercise     @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId  String
   reps        Int?
   time        Int?
@@ -372,7 +372,7 @@ model RoutineExercise {
 model BlockExercise {
   block                   ProgramBlock          @relation(fields: [programBlockId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   programBlockId          String
-  exercise                Exercise              @relation(fields: [exerciseId], references: [id])
+  exercise                Exercise              @relation(fields: [exerciseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   exerciseId              String
   orderInBlock            Int
   sets                    Int?

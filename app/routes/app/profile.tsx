@@ -429,7 +429,7 @@ export default function Profile() {
                     email: e.target.value
                   }))}
                   required
-                  disabled={isUpdatingProfile}
+                  disabled={isUpdatingProfile || (user.email === "testuser@email.com")}
                 />
                 {userSettingsFetcher.data?.errors?.email ? <span className="text-red-500 text-xs">{userSettingsFetcher.data?.errors?.email}</span> : null}
               </>

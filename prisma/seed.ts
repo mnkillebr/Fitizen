@@ -1,4 +1,4 @@
-import { BalanceLevel, BalanceType, BodyFocus, ContractionType, Equipment, Joint, LiftType, MovementPattern, MovementPlane, MuscleGroup, PrismaClient, Role, StretchType } from "@prisma/client";
+import { BalanceLevel, BalanceType, BodyFocus, ContractionType, Equipment, ExerciseTarget, Joint, LiftType, MovementPattern, MovementPlane, MuscleGroup, PrismaClient, Role, StretchType } from "@prisma/client";
 const db = new PrismaClient();
 
 function createUser() {
@@ -8,6 +8,17 @@ function createUser() {
       email: "testuser@email.com",
       firstName: "Test",
       lastName: "User"
+    }
+  })
+}
+
+function createAdmin() {
+  return db.user.create({
+    data: {
+      role: Role.admin,
+      email: "coach.mkillebrew@gmail.com",
+      firstName: "Coach",
+      lastName: "Killebrew"
     }
   })
 }
@@ -1175,10 +1186,12 @@ async function deleteAll() {
   await db.user.deleteMany();
   await db.exercise.deleteMany();
   await db.coach.deleteMany();
+  await db.program.deleteMany();
 }
 
 async function createAll() {
   await createUser();
+  await createAdmin();
   await Promise.all([
     ...getKettlebellExercises().map((exercise) => db.exercise.create({ data: exercise })),
     ...getAthleticConditioningExercises().map((exercise) => db.exercise.create({ data: exercise })),

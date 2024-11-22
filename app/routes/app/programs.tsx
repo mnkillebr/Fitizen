@@ -1,9 +1,10 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { Outlet, useLoaderData, useMatches, useNavigate, useNavigation } from "@remix-run/react";
+import { Form, Outlet, useLoaderData, useMatches, useNavigate, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { z } from "zod";
+import { Button } from "~/components/ui/button";
 import { hash } from "~/cryptography.server";
-import { getAllPrograms } from "~/models/program.server";
+import { createIntroProgram, getAllPrograms } from "~/models/program.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { validateForm } from "~/utils/validation";
 
@@ -21,7 +22,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 
   return json(
-    { programs },
+    { programs, role },
     { headers: {
         programsEtag,
         "Cache-control": "max-age=60, stale-while-revalidate=3600"
@@ -51,6 +52,10 @@ export async function action({ request }: ActionFunctionArgs) {
         (errors) => json({ errors }, { status: 400 })
       )
     }
+    case "createIntroProgram": {
+      const introProgram = await createIntroProgram()
+      return introProgram
+    }
     default: {
       return null;
     }
@@ -58,7 +63,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Programs() {
-  const { programs } = useLoaderData<typeof loader>();
+  const { programs, role } = useLoaderData<typeof loader>();
   const matches = useMatches();
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -77,6 +82,11 @@ export default function Programs() {
   return (
     <div className="pb-6 px-2 pt-0 md:px-3 md:pt-0 flex flex-col h-full gap-x-6 gap-y-4 snap-y snap-mandatory overflow-y-auto bg-background">
       {/* <h1 className="text-lg font-semibold md:text-2xl text-foreground">Programs</h1> */}
+      {role === "admin" ? (
+        <Form method="post">
+          <Button type="submit" name="_action" value="createIntroProgram">Create Intro Program</Button>
+        </Form>
+      ) : null}
       {programs.map((program: any, program_idx: number) => (
         <div
           key={program_idx}

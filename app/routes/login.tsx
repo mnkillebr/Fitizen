@@ -38,7 +38,7 @@ export async function action({ request }: ActionFunctionArgs) {
     formData,
     loginSchema,
     async ({ email }) => {
-      if (email.toLowerCase() === "testuser@email.com") {
+      if (email.toLowerCase() === "testuser@email.com" || email.toLowerCase() === "coach.mkillebrew@gmail.com") {
         const testUser = await getUserByEmail(email)
         session.set("userId", testUser?.id);
         // redirect and commit session
