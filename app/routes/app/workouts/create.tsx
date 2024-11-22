@@ -18,14 +18,16 @@ import { Exercise } from '../exercises';
 import { Exercise as ExerciseType } from "@prisma/client";
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
-import { Search } from 'lucide-react';
+import { Grip, Search, Video } from 'lucide-react';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
-import { generateMuxThumbnailToken } from '~/mux-tokens.server';
+import { generateMuxThumbnailToken, generateMuxVideoToken } from '~/mux-tokens.server';
 import { useSidebar } from '~/components/ui/sidebar';
 import { AppPagination } from '~/components/AppPagination';
 import { EXERCISE_ITEMS_PER_PAGE } from '~/utils/magicNumbers';
 import { hash } from '~/cryptography.server';
+import { useOpenDialog } from '~/components/Dialog';
+import { ExerciseDialog, exerciseDialogOptions } from '~/components/ExerciseDialog';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -80,9 +82,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return undefined
       }
     }
+    const videoToken = generateMuxVideoToken(ex_item.muxPlaybackId)
     const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId, smartCrop(), heightAdjust())
     return {
       ...ex_item,
+      videoToken,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
   }) : []
@@ -96,7 +100,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     {
       headers: {
         exercisesEtag,
-        "Cache-control": "max-age=600, stale-while-revalidate=3600"
+        "Cache-control": "max-age=3300, stale-while-revalidate=3600"
       }
     }
   )
@@ -221,7 +225,8 @@ export default function WorkoutBuilderForm() {
   const [openDescription, setOpenDescription] = useState(false);
   const [openExercisesPanel, setOpenExercisesPanel] = useState(false);
 
-    const toggleExercisesPanel = () => setOpenExercisesPanel(!openExercisesPanel);
+  const toggleExercisesPanel = () => setOpenExercisesPanel(!openExercisesPanel);
+  const openDialog = useOpenDialog();
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -551,7 +556,7 @@ export default function WorkoutBuilderForm() {
                                           <input type="hidden" name={`exercises[${exerciseIndex}].rest`} value={ex_item.rest ? ex_item.rest : "60 sec"} />
                                           <div className="flex flex-col justify-between">
                                             <label className="text-xs self-start font-medium text-muted-foreground">Name</label>
-                                            <p className="min-w-40 max-w-60 truncate shrink select-none">{ex_item.name}</p>
+                                            <p className="min-w-40 max-w-full truncate shrink select-none">{ex_item.name}</p>
                                           </div>
                                           <div className="flex gap-3 h-full w-full flex-wrap">
                                             <div className="flex flex-col justify-between">
@@ -706,7 +711,7 @@ export default function WorkoutBuilderForm() {
                                 <div className="flex flex-col gap-1">
                                   <div className="flex flex-col justify-between">
                                     <label className="text-xs self-start font-medium text-muted-foreground">Name</label>
-                                    <p className="min-w-40 max-w-60 truncate shrink select-none">{card.name}</p>
+                                    <p className="min-w-40 max-w-full truncate shrink select-none">{card.name}</p>
                                   </div>
                                   <div className="flex flex-wrap max-w-full gap-3">
                                     <div className="flex flex-col justify-between">
@@ -834,7 +839,7 @@ export default function WorkoutBuilderForm() {
                                   </div>
                                 </div>
                                 <div className="self-center">
-                                  <Bars3Icon className="size-6 cursor-grab active:cursor-grabbing mr-2" />
+                                  <Grip className="size-6 cursor-grab active:cursor-grabbing mr-2" />
                                 </div>
                               </div>
                             </div>
@@ -934,18 +939,30 @@ export default function WorkoutBuilderForm() {
                             transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'translate(0px, 0px)',
                           }}
                         >
-                          <img
-                            src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
-                            className="w-full rounded-t"
-                          />
-                          <div className="flex flex-col p-4">
-                            <p className="font-bold max-w-56 lg:max-w-64 truncate">{card.name}</p>
-                            <div className="flex divide-x divide-gray-400 text-sm">
-                              {card.body.slice(0,2).map((body, body_idx) => (
-                                <p key={body_idx} className={`${body_idx > 0 ? "px-1" : "pr-1"} text-xs capitalize`}>{`${body} body`}</p>
-                              ))}
-                              <p className="px-1 text-xs capitalize">{card.contraction}</p>
+                          <div
+                            className="relative group cursor-pointer"
+                            onClick={() => openDialog(
+                              <ExerciseDialog exercise={card} />,
+                              exerciseDialogOptions(card.name)
+                            )}
+                          >
+                            <img
+                              src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
+                              className="w-full rounded-t transition-opacity duration-300 group-hover:opacity-85"
+                            />
+                            <Video className="absolute w-full size-8 inset-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
+                          <div className="flex justify-between items-center p-4">
+                            <div className="flex flex-col">
+                              <p className="font-bold max-w-full truncate">{card.name}</p>
+                              <div className="flex divide-x divide-gray-400 text-sm">
+                                {card.body.slice(0,2).map((body, body_idx) => (
+                                  <p key={body_idx} className={`${body_idx > 0 ? "px-1" : "pr-1"} text-xs capitalize`}>{`${body} body`}</p>
+                                ))}
+                                <p className="px-1 text-xs capitalize">{card.contraction}</p>
+                              </div>
                             </div>
+                            <Grip />
                           </div>
                         </div>
                       )}
@@ -1018,6 +1035,12 @@ export default function WorkoutBuilderForm() {
                   selectFn={handleAddExercise}
                   selectCount={flattenedWorkoutCards.map((sel_ex: ExerciseType) => sel_ex.id.split("-")[0]).filter((id: any) => id === ex_item.id).length}
                   selected={flattenedWorkoutCards.map((sel_ex: ExerciseType) => sel_ex.id.split("-")[0]).includes(ex_item.id)}
+                  onViewExercise={() => {
+                    openDialog(
+                      <ExerciseDialog exercise={ex_item} />,
+                      exerciseDialogOptions(ex_item.name)
+                    )
+                  }}
                 />
               ))}
             </div>

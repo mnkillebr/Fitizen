@@ -118,7 +118,7 @@ export function CircuitLog({ item, index, unitOptions, exerciseDetails, flatDeta
                           className="hover:cursor-pointer min-w-6"
                           onClick={() => openDialog(
                             <ExerciseDialog exercise={ex_item} />,
-                              exerciseDialogOptions(ex_item.name)
+                            exerciseDialogOptions(ex_item.name)
                           )}
                         />
                       </div>

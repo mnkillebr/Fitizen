@@ -18,14 +18,16 @@ import { Exercise } from '../exercises';
 import { Exercise as ExerciseType, RoutineExercise as RoutineExerciseType } from "@prisma/client";
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
-import { Search } from 'lucide-react';
+import { Search, Video } from 'lucide-react';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '~/components/ui/select';
-import { generateMuxThumbnailToken } from '~/mux-tokens.server';
+import { generateMuxThumbnailToken, generateMuxVideoToken } from '~/mux-tokens.server';
 import { useSidebar } from '~/components/ui/sidebar';
 import { EXERCISE_ITEMS_PER_PAGE } from '~/utils/magicNumbers';
 import { AppPagination } from '~/components/AppPagination';
 import { hash } from '~/cryptography.server';
+import { ExerciseDialog, exerciseDialogOptions } from '~/components/ExerciseDialog';
+import { useOpenDialog } from '~/components/Dialog';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -139,8 +141,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     }
     const thumbnailToken = generateMuxThumbnailToken(ex_item.muxPlaybackId, smartCrop(), heightAdjust())
+    const videoToken = generateMuxVideoToken(ex_item.muxPlaybackId)
     return {
       ...ex_item,
+      videoToken,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
   }) : []
@@ -157,7 +161,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     {
       headers: {
         exercisesEtag,
-        "Cache-control": "max-age=600, stale-while-revalidate=3600"
+        "Cache-control": "max-age=3300, stale-while-revalidate=3600"
       }
     }
   )
@@ -299,7 +303,8 @@ export default function Edit() {
   const [openDescription, setOpenDescription] = useState(false);
   const [openExercisesPanel, setOpenExercisesPanel] = useState(false);
 
-    const toggleExercisesPanel = () => setOpenExercisesPanel(!openExercisesPanel);
+  const toggleExercisesPanel = () => setOpenExercisesPanel(!openExercisesPanel);
+  const openDialog = useOpenDialog();
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -1005,10 +1010,19 @@ export default function Edit() {
                             transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'translate(0px, 0px)',
                           }}
                         >
-                          <img
-                            src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
-                            className="w-full rounded-t"
-                          />
+                          <div
+                            className="relative group cursor-pointer"
+                            onClick={() => openDialog(
+                              <ExerciseDialog exercise={card} />,
+                              exerciseDialogOptions(card.name)
+                            )}
+                          >
+                            <img
+                              src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
+                              className="w-full rounded-t transition-opacity duration-300 group-hover:opacity-85"
+                            />
+                            <Video className="absolute w-full size-8 inset-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
                           <div className="flex flex-col p-4">
                             <p className="font-bold max-w-56 lg:max-w-64 truncate">{card.name}</p>
                             <div className="flex divide-x divide-gray-400 text-sm">
@@ -1089,6 +1103,12 @@ export default function Edit() {
                   selectFn={handleAddExercise}
                   selectCount={flattenedWorkoutCards.map((sel_ex: ExerciseType) => sel_ex.id.split("-")[0]).filter((id: any) => id === ex_item.id).length}
                   selected={flattenedWorkoutCards.map((sel_ex: ExerciseType) => sel_ex.id.split("-")[0]).includes(ex_item.id)}
+                  onViewExercise={() => {
+                    openDialog(
+                      <ExerciseDialog exercise={ex_item} />,
+                      exerciseDialogOptions(ex_item.name)
+                    )
+                  }}
                 />
               ))}
             </div>

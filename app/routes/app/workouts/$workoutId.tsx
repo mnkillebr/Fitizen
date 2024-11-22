@@ -18,7 +18,7 @@ import EventForm from "~/components/EventForm";
 import { convertObjectToFormData } from "~/utils/misc";
 import { format, setHours, setMinutes } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { generateMuxThumbnailToken } from "~/mux-tokens.server";
+import { generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
 import {
   Tooltip,
   TooltipContent,
@@ -27,6 +27,8 @@ import {
 } from "~/components/ui/tooltip"
 import { newSavedWorkoutLogCookie } from "~/cookies";
 import { WorkoutCompleted, workoutSuccessDialogOptions } from "~/components/WorkoutCompleted";
+import { Video } from "lucide-react";
+import { ExerciseDialog, exerciseDialogOptions } from "~/components/ExerciseDialog";
 
 const deleteWorkoutSchema = z.object({
   workoutId: z.string(),
@@ -106,9 +108,10 @@ type ExercisePanelProps = {
 
 type ExercisesPanelProps = {
   exerciseDetailsArray: Array<ExerciseDetailProps>;
+  openDialog: (component: React.ReactNode, options: any ) => void;
 }
 
-function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
+function ExercisesPanel({ exerciseDetailsArray, openDialog }: ExercisesPanelProps) {
   if (exerciseDetailsArray.length) {
     return (
       <div className="h-full flex flex-col gap-y-2 content-center snap-y snap-mandatory px-1 pb-1">
@@ -126,11 +129,20 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
                     className="flex shadow-md rounded-md *:content-center bg-white dark:bg-background dark:shadow-sm dark:shadow-border-muted snap-start"
                   >
                     {/* <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div> */}
-                    <img
-                      src={ex_item.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
-                      className="h-16 rounded-sm"
-                    />
-                    <div className="flex flex-col">
+                    <div
+                      className="relative group cursor-pointer shrink-0"
+                      onClick={() => openDialog(
+                        <ExerciseDialog exercise={ex_item} />,
+                        exerciseDialogOptions(ex_item.name)
+                      )}
+                    >
+                      <img
+                        src={ex_item.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
+                        className="h-16 rounded-sm transition-opacity duration-300 group-hover:opacity-85"
+                      />
+                      <Video className="absolute w-full size-4 inset-y-1/3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                    <div className="flex flex-col overflow-x-hidden">
                       <div className="px-3 text-sm/6 font-medium max-w-[100%-6rem] truncate">{ex_item.name}</div>
                       <div className="px-3 flex flex-wrap max-w-full gap-4">
                         <div className="flex flex-col justify-between">
@@ -168,12 +180,21 @@ function ExercisesPanel({ exerciseDetailsArray }: ExercisesPanelProps) {
                 className="flex shadow-md rounded-md *:content-center bg-white dark:bg-background dark:shadow-sm dark:shadow-border-muted snap-start"
               >
                 {/* <div className="bg-slate-400 rounded-md text-white size-16 min-w-16 text-center">Image</div> */}
-                <img
-                  src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
-                  className="h-16 rounded-sm"
-                />
-                <div className="flex flex-col">
-                  <div className="px-3 text-sm/6 font-medium max-w-[100%-6rem] truncate">{exercise.name}</div>
+                <div
+                  className="relative group cursor-pointer shrink-0"
+                  onClick={() => openDialog(
+                    <ExerciseDialog exercise={exercise} />,
+                    exerciseDialogOptions(exercise.name)
+                  )}
+                >
+                  <img
+                    src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
+                    className="h-16 rounded-sm transition-opacity duration-300 group-hover:opacity-85"
+                  />
+                  <Video className="absolute w-full size-4 inset-y-1/3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div className="flex flex-col overflow-x-hidden">
+                  <div className="px-3 text-sm/6 font-medium max-w-full truncate">{exercise.name}</div>
                   <div className="px-3 flex flex-wrap max-w-full gap-4">
                     <div className="flex flex-col justify-between">
                       <label className="text-xs self-start font-medium">Sets</label>
@@ -255,9 +276,11 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
       }
     }
     const thumbnailToken = generateMuxThumbnailToken(ex_item.exercise.muxPlaybackId, smartCrop(), heightAdjust())
+    const videoToken = generateMuxVideoToken(ex_item.exercise.muxPlaybackId)
     return {
       ...ex_item,
       ...ex_item.exercise,
+      videoToken,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.exercise.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
   }) ?? []
@@ -711,7 +734,7 @@ export default function WorkoutDetail() {
             >
               <div className="px-1 text-sm/6 font-semibold">Exercises</div>
               <div className="mt-2 max-h-[calc(100%-2.125rem)] overflow-y-auto">
-                <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
+                <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} openDialog={openDialog} />
               </div>
             </div>
           </TabsContent>
@@ -763,7 +786,7 @@ export default function WorkoutDetail() {
           >
             <div className="px-1 text-sm/6 font-semibold">Exercises</div>
             <div className="mt-2 max-h-[calc(100%-2.125rem)] overflow-y-auto">
-              <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} />
+              <ExercisesPanel exerciseDetailsArray={data.exerciseDetails} openDialog={openDialog} />
             </div>
           </div>
           <div

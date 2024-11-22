@@ -19,6 +19,7 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, Pagi
 import { EXERCISE_ITEMS_PER_PAGE } from "~/utils/magicNumbers";
 import { ExerciseDialog, exerciseDialogOptions } from "~/components/ExerciseDialog";
 import { AppPagination } from "~/components/AppPagination";
+import { Video } from "lucide-react";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -82,7 +83,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     {
       headers: {
         exercisesEtag,
-        "Cache-control": "max-age=600, stale-while-revalidate=3600"
+        "Cache-control": "max-age=3300, stale-while-revalidate=3600"
       }
     })
 }
@@ -220,11 +221,21 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
       )}
     >
       <div className="flex flex-col overflow-hidden justify-between w-full">
-        <img
+        <div
+          className="relative group cursor-pointer"
+          onClick={() => onViewExercise(exercise)}
+        >
+          <img
+            src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
+            className="w-full rounded-t-lg transition-opacity duration-300 group-hover:opacity-85"
+          />
+          <Video className="absolute w-full size-8 inset-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+        {/* <img
           src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
           className={clsx("w-full rounded-t-lg flex-1", selectable ? "" : "cursor-pointer")}
           onClick={() => onViewExercise(exercise)}
-        />
+        /> */}
         <div className="flex p-4 justify-between items-center">
           <div className="flex flex-col w-full">
             {role === "admin" ? (
