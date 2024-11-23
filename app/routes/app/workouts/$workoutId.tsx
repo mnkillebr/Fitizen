@@ -748,7 +748,7 @@ export default function WorkoutDetail() {
               <div className="px-1 text-sm/6 font-semibold">History</div>
               <div className="mt-2 h-full">
                 <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.125rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
-                  {data.logs.map(log => {
+                  {data.logs.length ? data.logs.map(log => {
                     return (
                       <div key={log.id} className="flex flex-col shadow-md dark:shadow-sm dark:shadow-border-muted rounded-md *:content-center bg-white snap-start dark:bg-background">
                         <div className="bg-slate-400 dark:bg-zinc-700 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
@@ -771,7 +771,7 @@ export default function WorkoutDetail() {
                         </div>
                       </div>
                     )
-                  })}
+                  }) : <div className="text-sm place-self-center mt-4 text-muted-foreground">No workout logs</div>}
                 </div>
               </div>
             </div>
@@ -798,7 +798,7 @@ export default function WorkoutDetail() {
             <div className="px-1 text-sm/6 font-semibold">History</div>
             <div className="mt-2 h-full">
               <div className="flex flex-col gap-y-2 content-center max-h-[calc(100%-2.125rem)] snap-y snap-mandatory overflow-y-auto px-1 pb-1">
-                {data.logs.map(log => {
+                {data.logs.length ? data.logs.map(log => {
                   return (
                     <div key={log.id} className="flex flex-col shadow-md dark:shadow-sm dark:shadow-border-muted rounded-md *:content-center bg-white dark:bg-background snap-start">
                       <div className="bg-slate-400 dark:bg-zinc-700 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
@@ -821,7 +821,7 @@ export default function WorkoutDetail() {
                       </div>
                     </div>
                   )
-                })}
+                }) : <div className="text-sm place-self-center mt-4 text-muted-foreground">No workout logs</div>}
               </div>
             </div>
           </div>

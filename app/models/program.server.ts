@@ -1,4 +1,4 @@
-import { ExerciseTarget, LoadUnit, Prisma, ProgramExerciseLog } from "@prisma/client";
+import { Exercise, ExerciseTarget, LoadUnit, Prisma, ProgramExerciseLog } from "@prisma/client";
 import db from "~/db.server";
 import { getAllExercises } from "./exercise.server";
 
@@ -20,31 +20,31 @@ export async function createIntroProgram() {
         foamRolling: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Cw5cmTFxPI01b3JnpKoJfqC5zbMHFswUhiw9RRiRwYFc")?.id as string, // glute
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Cw5cmTFxPI01b3JnpKoJfqC5zbMHFswUhiw9RRiRwYFc")?.id as string, // glute
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Y13TPfdmBJfGuTMMiSfGGb9jSYJTw8fKs01YryBsPgYs")?.id as string, // hamstring
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Y13TPfdmBJfGuTMMiSfGGb9jSYJTw8fKs01YryBsPgYs")?.id as string, // hamstring
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rFdQoRqApDggajrJow9I5k00M029hrefKh7VVMbBHM1WE")?.id as string, // calves
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rFdQoRqApDggajrJow9I5k00M029hrefKh7VVMbBHM1WE")?.id as string, // calves
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "lq2ZVeykjOh45SUNWoiwM00tu02qcajnInczgDo4rGdSg")?.id as string, // upper back
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "lq2ZVeykjOh45SUNWoiwM00tu02qcajnInczgDo4rGdSg")?.id as string, // upper back
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "eVXOea01MfF3J4Zt1wGzu7y1uJy01byZO7NMnMIaYBy6I")?.id as string, // hip flexor
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "eVXOea01MfF3J4Zt1wGzu7y1uJy01byZO7NMnMIaYBy6I")?.id as string, // hip flexor
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "QQF00WuozkKsLX8hseLcK67p5bmfnNYgqGQ6TitusMVA")?.id as string, // quads
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "QQF00WuozkKsLX8hseLcK67p5bmfnNYgqGQ6TitusMVA")?.id as string, // quads
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "GQa5WWwzNCwfamKzjMDcyJY1Z3bT29BoArujL4YPTjs")?.id as string, // adductors
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "GQa5WWwzNCwfamKzjMDcyJY1Z3bT29BoArujL4YPTjs")?.id as string, // adductors
               reps: 5,
             },
           ],
@@ -52,20 +52,20 @@ export async function createIntroProgram() {
         mobility: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "00D40000iYKRrC8HVKs501wQbddgiQXp01WehdItlacgmLag")?.id as string, // ankle mobility
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "00D40000iYKRrC8HVKs501wQbddgiQXp01WehdItlacgmLag")?.id as string, // ankle mobility
               reps: 10,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
               reps: 5,
               time: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "AlWsecKmWNVgzMQs47AahMUffH5O9yczvcv015FqsFZo")?.id as string, // Lateral Lunge
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "AlWsecKmWNVgzMQs47AahMUffH5O9yczvcv015FqsFZo")?.id as string, // Lateral Lunge
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // sldl
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // sldl
               reps: 5,
             },
           ],
@@ -73,42 +73,42 @@ export async function createIntroProgram() {
         activation: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "V7Dn1nXOTZ8EpkXguAY5ts00ZbKaKDKT02MngV2GwYK2o")?.id as string,     // supine breathing
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "V7Dn1nXOTZ8EpkXguAY5ts00ZbKaKDKT02MngV2GwYK2o")?.id as string,     // supine breathing
               reps: 5,
               time: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Ep00hFh29GqHiP00r00pMFSRlCOfJAdddgdDiAENY01i6qI")?.id as string,     // adductor rock
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Ep00hFh29GqHiP00r00pMFSRlCOfJAdddgdDiAENY01i6qI")?.id as string,     // adductor rock
               reps: 10,
               time: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "NXwfuEWW3QL1xqXC97b87xVhyAcoWCuikh971VbWXK8")?.id as string,     // floorslide
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "NXwfuEWW3QL1xqXC97b87xVhyAcoWCuikh971VbWXK8")?.id as string,     // floorslide
               reps: 8,
               time: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "N602azha2Y3XjCw4QkJcbrGH6TzIYS02ZE2PegWcsvN00g")?.id as string,     // band assisted leg lowering
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "N602azha2Y3XjCw4QkJcbrGH6TzIYS02ZE2PegWcsvN00g")?.id as string,     // band assisted leg lowering
               reps: 8,
               time: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string,     // glute bridge
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string,     // glute bridge
               reps: 8,
               time: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "5a5ziapKMdlI01rLQqzA3f93Fo1xrpHIkR02g8GCGq1008")?.id as string,     // v stance t spine
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "5a5ziapKMdlI01rLQqzA3f93Fo1xrpHIkR02g8GCGq1008")?.id as string,     // v stance t spine
               reps: 5,
               time: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "vBU0063pFAXYUcfeQiPWJokcLFaC4jh8KU8PFtrQsiYI")?.id as string,     // 90/90 er/ir
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "vBU0063pFAXYUcfeQiPWJokcLFaC4jh8KU8PFtrQsiYI")?.id as string,     // 90/90 er/ir
               reps: 5,
               time: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "2hfDY4jzZeTRi7unQ117qNVstu89TMABMMlxe4X6mhE")?.id as string,     // spiderman stretch
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "2hfDY4jzZeTRi7unQ117qNVstu89TMABMMlxe4X6mhE")?.id as string,     // spiderman stretch
               reps: 5,
               time: 5,
             },
@@ -124,11 +124,11 @@ export async function createIntroProgram() {
         dynamic: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "JZaigadq02A3tlHu1o01dpfM2t52dGdkc01P003iu013FfEE")?.id as string, // knee to chest
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "JZaigadq02A3tlHu1o01dpfM2t52dGdkc01P003iu013FfEE")?.id as string, // knee to chest
               reps: 10,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "KOq1C4Ja7A918fGQ2YQkRTiMSfFzwFzJWmAnQUtsVR8")?.id as string, // leg cradle
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "KOq1C4Ja7A918fGQ2YQkRTiMSfFzwFzJWmAnQUtsVR8")?.id as string, // leg cradle
               reps: 10,
             },
           ],
@@ -136,15 +136,15 @@ export async function createIntroProgram() {
         power: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "01SmwwKgzv6RNkCqQ9D01VnYS00cxd01AD5XtX5022pgh82Q")?.id as string,     // standing side toss
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "01SmwwKgzv6RNkCqQ9D01VnYS00cxd01AD5XtX5022pgh82Q")?.id as string,     // standing side toss
               reps: 10,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "02avXkiqQduLZs002VXCTWyXUNv9KwcLDzGT9i001bpt2c")?.id as string,     // box jump
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "02avXkiqQduLZs002VXCTWyXUNv9KwcLDzGT9i001bpt2c")?.id as string,     // box jump
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "GZVFaJSzhPVIG400nJnqtvWG02AtUqhaU35wqq6IuuG2w")?.id as string,     // mini band er/ir
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "GZVFaJSzhPVIG400nJnqtvWG02AtUqhaU35wqq6IuuG2w")?.id as string,     // mini band er/ir
               reps: 8,
             },
           ],
@@ -159,11 +159,11 @@ export async function createIntroProgram() {
         dynamic: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "JZaigadq02A3tlHu1o01dpfM2t52dGdkc01P003iu013FfEE")?.id as string, // knee to chest
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "JZaigadq02A3tlHu1o01dpfM2t52dGdkc01P003iu013FfEE")?.id as string, // knee to chest
               reps: 10,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "KOq1C4Ja7A918fGQ2YQkRTiMSfFzwFzJWmAnQUtsVR8")?.id as string, // leg cradle
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "KOq1C4Ja7A918fGQ2YQkRTiMSfFzwFzJWmAnQUtsVR8")?.id as string, // leg cradle
               reps: 10,
             },
           ],
@@ -171,15 +171,15 @@ export async function createIntroProgram() {
         power: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "h01LmuQbT3mgLVdWSLIaXfcIP7NoYP5Yo8pHP1CFMpNw")?.id as string,     // standing chest pass
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "h01LmuQbT3mgLVdWSLIaXfcIP7NoYP5Yo8pHP1CFMpNw")?.id as string,     // standing chest pass
               reps: 10,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "EMkDMJBy8ByKJJgXdCV7zHn8BIJ7OcxtKA00nRar7tjk")?.id as string,     // lateral bound
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "EMkDMJBy8ByKJJgXdCV7zHn8BIJ7OcxtKA00nRar7tjk")?.id as string,     // lateral bound
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "S8xXg01R01RxbX2H2exILoA2mhlUJRaLekbkwyznhFUyw")?.id as string,     // mini band walk
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "S8xXg01R01RxbX2H2exILoA2mhlUJRaLekbkwyznhFUyw")?.id as string,     // mini band walk
               reps: 8,
             },
           ],
@@ -194,11 +194,11 @@ export async function createIntroProgram() {
         dynamic: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "JZaigadq02A3tlHu1o01dpfM2t52dGdkc01P003iu013FfEE")?.id as string, // knee to chest
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "JZaigadq02A3tlHu1o01dpfM2t52dGdkc01P003iu013FfEE")?.id as string, // knee to chest
               reps: 10,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "KOq1C4Ja7A918fGQ2YQkRTiMSfFzwFzJWmAnQUtsVR8")?.id as string, // leg cradle
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "KOq1C4Ja7A918fGQ2YQkRTiMSfFzwFzJWmAnQUtsVR8")?.id as string, // leg cradle
               reps: 10,
             },
           ],
@@ -206,15 +206,15 @@ export async function createIntroProgram() {
         power: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "01SmwwKgzv6RNkCqQ9D01VnYS00cxd01AD5XtX5022pgh82Q")?.id as string,     // standing side toss
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "01SmwwKgzv6RNkCqQ9D01VnYS00cxd01AD5XtX5022pgh82Q")?.id as string,     // standing side toss
               reps: 10,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "02avXkiqQduLZs002VXCTWyXUNv9KwcLDzGT9i001bpt2c")?.id as string,     // box jump
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "02avXkiqQduLZs002VXCTWyXUNv9KwcLDzGT9i001bpt2c")?.id as string,     // box jump
               reps: 5,
             },
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "RAQQsSCA61EIepOENElDW01gC8i9nZssUo7001UhvthmA")?.id as string,     // oh ball slam
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "RAQQsSCA61EIepOENElDW01gC8i9nZssUo7001UhvthmA")?.id as string,     // oh ball slam
               reps: 8,
             },
           ],
@@ -228,7 +228,7 @@ export async function createIntroProgram() {
         exercises: {
           create: [
             {
-              exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "43ECbGKiNUdiLf3TTuRCRBAqmCgQOdcYH6GQaB66g9g")?.id as string,     // bike conditioning
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "43ECbGKiNUdiLf3TTuRCRBAqmCgQOdcYH6GQaB66g9g")?.id as string,     // bike conditioning
               time: 60,
             }
           ]
@@ -260,21 +260,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "ieS02o8ylL00mb23Yu15II968S675LKwD7xzjBTfw3wOo")?.id as string, // goblet squat
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "ieS02o8ylL00mb23Yu15II968S675LKwD7xzjBTfw3wOo")?.id as string, // goblet squat
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo")?.id as string, // x pulldown
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo")?.id as string, // x pulldown
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -288,21 +288,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rVEb9AaVBs3nVgWYTgAU01YFUGbQ8z7Y022XbntnEXyV4")?.id as string, // standing static chop
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rVEb9AaVBs3nVgWYTgAU01YFUGbQ8z7Y022XbntnEXyV4")?.id as string, // standing static chop
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // tall kneel pallof
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // tall kneel pallof
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
@@ -316,21 +316,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE")?.id as string, // pushup
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE")?.id as string, // pushup
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -354,21 +354,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "mCd01PET6JsK1Fj00N0000xxFaoMR3oAjYPPuLX02FxlbI2U")?.id as string, // kb dead
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "mCd01PET6JsK1Fj00N0000xxFaoMR3oAjYPPuLX02FxlbI2U")?.id as string, // kb dead
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "sFaVdiBlu01J6HwfpFo83ukkfV29mKGUrlYIVCC5oEi8")?.id as string, // tall kneel anti rot hold
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "sFaVdiBlu01J6HwfpFo83ukkfV29mKGUrlYIVCC5oEi8")?.id as string, // tall kneel anti rot hold
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 15,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -382,21 +382,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 15,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "J3UeencZvHDF9hhnA44IPY00xLrx00ybVcfeEON02be4z4")?.id as string, // standing static lift
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "J3UeencZvHDF9hhnA44IPY00xLrx00ybVcfeEON02be4z4")?.id as string, // standing static lift
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "J01ugm7CbJuuP9uBXu2DIkKKAXbnhY4gKgaOseP00ccKc")?.id as string, // db bench
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "J01ugm7CbJuuP9uBXu2DIkKKAXbnhY4gKgaOseP00ccKc")?.id as string, // db bench
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
@@ -410,21 +410,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // reaching lateral lunge
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // reaching lateral lunge
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 5,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "G02qub2Qj013kbp44UaNK2WdSBDqdOGTA01Wu01ipBPBHRI")?.id as string, // suitcase carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "G02qub2Qj013kbp44UaNK2WdSBDqdOGTA01Wu01ipBPBHRI")?.id as string, // suitcase carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -448,21 +448,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "AbyDWdldxxJG72KnkGTTk74Xolx4Hf84GyMnhEz200TM")?.id as string, // w pulldown
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "AbyDWdldxxJG72KnkGTTk74Xolx4Hf84GyMnhEz200TM")?.id as string, // w pulldown
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -476,21 +476,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rzI8edfeiH3kFAKcaqJOvezk1Z02fQapq1DvcfDQuAFI")?.id as string, // half kneel inline row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rzI8edfeiH3kFAKcaqJOvezk1Z02fQapq1DvcfDQuAFI")?.id as string, // half kneel inline row
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "BZ3n1EIPqDDY5FXE9psTpZCerOLA2cmQhCPRa5jBGUE")?.id as string, // incline db bench
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "BZ3n1EIPqDDY5FXE9psTpZCerOLA2cmQhCPRa5jBGUE")?.id as string, // incline db bench
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
@@ -504,21 +504,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string, // hip lift
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string, // hip lift
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "17ZQ1BvMNv011z5hmmyC00RzPhQhn2l1EclwJUMgKoEJQ")?.id as string, // sled push
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "17ZQ1BvMNv011z5hmmyC00RzPhQhn2l1EclwJUMgKoEJQ")?.id as string, // sled push
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -549,21 +549,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "ieS02o8ylL00mb23Yu15II968S675LKwD7xzjBTfw3wOo")?.id as string, // goblet squat
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "ieS02o8ylL00mb23Yu15II968S675LKwD7xzjBTfw3wOo")?.id as string, // goblet squat
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo")?.id as string, // x pulldown
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo")?.id as string, // x pulldown
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -577,21 +577,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rVEb9AaVBs3nVgWYTgAU01YFUGbQ8z7Y022XbntnEXyV4")?.id as string, // standing static chop
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rVEb9AaVBs3nVgWYTgAU01YFUGbQ8z7Y022XbntnEXyV4")?.id as string, // standing static chop
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // tall kneel pallof
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // tall kneel pallof
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -605,21 +605,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE")?.id as string, // pushup
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE")?.id as string, // pushup
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -643,21 +643,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "mCd01PET6JsK1Fj00N0000xxFaoMR3oAjYPPuLX02FxlbI2U")?.id as string, // kb dead
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "mCd01PET6JsK1Fj00N0000xxFaoMR3oAjYPPuLX02FxlbI2U")?.id as string, // kb dead
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "sFaVdiBlu01J6HwfpFo83ukkfV29mKGUrlYIVCC5oEi8")?.id as string, // tall kneel anti rot hold
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "sFaVdiBlu01J6HwfpFo83ukkfV29mKGUrlYIVCC5oEi8")?.id as string, // tall kneel anti rot hold
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 20,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -671,21 +671,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.time,
                                 time: 15,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "J3UeencZvHDF9hhnA44IPY00xLrx00ybVcfeEON02be4z4")?.id as string, // standing static lift
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "J3UeencZvHDF9hhnA44IPY00xLrx00ybVcfeEON02be4z4")?.id as string, // standing static lift
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "J01ugm7CbJuuP9uBXu2DIkKKAXbnhY4gKgaOseP00ccKc")?.id as string, // db bench
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "J01ugm7CbJuuP9uBXu2DIkKKAXbnhY4gKgaOseP00ccKc")?.id as string, // db bench
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -699,21 +699,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // reaching lateral lunge
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // reaching lateral lunge
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 5,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "G02qub2Qj013kbp44UaNK2WdSBDqdOGTA01Wu01ipBPBHRI")?.id as string, // suitcase carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "G02qub2Qj013kbp44UaNK2WdSBDqdOGTA01Wu01ipBPBHRI")?.id as string, // suitcase carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -737,21 +737,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "AbyDWdldxxJG72KnkGTTk74Xolx4Hf84GyMnhEz200TM")?.id as string, // w pulldown
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "AbyDWdldxxJG72KnkGTTk74Xolx4Hf84GyMnhEz200TM")?.id as string, // w pulldown
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -765,21 +765,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rzI8edfeiH3kFAKcaqJOvezk1Z02fQapq1DvcfDQuAFI")?.id as string, // half kneel inline row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rzI8edfeiH3kFAKcaqJOvezk1Z02fQapq1DvcfDQuAFI")?.id as string, // half kneel inline row
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "BZ3n1EIPqDDY5FXE9psTpZCerOLA2cmQhCPRa5jBGUE")?.id as string, // incline db bench
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "BZ3n1EIPqDDY5FXE9psTpZCerOLA2cmQhCPRa5jBGUE")?.id as string, // incline db bench
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -793,21 +793,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string, // hip lift
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string, // hip lift
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "17ZQ1BvMNv011z5hmmyC00RzPhQhn2l1EclwJUMgKoEJQ")?.id as string, // sled push
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "17ZQ1BvMNv011z5hmmyC00RzPhQhn2l1EclwJUMgKoEJQ")?.id as string, // sled push
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -838,21 +838,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "ieS02o8ylL00mb23Yu15II968S675LKwD7xzjBTfw3wOo")?.id as string, // goblet squat
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "ieS02o8ylL00mb23Yu15II968S675LKwD7xzjBTfw3wOo")?.id as string, // goblet squat
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo")?.id as string, // x pulldown
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo")?.id as string, // x pulldown
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -866,21 +866,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rVEb9AaVBs3nVgWYTgAU01YFUGbQ8z7Y022XbntnEXyV4")?.id as string, // standing static chop
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rVEb9AaVBs3nVgWYTgAU01YFUGbQ8z7Y022XbntnEXyV4")?.id as string, // standing static chop
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // tall kneel pallof
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // tall kneel pallof
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -894,21 +894,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE")?.id as string, // pushup
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE")?.id as string, // pushup
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 12,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -932,21 +932,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "mCd01PET6JsK1Fj00N0000xxFaoMR3oAjYPPuLX02FxlbI2U")?.id as string, // kb dead
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "mCd01PET6JsK1Fj00N0000xxFaoMR3oAjYPPuLX02FxlbI2U")?.id as string, // kb dead
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "sFaVdiBlu01J6HwfpFo83ukkfV29mKGUrlYIVCC5oEi8")?.id as string, // tall kneel anti rot hold
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "sFaVdiBlu01J6HwfpFo83ukkfV29mKGUrlYIVCC5oEi8")?.id as string, // tall kneel anti rot hold
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 25,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -960,21 +960,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.time,
                                 time: 20,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "J3UeencZvHDF9hhnA44IPY00xLrx00ybVcfeEON02be4z4")?.id as string, // standing static lift
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "J3UeencZvHDF9hhnA44IPY00xLrx00ybVcfeEON02be4z4")?.id as string, // standing static lift
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "J01ugm7CbJuuP9uBXu2DIkKKAXbnhY4gKgaOseP00ccKc")?.id as string, // db bench
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "J01ugm7CbJuuP9uBXu2DIkKKAXbnhY4gKgaOseP00ccKc")?.id as string, // db bench
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -988,21 +988,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // reaching lateral lunge
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // reaching lateral lunge
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "G02qub2Qj013kbp44UaNK2WdSBDqdOGTA01Wu01ipBPBHRI")?.id as string, // suitcase carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "G02qub2Qj013kbp44UaNK2WdSBDqdOGTA01Wu01ipBPBHRI")?.id as string, // suitcase carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -1026,21 +1026,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "AbyDWdldxxJG72KnkGTTk74Xolx4Hf84GyMnhEz200TM")?.id as string, // w pulldown
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "AbyDWdldxxJG72KnkGTTk74Xolx4Hf84GyMnhEz200TM")?.id as string, // w pulldown
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -1054,21 +1054,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rzI8edfeiH3kFAKcaqJOvezk1Z02fQapq1DvcfDQuAFI")?.id as string, // half kneel inline row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rzI8edfeiH3kFAKcaqJOvezk1Z02fQapq1DvcfDQuAFI")?.id as string, // half kneel inline row
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "BZ3n1EIPqDDY5FXE9psTpZCerOLA2cmQhCPRa5jBGUE")?.id as string, // incline db bench
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "BZ3n1EIPqDDY5FXE9psTpZCerOLA2cmQhCPRa5jBGUE")?.id as string, // incline db bench
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -1082,21 +1082,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string, // hip lift
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string, // hip lift
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "17ZQ1BvMNv011z5hmmyC00RzPhQhn2l1EclwJUMgKoEJQ")?.id as string, // sled push
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "17ZQ1BvMNv011z5hmmyC00RzPhQhn2l1EclwJUMgKoEJQ")?.id as string, // sled push
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -1127,21 +1127,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "ieS02o8ylL00mb23Yu15II968S675LKwD7xzjBTfw3wOo")?.id as string, // goblet squat
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "ieS02o8ylL00mb23Yu15II968S675LKwD7xzjBTfw3wOo")?.id as string, // goblet squat
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 12,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo")?.id as string, // x pulldown
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "GTy01N9EDc023ZE02QRVUPaF7eDaiurrnyO5z2W6oo8VTo")?.id as string, // x pulldown
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -1155,21 +1155,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rVEb9AaVBs3nVgWYTgAU01YFUGbQ8z7Y022XbntnEXyV4")?.id as string, // standing static chop
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rVEb9AaVBs3nVgWYTgAU01YFUGbQ8z7Y022XbntnEXyV4")?.id as string, // standing static chop
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 12,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // tall kneel pallof
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // tall kneel pallof
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -1183,21 +1183,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE")?.id as string, // pushup
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "nepxkswcJlH82X26jnzEKAeol2qbTlTAM9FWdytsseE")?.id as string, // pushup
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 12,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -1221,21 +1221,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "mCd01PET6JsK1Fj00N0000xxFaoMR3oAjYPPuLX02FxlbI2U")?.id as string, // kb dead
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "mCd01PET6JsK1Fj00N0000xxFaoMR3oAjYPPuLX02FxlbI2U")?.id as string, // kb dead
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 12,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "sFaVdiBlu01J6HwfpFo83ukkfV29mKGUrlYIVCC5oEi8")?.id as string, // tall kneel anti rot hold
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "sFaVdiBlu01J6HwfpFo83ukkfV29mKGUrlYIVCC5oEi8")?.id as string, // tall kneel anti rot hold
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 25,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -1249,21 +1249,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "VBGBVJn4Cq6LbhY8eDrWhHSf5TQIjzQoAh01YvdZPnbA")?.id as string, // split squat hold
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.time,
                                 time: 25,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "J3UeencZvHDF9hhnA44IPY00xLrx00ybVcfeEON02be4z4")?.id as string, // standing static lift
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "J3UeencZvHDF9hhnA44IPY00xLrx00ybVcfeEON02be4z4")?.id as string, // standing static lift
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 12,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "J01ugm7CbJuuP9uBXu2DIkKKAXbnhY4gKgaOseP00ccKc")?.id as string, // db bench
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "J01ugm7CbJuuP9uBXu2DIkKKAXbnhY4gKgaOseP00ccKc")?.id as string, // db bench
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -1277,21 +1277,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension row
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 12,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // reaching lateral lunge
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // reaching lateral lunge
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "G02qub2Qj013kbp44UaNK2WdSBDqdOGTA01Wu01ipBPBHRI")?.id as string, // suitcase carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "G02qub2Qj013kbp44UaNK2WdSBDqdOGTA01Wu01ipBPBHRI")?.id as string, // suitcase carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,
@@ -1315,21 +1315,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "AbyDWdldxxJG72KnkGTTk74Xolx4Hf84GyMnhEz200TM")?.id as string, // w pulldown
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "AbyDWdldxxJG72KnkGTTk74Xolx4Hf84GyMnhEz200TM")?.id as string, // w pulldown
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "Mjj9s00w01WexyvKV1Aia5IMmcXxWSn1WQzGjbBrF7kow")?.id as string, // front plank
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.time,
@@ -1343,21 +1343,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // reaching sldl
                                 orderInBlock: 1,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "rzI8edfeiH3kFAKcaqJOvezk1Z02fQapq1DvcfDQuAFI")?.id as string, // half kneel inline row
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "rzI8edfeiH3kFAKcaqJOvezk1Z02fQapq1DvcfDQuAFI")?.id as string, // half kneel inline row
                                 orderInBlock: 2,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
                                 reps: 12,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "BZ3n1EIPqDDY5FXE9psTpZCerOLA2cmQhCPRa5jBGUE")?.id as string, // incline db bench
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "BZ3n1EIPqDDY5FXE9psTpZCerOLA2cmQhCPRa5jBGUE")?.id as string, // incline db bench
                                 orderInBlock: 3,
                                 sets: 3,
                                 target: ExerciseTarget.reps,
@@ -1371,21 +1371,21 @@ export async function createIntroProgram() {
                           exercises: {
                             create: [
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string, // hip lift
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "afK1OG5pBpn02mYeC5W5YMQKFeeFPzgd8gxGYbtmj7s4")?.id as string, // hip lift
                                 orderInBlock: 1,
                                 sets: 2,
                                 target: ExerciseTarget.reps,
                                 reps: 8,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "17ZQ1BvMNv011z5hmmyC00RzPhQhn2l1EclwJUMgKoEJQ")?.id as string, // sled push
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "17ZQ1BvMNv011z5hmmyC00RzPhQhn2l1EclwJUMgKoEJQ")?.id as string, // sled push
                                 orderInBlock: 2,
                                 sets: 2,
                                 target: ExerciseTarget.time,
                                 time: 10,
                               },
                               {
-                                exerciseId: exercises.find((exercise: { muxPlaybackId: string }) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
+                                exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "a5hSUwmp00rvp1MxVhxP009QGw500DpYDwKZ5th31Nsij4")?.id as string, // farmers carry
                                 orderInBlock: 3,
                                 sets: 2,
                                 target: ExerciseTarget.time,

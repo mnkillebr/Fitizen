@@ -1,5 +1,6 @@
-import { Prisma, ExerciseTarget, Side, LoadUnit, } from "@prisma/client";
+import { Prisma, ExerciseTarget, Side, LoadUnit, Exercise, } from "@prisma/client";
 import db from "~/db.server";
+import { getAllExercises } from "./exercise.server";
 
 export type ExerciseSchemaType = {
   exerciseId: string;
@@ -234,23 +235,121 @@ export async function updateUserWorkoutWithExercises(userId: string, workoutId: 
 
 export async function createWorkoutWithExercise() {
   try {
+    const exercises = await getAllExercises(null)
     const createWorkout = await db.routine.create({
       data: {
-        name: "Random workout",
-        description: "For those days when you're feeling random",
-        // isFree: true,
+        name: "Full body sampler",
+        description: "A full body workout that incorporates all planes of movement",
+        isFree: true,
         exercises: {
           create: [
             {
-              exerciseId: "clzuebrd300045brturmk9bcf",
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "vBU0063pFAXYUcfeQiPWJokcLFaC4jh8KU8PFtrQsiYI")?.id as string, // 90 / 90 stretch
               orderInRoutine: 1,
+              target: ExerciseTarget.reps,
+              sets: "1",
+              reps: "5",
+              rest: "None",
+              time: "3",
+              notes: "5 reps per side, 3 sec exhale",
+              side: null,
+              circuitId: null,
+            },
+            {
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "N602azha2Y3XjCw4QkJcbrGH6TzIYS02ZE2PegWcsvN00g")?.id as string, // leg lowering
+              orderInRoutine: 2,
+              target: ExerciseTarget.reps,
+              sets: "1",
+              reps: "5",
+              rest: "None",
+              time: "3",
+              notes: "5 reps per side, 3 sec exhale",
+              side: null,
+              circuitId: null,
+            },
+            {
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "5a5ziapKMdlI01rLQqzA3f93Fo1xrpHIkR02g8GCGq1008")?.id as string, // v stance
+              orderInRoutine: 3,
+              target: ExerciseTarget.reps,
+              sets: "1",
+              reps: "5",
+              rest: "None",
+              time: "3",
+              notes: "5 reps per side, 3 sec exhale",
+              side: null,
+              circuitId: null,
+            },
+            {
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "7BLwcXxbceIsniBtbdThz3blTZG1i2lftuOATmOu7ms")?.id as string, // sldl
+              orderInRoutine: 4,
+              target: ExerciseTarget.reps,
+              sets: "1",
+              reps: "5",
+              rest: "None",
+              time: "3",
+              notes: "5 reps per side, 3 sec exhale",
+              side: null,
+              circuitId: null,
+            },
+            {
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // split squat
+              orderInRoutine: 5,
+              target: ExerciseTarget.time,
+              sets: "3",
+              reps: null,
+              rest: "90 sec",
+              time: "30 sec",
+              notes: "30 sec per leg",
+              side: null,
+              circuitId: 'circuit-1732317444526',
+            },
+            {
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "TU4XmFZXrsRuP5pI4kPLFV7rGuOijeFqZF2vt01983O8")?.id as string, // half kneel press
+              orderInRoutine: 6,
+              target: ExerciseTarget.reps,
+              sets: "3",
+              reps: "8",
+              rest: "90 sec",
+              time: null,
+              notes: "8 reps per side",
+              side: null,
+              circuitId: 'circuit-1732317444526',
+            },
+            {
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "tG1R00di01E02CnddXquQQilFpRlSqLg55aw4niXIOvkxA")?.id as string, // palloff
+              orderInRoutine: 7,
               target: ExerciseTarget.reps,
               sets: "3",
               reps: "12",
+              rest: "90 sec",
+              time: null,
+              notes: "12 reps per side",
+              side: null,
+              circuitId: 'circuit-1732317444526',
+            },
+            {
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "8HlOIpUPa2ur6pzng0102iYzBDRRWA9omKjkm10200sPPAo")?.id as string, // lateral lunge
+              orderInRoutine: 8,
+              target: ExerciseTarget.reps,
+              sets: "4",
+              reps: "8",
               rest: "60 sec",
+              time: null,
+              notes: "alternate sides each rep for 16 total reps",
+              side: null,
+              circuitId: 'circuit-1732317664252',
+            },
+            {
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "yNTTTsacFF9K4vf02QwlFn7RWZDStq3T00hwrmnqw5cF4")?.id as string, // suspension
+              orderInRoutine: 9,
+              target: ExerciseTarget.reps,
+              sets: "4",
+              reps: "10",
+              rest: "60 sec",
+              time: null,
               notes: null,
               side: null,
-              circuitId: null,
+              circuitId: 'circuit-1732317664252',
             },
           ],
         }

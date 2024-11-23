@@ -389,7 +389,7 @@ model BlockExercise {
 
 model ProgramLog {
   id            String        @id @default(cuid())
-  user          User          @relation(fields: [userId], references: [id])
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId        String
   program       Program       @relation(fields: [programId], references: [id])
   programId     String
@@ -423,7 +423,7 @@ model ProgramExerciseLogSet {
 
 model WorkoutLog {
   id            String        @id @default(cuid())
-  user          User          @relation(fields: [userId], references: [id])
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId        String
   routine       Routine       @relation(fields: [routineId], references: [id])
   routineId     String
@@ -488,7 +488,7 @@ model Availability {
 model Appointment {
   id         String       @id @default(cuid())
   userId     String
-  user       User         @relation(fields: [userId], references: [id])
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   coachId    String
   coach      Coach        @relation(fields: [coachId], references: [id])
   startTime  DateTime

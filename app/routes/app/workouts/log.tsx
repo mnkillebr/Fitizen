@@ -77,7 +77,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       },
     }
   });
-  if (workout !== null && workout.userId !== user.id) {
+  if (workout !== null && workout.userId && workout.userId !== user.id) {
     throw redirect("/app", 401)
   }
   if (!workout) {
