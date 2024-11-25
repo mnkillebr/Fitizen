@@ -28,6 +28,7 @@ import { EXERCISE_ITEMS_PER_PAGE } from '~/utils/magicNumbers';
 import { hash } from '~/cryptography.server';
 import { useOpenDialog } from '~/components/Dialog';
 import { ExerciseDialog, exerciseDialogOptions } from '~/components/ExerciseDialog';
+import { Skeleton } from '~/components/ui/skeleton';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -208,6 +209,51 @@ const StrictModeDroppable = ({ children, ...props }: any) => {
   }
   return <Droppable {...props}>{children}</Droppable>;
 };
+
+type WorkoutCardComponentProps = {
+  card: any;
+  openDialog: (component: React.ReactNode, options: any) => void;
+}
+
+const WorkoutCardComponent = ({ card, openDialog }: WorkoutCardComponentProps) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  return (
+    <>
+      <div
+        className="relative group cursor-pointer aspect-[1.496]"
+        onClick={() => openDialog(
+          <ExerciseDialog exercise={card} />,
+          exerciseDialogOptions(card.name)
+        )}
+      >
+        {!imageLoaded && (
+          <Skeleton className="absolute inset-0 w-full h-full" />
+        )}
+        <img
+          src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
+          className={clsx(
+            "w-full rounded-t transition-opacity duration-300 group-hover:opacity-85",
+            imageLoaded ? "opacity-100" : "opacity-0"
+          )}
+          onLoad={() => setImageLoaded(true)}
+        />
+        <Video className="absolute w-full size-8 inset-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
+      <div className="flex justify-between items-center p-4">
+        <div className="flex flex-col">
+          <p className="font-bold max-w-full truncate">{card.name}</p>
+          <div className="flex divide-x divide-gray-400 text-sm">
+            {card.body.slice(0,2).map((body: string, body_idx: number) => (
+              <p key={body_idx} className={`${body_idx > 0 ? "px-1" : "pr-1"} text-xs capitalize`}>{`${body} body`}</p>
+            ))}
+            <p className="px-1 text-xs capitalize">{card.contraction}</p>
+          </div>
+        </div>
+        <Grip />
+      </div>
+    </>
+  )
+}
 
 export default function WorkoutBuilderForm() {
   const { exercises, page, totalPages } = useLoaderData<typeof loader>();
@@ -939,31 +985,7 @@ export default function WorkoutBuilderForm() {
                             transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'translate(0px, 0px)',
                           }}
                         >
-                          <div
-                            className="relative group cursor-pointer"
-                            onClick={() => openDialog(
-                              <ExerciseDialog exercise={card} />,
-                              exerciseDialogOptions(card.name)
-                            )}
-                          >
-                            <img
-                              src={card.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
-                              className="w-full rounded-t transition-opacity duration-300 group-hover:opacity-85"
-                            />
-                            <Video className="absolute w-full size-8 inset-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          </div>
-                          <div className="flex justify-between items-center p-4">
-                            <div className="flex flex-col">
-                              <p className="font-bold max-w-full truncate">{card.name}</p>
-                              <div className="flex divide-x divide-gray-400 text-sm">
-                                {card.body.slice(0,2).map((body, body_idx) => (
-                                  <p key={body_idx} className={`${body_idx > 0 ? "px-1" : "pr-1"} text-xs capitalize`}>{`${body} body`}</p>
-                                ))}
-                                <p className="px-1 text-xs capitalize">{card.contraction}</p>
-                              </div>
-                            </div>
-                            <Grip />
-                          </div>
+                          <WorkoutCardComponent card={card} openDialog={openDialog} />
                         </div>
                       )}
                     </Draggable>

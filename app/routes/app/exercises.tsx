@@ -20,6 +20,8 @@ import { EXERCISE_ITEMS_PER_PAGE } from "~/utils/magicNumbers";
 import { ExerciseDialog, exerciseDialogOptions } from "~/components/ExerciseDialog";
 import { AppPagination } from "~/components/AppPagination";
 import { Video } from "lucide-react";
+import { useState } from "react";
+import { Skeleton } from "~/components/ui/skeleton";
 
 const updateExerciseNameSchema = z.object({
   exerciseId: z.string(),
@@ -206,6 +208,7 @@ type ExerciseProps = {
 
 export function Exercise({ exercise, selectable, selectFn, selected, role, selectCount, onViewExercise = () => {}}: ExerciseProps) {
   const isHydrated = useIsHydrated();
+  const [imageLoaded, setImageLoaded] = useState(false);
   const deleteExerciseFetcher = useFetcher<deleteExerciseFetcherType>();
   const updateExerciseNameFetcher = useFetcher<updateNameFetcherType>();
   const isDeletingExercise =
@@ -222,12 +225,19 @@ export function Exercise({ exercise, selectable, selectFn, selected, role, selec
     >
       <div className="flex flex-col overflow-hidden justify-between w-full">
         <div
-          className="relative group cursor-pointer"
+          className="relative group cursor-pointer aspect-[1.496]"
           onClick={() => onViewExercise(exercise)}
         >
+          {!imageLoaded && (
+            <Skeleton className="absolute inset-0 w-full h-full" />
+          )}
           <img
             src={exercise.thumbnail ?? "https://res.cloudinary.com/dqrk3drua/image/upload/f_auto,q_auto/cld-sample-3.jpg"}
-            className="w-full rounded-t-lg transition-opacity duration-300 group-hover:opacity-85"
+            className={clsx(
+              "w-full rounded-t-lg transition-opacity duration-300 group-hover:opacity-85",
+              imageLoaded ? "opacity-100" : "opacity-0"
+            )}
+            onLoad={() => setImageLoaded(true)}
           />
           <Video className="absolute w-full size-8 inset-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>

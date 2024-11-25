@@ -89,7 +89,7 @@ export async function action({ request }: ActionFunctionArgs) {
         async ({ workoutId }) => {
           const workout = await getWorkout(workoutId);
 
-          if (workout !== null && workout.userId !== user.id) {
+          if (workout !== null && workout.userId && workout.userId !== user.id) {
             throw json(
               { message: "This workout routine is not yours, so you cannot delete it."},
               { status: 401 }

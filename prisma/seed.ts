@@ -1185,6 +1185,7 @@ function getAthleticConditioningExercises() {
 async function deleteAll() {
   await db.user.deleteMany();
   await db.exercise.deleteMany();
+  await db.routine.deleteMany();
   await db.coach.deleteMany();
   await db.program.deleteMany();
 }

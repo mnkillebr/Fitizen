@@ -302,8 +302,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     },
     exerciseDetails,
     logs,
-    newLogSaved: logs.find(log => log.id === newlogId)
-    // exerciseDetailss
+    newLogSaved: logs.find(log => log.id === newlogId),
+    role: user.role,
   });
 }
 
@@ -322,7 +322,7 @@ export async function action({ request }: ActionFunctionArgs) {
         async ({ workoutId }) => {
           const workout = await getWorkout(workoutId);
 
-          if (workout !== null && workout.userId !== user.id) {
+          if (workout !== null && workout.userId && workout.userId !== user.id) {
             throw json(
               { message: "This workout routine is not yours, so you cannot delete it."},
               { status: 401 }
@@ -524,7 +524,7 @@ export default function WorkoutDetail() {
                         <CalendarIcon className="h-4" />
                         Add to Calendar
                       </button>
-                      {data.workout?.owns ? (
+                      {data.workout?.owns || data.role === "admin" ? (
                         <>
                           <Link to={`/app/workouts/edit?id=${data.workout?.id}`} className="flex items-center gap-1 hover:bg-slate-200 dark:hover:bg-primary/20 hover:rounded-md p-1">
                             <PencilIcon className="h-4" />
