@@ -72,7 +72,7 @@ export function sendMagicLinkEmail(link: string, email: string) {
       </div>
     )
     return sendEmail({
-      from: "Fitizen <mnkillebr@gmail.com>",
+      from: "Fitizen <coach.mkillebrew@gmail.com>",
       to: [email],
       subject: "Log in to Fitizen",
       html,
