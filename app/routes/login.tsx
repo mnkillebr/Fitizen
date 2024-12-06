@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { Form, json, useActionData } from "@remix-run/react";
+import { Form, json, useActionData, useNavigate } from "@remix-run/react";
 import { z } from "zod";
 import { ErrorMessage, PrimaryButton, PrimaryInput } from "~/components/form";
 import { sessionCookie } from "~/cookies";
@@ -70,8 +70,28 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Login() {
   const actionData = useActionData<loginActionType>();
+  const navigate = useNavigate();
   const { signIn } = useSignIn()
+
   if (!signIn) return null
+
+  const handleEmailSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const email = form.email.value;
+    
+    try {
+      await signIn.create({
+        identifier: email,
+        strategy: "email_code",
+      });
+      
+      navigate(`/verify-email?email=${encodeURIComponent(email)}&type=signin`);
+    } catch (err) {
+      console.error("Error during sign in:", err);
+    }
+  };
+
   const handleGoogleLogin = () => {
     const signInWith = (strategy: OAuthStrategy) => {
       return signIn.authenticateWithRedirect({
@@ -95,7 +115,7 @@ export default function Login() {
         (
           <div className="flex flex-col gap-y-3 border dark:border-border-muted rounded-md p-6 w-full max-w-2xl">
             <h1 className="font-bold text-3xl mb-5">Log In</h1>
-            <Form className="mx-auto w-full" method="post">
+            <Form className="mx-auto w-full" onSubmit={handleEmailSignIn}>
               <div className="flex flex-col pb-4 text-left">
                 <Label className="text-muted-foreground mb-2 ml-1">Log in with your email</Label>
                 <Input

@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/remix"
+import { useAuth, useClerk } from "@clerk/remix"
 import { useNavigate, useSubmit } from "@remix-run/react"
 import {
   BadgeCheck,
@@ -43,12 +43,15 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const { signOut, isSignedIn } = useAuth();
+  const { signOut: clerkSignOut } = useClerk();
   const navigate = useNavigate();
   const submit = useSubmit();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (isSignedIn) {
-      signOut(() => submit({ "_action": "logout" }, { action: "/", method: "post" }))
+      await clerkSignOut()
+      await signOut(() => submit({ "_action": "logout" }, { action: "/", method: "post" }))
+      submit({ "_action": "logout" }, { action: "/", method: "post" })
     }
     return submit({ "_action": "logout" }, { action: "/", method: "post" })
   }

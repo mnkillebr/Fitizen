@@ -11,6 +11,7 @@ import { Button } from "~/components/ui/button";
 import { z } from "zod";
 import { validateForm } from "~/utils/validation";
 import { ErrorMessage } from "~/components/form";
+import { getUserByClerkId } from "~/models/user.server";
 
 type setupActionType = {
   firstName?: string;
@@ -29,8 +30,28 @@ const setupSchema =  z.object({
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const clerkId = url.searchParams.get("clerkId");
-  if (!clerkId) return redirect("/signup")
-  return json({ clerkId })
+  const sessionId = url.searchParams.get("sessionId");
+
+  if (!clerkId || !sessionId) {
+    return redirect("/signup")
+  }
+
+  const existingUser = await getUserByClerkId(clerkId);
+
+  if (existingUser) {
+    const cookieHeader = request.headers.get("cookie");
+    const session = await getSession(cookieHeader);
+    // set session userid
+    session.set("userId", existingUser.id);
+    // redirect and commit session
+    return redirect("/app", {
+      headers: {
+        "Set-Cookie": await commitSession(session),
+      }
+    });
+  }
+
+  return json({ clerkId, sessionId })
 }
 
 export async function action({ request }: ActionFunctionArgs) {

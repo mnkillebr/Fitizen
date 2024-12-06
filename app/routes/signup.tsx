@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { Form, json, useActionData } from "@remix-run/react";
+import { Form, json, useActionData, useNavigate } from "@remix-run/react";
 import { z } from "zod";
 import { ErrorMessage } from "~/components/form";
 import { generateMagicLink, sendMagicLinkEmail } from "~/magic-links.server";
@@ -16,11 +16,11 @@ import { Button } from "~/components/ui/button";
 import { GoogleIcon } from "images/icons";
 import { useSignUp } from "@clerk/remix";
 
-const loginSchema = z.object({
+const signupSchema = z.object({
   email: z.string().email(),
 })
 
-type loginActionType = {
+type signupActionType = {
   email?: string;
   errors?: {
     [key: string]: string;
@@ -39,7 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   return validateForm(
     formData,
-    loginSchema,
+    signupSchema,
     async ({ email }) => {
       if (email.toLowerCase() === "testuser@email.com" || email.toLowerCase() === "coach.mkillebrew@gmail.com") {
         const testUser = await getUserByEmail(email)
@@ -66,10 +66,31 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function SignUp() {
-  const actionData = useActionData<loginActionType>();
+  const actionData = useActionData<signupActionType>();
+  const navigate = useNavigate();
   const { isLoaded, signUp } = useSignUp();
   
   if (!isLoaded) return null;
+
+  const handleEmailSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const email = form.email.value;
+    
+    try {
+      await signUp.create({
+        emailAddress: email,
+      });
+      
+      // Start email verification process
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      
+      // Redirect to verification page
+      navigate(`/verify-email?email=${encodeURIComponent(email)}&type=signup`);
+    } catch (err) {
+      console.error("Error during sign up:", err);
+    }
+  };
 
   const handleOAuthSignUp = async () => {
     try {
@@ -95,7 +116,7 @@ export default function SignUp() {
         (
           <div className="flex flex-col gap-y-3 border dark:border-border-muted rounded-md p-6 w-full max-w-2xl">
             <h1 className="font-bold text-3xl mb-5">Sign up</h1>
-            <Form className="mx-auto w-full" method="post">
+            <Form className="mx-auto w-full" onSubmit={handleEmailSignUp}>
               <div className="flex flex-col pb-4 text-left">
                 <Label className="text-muted-foreground mb-2 ml-1">Sign up with your email</Label>
                 <Input
