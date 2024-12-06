@@ -32,8 +32,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const workouts = await getAllUserWorkouts(user.id, query);
-
-  return json({ workouts, role })
+  let sampleWorkout
+  if (!workouts.length) {
+    sampleWorkout = await createWorkoutWithExercise();
+  }
+  const allWorkouts = sampleWorkout ? [...workouts, sampleWorkout] : workouts
+  return json({ workouts: allWorkouts, role })
 }
 
 export async function action({ request }: ActionFunctionArgs) {

@@ -15,14 +15,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const programs = await getAllPrograms(query);
+  let introProgram
+  if (!programs.length) {
+    introProgram = await createIntroProgram();
+  }
   const programsEtag = hash(JSON.stringify(programs))
 
   if (programsEtag === request.headers.get("if-none-match")) {
     return new Response(null, { status: 304 })
   }
-
+  const allPrograms = introProgram ? [...programs, introProgram] : programs
   return json(
-    { programs, role },
+    { programs: allPrograms, role },
     { headers: {
         programsEtag,
         "Cache-control": "max-age=60, stale-while-revalidate=3600"
