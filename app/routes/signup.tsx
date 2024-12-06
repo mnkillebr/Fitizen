@@ -1,8 +1,7 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { Form, json, useActionData } from "@remix-run/react";
 import { z } from "zod";
-import { ErrorMessage, PrimaryButton, PrimaryInput } from "~/components/form";
-import { sessionCookie } from "~/cookies";
+import { ErrorMessage } from "~/components/form";
 import { generateMagicLink, sendMagicLinkEmail } from "~/magic-links.server";
 import { getUserByEmail } from "~/models/user.server";
 import { commitSession, getSession } from "~/sessions";
@@ -15,8 +14,7 @@ import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Button } from "~/components/ui/button";
 import { GoogleIcon } from "images/icons";
-import { useSignIn } from "@clerk/remix";
-import { OAuthStrategy } from '@clerk/types'
+import { useSignUp } from "@clerk/remix";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -36,7 +34,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   await requireLoggedOutUser(request);
-  
   const cookieHeader = request.headers.get("cookie");
   const session = await getSession(cookieHeader);
   const formData = await request.formData();
@@ -68,20 +65,23 @@ export async function action({ request }: ActionFunctionArgs) {
   )
 }
 
-export default function Login() {
+export default function SignUp() {
   const actionData = useActionData<loginActionType>();
-  const { signIn } = useSignIn()
-  if (!signIn) return null
-  const handleGoogleLogin = () => {
-    const signInWith = (strategy: OAuthStrategy) => {
-      return signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl: '/auth/callback',
-        redirectUrlComplete: '/auth/callback',
-      })
+  const { isLoaded, signUp } = useSignUp();
+  
+  if (!isLoaded) return null;
+
+  const handleOAuthSignUp = async () => {
+    try {
+      await signUp.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/auth/callback",
+        redirectUrlComplete: "/auth/callback"
+      });
+    } catch (err) {
+      console.error("Error during OAuth sign up:", err);
     }
-    signInWith('oauth_google')
-  }
+  };
 
 	return (
 		<div className="text-center mt-32 text-foreground flex justify-center">
@@ -94,10 +94,10 @@ export default function Login() {
         ) :
         (
           <div className="flex flex-col gap-y-3 border dark:border-border-muted rounded-md p-6 w-full max-w-2xl">
-            <h1 className="font-bold text-3xl mb-5">Log In</h1>
+            <h1 className="font-bold text-3xl mb-5">Sign up</h1>
             <Form className="mx-auto w-full" method="post">
               <div className="flex flex-col pb-4 text-left">
-                <Label className="text-muted-foreground mb-2 ml-1">Log in with your email</Label>
+                <Label className="text-muted-foreground mb-2 ml-1">Sign up with your email</Label>
                 <Input
                   type="email"
                   name="email"
@@ -113,13 +113,13 @@ export default function Login() {
                 />
                 <ErrorMessage>{actionData?.errors?.email}</ErrorMessage>
               </div>
-              <Button className="w-full" type="submit">Log In</Button>
+              <Button className="w-full" type="submit">Sign up</Button>
             </Form>
             <Separator className="dark:bg-border-muted"/>
             <Label>or</Label>
             <Button
               className="w-full"
-              onClick={handleGoogleLogin}
+              onClick={handleOAuthSignUp}
             >
               <GoogleIcon />
               Continue with Google

@@ -30,10 +30,15 @@ import { AppDashboardLayout } from "./components/DashboardLayout";
 import { validateForm } from "./utils/validation";
 import { z } from "zod";
 import { DarkModeToggle } from "./components/DarkModeToggle";
+import { rootAuthLoader } from "@clerk/remix/ssr.server";
+import { ClerkApp } from "@clerk/remix";
 
 const navigation = [
-  { name: "Settings", href: "settings" },
+  // { name: "Settings", href: "settings" },
   { name: "About", href: "about" },
+  { name: "Blog", href: "blog" },
+  { name: "Privacy", href: "privacy" },
+  { name: "Terms", href: "terms" },
 ]
 
 const dashNavigation = [
@@ -82,9 +87,11 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await getCurrentUser(request);
-  return json({ user, isLoggedIn: user !== null })
+export async function loader(args: LoaderFunctionArgs) {
+  return rootAuthLoader(args, async ({ request }) => {
+    const user = await getCurrentUser(request);
+    return json({ user, isLoggedIn: user !== null })
+  })
 }
 
 const themeSchema = z.object({
@@ -168,8 +175,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
-  const { user } = useLoaderData<typeof loader>();
+export function App() {
+  const { user, isLoggedIn } = useLoaderData<typeof loader>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const matches = useMatches();
   const inAppRoute = matches.map(m => m.id).includes("routes/app");
@@ -218,29 +225,45 @@ export default function App() {
             </div>
           )}  */}
           <div className="hidden md:flex md:flex-1 md:justify-end">
-            {inAppRoute ? (
-              <button
-                onClick={handleLogout}
-                className="text-gray-900 hover:text-primary h-6 w-6"
-              >
-                <ArrowLeftEndOnRectangleIcon />
-              </button>
-            ) : (
-              <>
-                <DarkModeToggle />
+            <DarkModeToggle />
+            <div className="flex gap-3">
+              {isLoggedIn ? (
                 <Link
-                  to="login"
+                  to="app"
                   className={clsx(
                     "flex items-center text-primary-foreground bg-primary",
                     "py-2 pl-3 pr-2 rounded-md hover:bg-primary/90 shadow",
                     "text-sm"
                   )}
                 >
-                  <div>Log In</div>
-                  <ChevronRight className="h-4 w-4"/>
+                  Dashboard
                 </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link
+                    to="signup"
+                    className={clsx(
+                      "flex items-center text-primary-foreground bg-primary",
+                      "p-2 rounded-md hover:bg-primary/90 shadow",
+                      "text-sm"
+                    )}
+                  >
+                    <div>Sign Up</div>
+                  </Link>
+                  <Link
+                    to="login"
+                    className={clsx(
+                      "flex items-center text-primary-foreground bg-primary",
+                      "py-2 pl-3 pr-2 rounded-md hover:bg-primary/90 shadow",
+                      "text-sm"
+                    )}
+                  >
+                    <div>Log In</div>
+                    <ChevronRight className="h-4 w-4"/>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </nav>
         <Dialog className="md:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
@@ -265,8 +288,8 @@ export default function App() {
               </button>
             </div>
             <div className="mt-6 flow-root">
-              <div className="-my-6 divide-y divide-gray-500/10">
-                <div className="space-y-2 py-6">
+              <div className="-my-6 divide-y divide-gray-500/20 dark:divide-gray-500">
+                <div className="py-6">
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
@@ -283,6 +306,12 @@ export default function App() {
                   </button>
                 ) : (
                   <div className="py-6">
+                    <a
+                      href="signup"
+                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-foreground hover:bg-gray-50 dark:hover:bg-background-muted dark:hover:text-muted-foreground hover:text-primary transition duration-100"
+                    >
+                      Sign Up
+                    </a>
                     <a
                       href="login"
                       className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-foreground hover:bg-gray-50 dark:hover:bg-background-muted dark:hover:text-muted-foreground hover:text-primary transition duration-100"
@@ -306,6 +335,11 @@ export default function App() {
     </div>
   );
 };
+
+export default ClerkApp(App, {
+  signInFallbackRedirectUrl: "/app",
+  signUpFallbackRedirectUrl: "/app"
+});
 
 export function ErrorBoundary() {
   const error = useRouteError();

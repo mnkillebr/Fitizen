@@ -249,7 +249,7 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     firstName: user.firstName,
     lastName: user.lastName,
-    email: user.email,
+    email: user.email ?? "",
   });
 
   const isUpdatingProfile = navigation.state === "submitting";

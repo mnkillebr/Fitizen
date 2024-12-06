@@ -2,7 +2,7 @@ import { useRouteError } from "@remix-run/react";
 
 export default function About() {
   return (
-    <div className="flex flex-col items-center mt-20">
+    <div className="flex flex-col items-center mt-24 md:mt-20">
       <div className="font-semibold text-2xl">About Page Coming Soon</div>
     </div>
   );

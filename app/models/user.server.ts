@@ -17,6 +17,14 @@ export function getUserById(userId: string) {
   });
 };
 
+export function getUserByClerkId(clerkId: string) {
+  return db.user.findUnique({
+    where: {
+      clerkId
+    }
+  });
+};
+
 export function createUser(email: string, firstName: string, lastName: string) {
   return db.user.create({
     data: {

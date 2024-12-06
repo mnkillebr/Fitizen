@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.2.3",
+    "@clerk/remix": "^4.2.57",
     "@cloudinary/react": "^1.13.0",
     "@cloudinary/url-gen": "^1.20.0",
     "@headlessui/react": "^2.0.4",

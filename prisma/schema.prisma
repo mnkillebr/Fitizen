@@ -15,7 +15,8 @@ datasource db {
 
 model User {
   id                    String             @id @default(cuid())
-  email                 String             @unique
+  email                 String?            @unique
+  clerkId               String?            @unique
   passwordHash          String?
   profilePhotoUrl       String?
   profilePhotoId        String?
@@ -80,11 +81,13 @@ model FitnessProfile {
 }
 
 model SocialLogin {
-  id             String    @id @default(cuid())
-  provider       String
-  providerUserId String
-  user           User   @relation(fields: [userId], references: [id])
-  userId         String
+  id                 String    @id @default(cuid())
+  provider           String
+  providerUserId     String
+  user               User      @relation(fields: [userId], references: [id])
+  userId             String
+  accessToken        String?
+  refreshToken       String?
 
   @@unique([provider, providerUserId])
 }
