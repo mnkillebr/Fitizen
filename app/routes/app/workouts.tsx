@@ -6,7 +6,7 @@ import { PrimaryButton } from "~/components/form";
 import { z } from "zod";
 import { validateForm } from "~/utils/validation";
 import { createWorkoutWithExercise, getAllUserWorkouts, deleteWorkout, getWorkout, updateUserWorkoutWithExercises } from "~/models/workout.server";
-import { Role as RoleType } from "@prisma/client";
+import { Exercise as ExerciseType, Role as RoleType, Routine as RoutineType } from "@prisma/client";
 import clsx from "clsx";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { ArrowRight, ChevronLeft } from "images/icons";
@@ -33,7 +33,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const query = url.searchParams.get("q");
   const workouts = await getAllUserWorkouts(user.id, query);
 
-  return json({ workouts, role })
+  let sampleWorkout
+  if (!workouts.length) {
+    sampleWorkout = await createWorkoutWithExercise();
+  }
+  const allWorkouts = sampleWorkout ? [...workouts, sampleWorkout] : workouts
+  return json({ workouts: allWorkouts, role })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -224,6 +229,9 @@ type WorkoutProps = {
     name: string;
     description: string | null;
     userId: string | null;
+    isFree: boolean;
+    exercises: ExerciseType[];
+    createdAt: string;
   };
   role?: RoleType;
   loading?: boolean;
