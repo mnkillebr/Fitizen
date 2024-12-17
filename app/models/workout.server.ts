@@ -63,6 +63,7 @@ export function getAllWorkouts(query: string | null) {
         contains: query || "",
         mode: "insensitive",
       },
+      isFree: true,
     },
     include: {
       exercises: true,

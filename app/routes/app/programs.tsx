@@ -123,7 +123,7 @@ export default function Programs() {
             <div className="italic">Beginner</div>
           </div>
         </div>
-        <div className="absolute top-[calc(40%)] left-[calc(27%)] text-white font-semibold text-[64px]">COMING SOON</div>
+        <div className="absolute inset-0 self-center text-white font-semibold text-[64px]">COMING SOON</div>
         <div className="absolute bottom-0 right-0 w-1/3 h-1/6 bg-transparent flex justify-center">
           <div className="content-center select-none bg-primary text-slate-900 font-bold rounded-tl-lg rounded-br-lg w-full h-full">Go &rarr;</div>
         </div>

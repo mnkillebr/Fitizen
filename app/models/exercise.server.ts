@@ -60,6 +60,14 @@ export async function getAllExercisesPaginated(query: string | null, skip: numbe
   };
 };
 
+export function getExercise(exerciseId: string) {
+  return db.exercise.findUnique({
+    where: {
+      id: exerciseId
+    }
+  });
+};
+
 export function getExercisesById(exerciseIds: string[]) {
   return db.exercise.findMany({
     where: {

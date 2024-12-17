@@ -11,6 +11,7 @@ import { createReadableStreamFromReadable } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+import { cors } from "./utils/cors.server";
 
 const ABORT_DELAY = 5_000;
 
@@ -95,6 +96,11 @@ function handleBrowserRequest(
   responseHeaders: Headers,
   remixContext: EntryContext
 ) {
+  // Handle CORS preflight
+  if (request.method === "OPTIONS") {
+    return cors(request, new Response(null, { status: 204 }));
+  }
+
   return new Promise((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
@@ -111,13 +117,16 @@ function handleBrowserRequest(
 
           responseHeaders.set("Content-Type", "text/html");
 
-          resolve(
+          // Apply CORS to the response
+          const response = cors(
+            request,
             new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
             })
           );
 
+          resolve(response);
           pipe(body);
         },
         onShellError(error: unknown) {
