@@ -1454,6 +1454,7 @@ export function getProgramById(programId: string) {
                           name: true,
                           muxPlaybackId: true,
                           cues: true,
+                          tags: true,
                         },
                       },
                       orderInBlock: true,
