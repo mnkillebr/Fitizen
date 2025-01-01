@@ -41,6 +41,13 @@ export function getWorkout(workoutId: string) {
   return db.routine.findUnique({
     where: {
       id: workoutId,
+    },
+    include: {
+      exercises: {
+        include: {
+          exercise: true,
+        }
+      }
     }
   });
 }

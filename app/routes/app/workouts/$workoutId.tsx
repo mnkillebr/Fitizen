@@ -51,7 +51,7 @@ interface ExerciseDetailsType extends ExerciseType {
 
 }
 
-function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undefined, exerciseDetails: Array<ExerciseDetailsType>) {
+export function exerciseDetailsMap(routineExercises: Array<RoutineExerciseType> | undefined, exerciseDetails: Array<ExerciseDetailsType>) {
   if (routineExercises) {
     const detailedExercises = routineExercises.map((item) => {
       const itemId = item.exerciseId
