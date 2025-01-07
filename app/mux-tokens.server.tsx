@@ -48,3 +48,23 @@ export function generateMuxThumbnailToken(playbackId: string | null, fit: string
     return undefined
   }
 }
+
+export function generateMuxGifToken(playbackId: string | null, defaultHeight: string = "640") {
+  if (playbackId) {
+    const secretKey = Buffer.from(MUX_SIGNING_KEY_SECRET, 'base64').toString("ascii")
+    const token = jwt.sign(
+      {
+        sub: playbackId,
+        aud: "g",
+        exp: Math.floor(Date.now() / 1000) + (60 * 60),
+        kid: MUX_SIGNING_KEY_ID,
+        height: defaultHeight,
+      },
+      secretKey,
+      { algorithm: "RS256" }, 
+    )
+    return token
+  } else {
+    return undefined
+  }
+}

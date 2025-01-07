@@ -1,6 +1,6 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { getWorkout } from "~/models/workout.server";
-import { generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
+import { generateMuxGifToken, generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
 import { exerciseDetailsMap } from "~/routes/app/workouts/$workoutId";
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -27,12 +27,14 @@ export async function loader({ params }: LoaderFunctionArgs) {
       }
     }
     const thumbnailToken = generateMuxThumbnailToken(ex_item.exercise.muxPlaybackId, smartCrop(), heightAdjust())
+    const gifToken = generateMuxGifToken(ex_item.exercise.muxPlaybackId, "640")
     const videoToken = generateMuxVideoToken(ex_item.exercise.muxPlaybackId)
     return {
       ...ex_item,
       ...ex_item.exercise,
       videoToken,
       thumbnail: thumbnailToken ? `https://image.mux.com/${ex_item.exercise.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
+      gif: gifToken ? `https://image.mux.com/${ex_item.exercise.muxPlaybackId}/animated.gif?token=${gifToken}` : undefined
     }
   }) ?? []
 

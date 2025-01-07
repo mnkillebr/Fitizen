@@ -210,7 +210,8 @@ function getAthleticConditioningExercises() {
       pattern: [MovementPattern.squat, MovementPattern.lunge, MovementPattern.core],
       plane: [MovementPlane.sagittal],
       stretch: StretchType.dynamic,
-      muxPlaybackId: "Ep00hFh29GqHiP00r00pMFSRlCOfJAdddgdDiAENY01i6qI",
+      muxPlaybackId: "vBU0063pFAXYUcfeQiPWJokcLFaC4jh8KU8PFtrQsiYI"
+      // muxPlaybackId: "Ep00hFh29GqHiP00r00pMFSRlCOfJAdddgdDiAENY01i6qI",
     },
     {
       name: "90/90 ER/IR Hip Stretch",
@@ -230,7 +231,7 @@ function getAthleticConditioningExercises() {
       pattern: [MovementPattern.squat, MovementPattern.lunge],
       plane: [MovementPlane.transverse],
       stretch: StretchType.static,
-      muxPlaybackId: "vBU0063pFAXYUcfeQiPWJokcLFaC4jh8KU8PFtrQsiYI",
+      muxPlaybackId: "Ep00hFh29GqHiP00r00pMFSRlCOfJAdddgdDiAENY01i6qI",
     },
     {
       name: "Adductor Foam Roll",

@@ -4,6 +4,7 @@ export function cors(request: Request, response: Response): Response {
     'http://localhost:19006', // iOS Simulator
     'http://localhost:19000', // Expo development server
     'http://10.0.2.2:3000',  // Android Emulator
+    /^https:\/\/.*\.ngrok-free\.app$/
     // Add your production URLs here
   ];
 
