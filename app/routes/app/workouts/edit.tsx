@@ -11,7 +11,7 @@ import { MagnifyingGlassIcon as SearchIcon } from "@heroicons/react/24/outline";
 import { validateForm, validateObject } from '~/utils/validation';
 import clsx from 'clsx';
 import { PrimaryButton } from '~/components/form';
-import Tooltip from '~/components/Tooltip';
+// import Tooltip from '~/components/Tooltip';
 import { requireLoggedInUser } from '~/utils/auth.server';
 import { getWorkoutWithExercises, updateUserWorkoutWithExercises } from '~/models/workout.server';
 import { Exercise } from '../exercises';
@@ -29,6 +29,8 @@ import { hash } from '~/cryptography.server';
 import { ExerciseDialog, exerciseDialogOptions } from '~/components/ExerciseDialog';
 import { useOpenDialog } from '~/components/Dialog';
 import { Skeleton } from '~/components/ui/skeleton';
+import { TooltipContent, TooltipProvider, TooltipTrigger, Tooltip } from '~/components/ui/tooltip';
+import { InfoIcon } from 'images/icons';
 
 const targetOptions = [
   {value: "reps", label: "Repetitions"},
@@ -178,6 +180,7 @@ const workoutSchema = z.object({
     sets: z.string(),
     target: z.string(),
     reps: z.string().optional(),
+    rpe: z.string(),
     time: z.string().optional(),
     rest: z.string(),
     notes: z.string().optional(),
@@ -207,6 +210,7 @@ export async function action({ request }: ActionFunctionArgs) {
             ...exercise,
             exerciseId: exercise.exerciseId.split("-")[0],
             orderInRoutine: parseInt(exercise.orderInRoutine),
+            rpe: parseInt(exercise.rpe),
           }))
           const prevExercises = prevWorkout?.exercises;
           const newExercises = mappedExercises.reduce((result: any, curr: any) => {
@@ -613,9 +617,14 @@ export default function Edit() {
                 className="px-2 py-1 rounded disabled:opacity-30"
                 disabled={!selectedCards.size}
               >
-                <Tooltip label="Delete" className="bottom-5 left-0 text-sm">
-                  <TrashIcon className="size-4 text-red-500" />
-                </Tooltip>
+                <TooltipProvider>
+                  <Tooltip delayDuration={300}>
+                    <TooltipTrigger className="*:mr-5">
+                      <TrashIcon className="size-4 text-red-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>Delete</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </button>
             </div>
             <StrictModeDroppable droppableId="workoutCards">
@@ -759,6 +768,29 @@ export default function Edit() {
                                                 />
                                               </div>
                                             )}
+                                            <div className="flex flex-col justify-between">
+                                              <div className="flex gap-2">
+                                                <label className="text-xs self-start font-medium text-muted-foreground">RPE</label>
+                                                <TooltipProvider>
+                                                  <Tooltip delayDuration={300}>
+                                                    <TooltipTrigger className="*:mr-5 *:hover:text-primary">
+                                                      <InfoIcon className="w-3 h-3 cursor-default"/>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                      Rated Perceived Exertion (RPE)
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                </TooltipProvider>
+                                              </div>
+                                              <Input
+                                                type="number"
+                                                className="w-13 text-sm h-5 pr-1 bg-background dark:border-border-muted"
+                                                defaultValue={ex_item.rpe ? ex_item.rpe : "1"}
+                                                min={1}
+                                                max={10}
+                                                name={`exercises[${exerciseIndex}].rpe`}
+                                              />
+                                            </div>
                                             <div className="flex flex-col justify-between">
                                               <label className="text-xs self-start font-medium text-muted-foreground">Notes</label>
                                               <Input
@@ -921,6 +953,29 @@ export default function Edit() {
                                         />
                                       </div>
                                     )}
+                                    <div className="flex flex-col justify-between">
+                                    <div className="flex gap-2">
+                                      <label className="text-xs self-start font-medium text-muted-foreground">RPE</label>
+                                      <TooltipProvider>
+                                        <Tooltip delayDuration={300}>
+                                          <TooltipTrigger className="*:mr-5 *:hover:text-primary">
+                                            <InfoIcon className="w-3 h-3 cursor-default"/>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            Rated Perceived Exertion (RPE)
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                    <Input
+                                      type="number"
+                                      className="w-13 text-sm h-5 pr-1 bg-background dark:border-border-muted"
+                                      defaultValue={card.rpe ? card.rpe : "1"}
+                                      min={1}
+                                      max={10}
+                                      name={`exercises[${exerciseIndex}].rpe`}
+                                    />
+                                  </div>
                                     <div className="flex flex-col justify-between">
                                       <label className="text-xs self-start font-medium text-muted-foreground">Notes</label>
                                       <Input

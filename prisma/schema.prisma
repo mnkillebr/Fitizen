@@ -364,6 +364,7 @@ model RoutineExercise {
   time              String?
   notes             String?
   rest              String
+  rpe               Int              @default(1)
   side              Side?
 
   @@id([routineId, exerciseId])

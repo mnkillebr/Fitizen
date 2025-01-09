@@ -8,6 +8,7 @@ export type ExerciseSchemaType = {
   target: ExerciseTarget;
   sets: string;
   reps: string;
+  rpe: number;
   notes: string;
   time: string;
   rest: string;
@@ -258,6 +259,7 @@ export async function createWorkoutWithExercise() {
               sets: "1",
               reps: "5",
               rest: "None",
+              rpe: 1,
               time: "3",
               notes: "5 reps per side, 3 sec exhale",
               side: null,
@@ -270,6 +272,7 @@ export async function createWorkoutWithExercise() {
               sets: "1",
               reps: "5",
               rest: "None",
+              rpe: 1,
               time: "3",
               notes: "5 reps per side, 3 sec exhale",
               side: null,
@@ -282,6 +285,7 @@ export async function createWorkoutWithExercise() {
               sets: "1",
               reps: "5",
               rest: "None",
+              rpe: 1,
               time: "3",
               notes: "5 reps per side, 3 sec exhale",
               side: null,
@@ -294,18 +298,20 @@ export async function createWorkoutWithExercise() {
               sets: "1",
               reps: "5",
               rest: "None",
+              rpe: 3,
               time: "3",
               notes: "5 reps per side, 3 sec exhale",
               side: null,
               circuitId: null,
             },
             {
-              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // split squat
+              exerciseId: exercises.find((exercise: Exercise) => exercise.muxPlaybackId === "s628Twytob5ynbDKqKoNMiLHvMG2ZyTauK02vuV5texM")?.id as string, // goblet split squat
               orderInRoutine: 5,
               target: ExerciseTarget.time,
               sets: "3",
               reps: null,
               rest: "90 sec",
+              rpe: 5,
               time: "30 sec",
               notes: "30 sec per leg",
               side: null,
@@ -318,6 +324,7 @@ export async function createWorkoutWithExercise() {
               sets: "3",
               reps: "8",
               rest: "90 sec",
+              rpe: 5,
               time: null,
               notes: "8 reps per side",
               side: null,
@@ -330,6 +337,7 @@ export async function createWorkoutWithExercise() {
               sets: "3",
               reps: "12",
               rest: "90 sec",
+              rpe: 5,
               time: null,
               notes: "12 reps per side",
               side: null,
@@ -342,6 +350,7 @@ export async function createWorkoutWithExercise() {
               sets: "4",
               reps: "8",
               rest: "60 sec",
+              rpe: 5,
               time: null,
               notes: "alternate sides each rep for 16 total reps",
               side: null,
@@ -354,6 +363,7 @@ export async function createWorkoutWithExercise() {
               sets: "4",
               reps: "10",
               rest: "60 sec",
+              rpe: 5,
               time: null,
               notes: null,
               side: null,

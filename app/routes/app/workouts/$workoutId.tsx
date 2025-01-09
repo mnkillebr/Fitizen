@@ -160,6 +160,10 @@ function ExercisesPanel({ exerciseDetailsArray, openDialog }: ExercisesPanelProp
                             <p className="w-fit text-sm h-5">{ex_item.time}</p>
                           </div>
                         )}
+                        <div className="flex flex-col justify-between">
+                          <label className="text-xs self-start font-medium">RPE</label>
+                          <p className="w-fit text-sm h-5">{ex_item.rpe}</p>
+                        </div>
                         {ex_item.notes ? (
                           <div className="flex flex-col justify-between">
                             <label className="text-xs self-start font-medium">Notes</label>
@@ -218,6 +222,10 @@ function ExercisesPanel({ exerciseDetailsArray, openDialog }: ExercisesPanelProp
                     <div className="flex flex-col justify-between">
                       <label className="text-xs self-start font-medium">Rest</label>
                       <p className="w-fit text-sm h-5">{exercise.rest}</p>
+                    </div>
+                    <div className="flex flex-col justify-between">
+                      <label className="text-xs self-start font-medium">RPE</label>
+                      <p className="w-fit text-sm h-5">{exercise.rpe}</p>
                     </div>
                     {exercise.notes ? (
                       <div className="flex flex-col justify-between">

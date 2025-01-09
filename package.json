@@ -40,6 +40,8 @@
     "@remix-run/react": "^2.12.1",
     "@remix-run/serve": "^2.12.1",
     "@remix-run/v1-route-convention": "^0.1.4",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.47.12",
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^2.4.0",
     "cloudinary-video-player": "^2.1.0",
