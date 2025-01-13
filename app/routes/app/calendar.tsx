@@ -1,5 +1,5 @@
 import { AppointmentType, Recurrence } from "@prisma/client";
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data, json } from "@remix-run/node";
 import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
 import { z } from "zod";
 import Calendar from "~/components/Calendar";
@@ -29,7 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     label: coach.name,
     value: coach.id,
   }))
-  return json({ coaches, appointments: coachMappedAppointments, userWorkouts, userSessions: nameMappedSessions })
+  return { coaches, appointments: coachMappedAppointments, userWorkouts, userSessions: nameMappedSessions }
 }
 
 const appointmentSchema = z.object({
@@ -81,7 +81,7 @@ export async function action({ request }: ActionFunctionArgs) {
           createUserAppointment(user.id, coachId, appointmentObj)
           return { message: "Appointment has been scheduled" }
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "update_appointment": {
@@ -105,7 +105,7 @@ export async function action({ request }: ActionFunctionArgs) {
           updateUserAppointment(user.id, coachId, appointmentObj)
           return { message: "Appointment has been updated" }
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "delete_appointment": {
@@ -116,7 +116,7 @@ export async function action({ request }: ActionFunctionArgs) {
           deleteUserAppointment(user.id, id)
           return { message: "Appointment has been deleted" }
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "workout_session": {
@@ -140,7 +140,7 @@ export async function action({ request }: ActionFunctionArgs) {
           createUserWorkoutSession(user.id, workoutId, sessionObj)
           return { message: "Workout has been scheduled" }
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "update_workout_session": {
@@ -164,7 +164,7 @@ export async function action({ request }: ActionFunctionArgs) {
           updateUserWorkoutSession(user.id, workoutId, sessionObj)
           return { message: "Workout has been updated" }
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "delete_workout_session": {
@@ -175,14 +175,14 @@ export async function action({ request }: ActionFunctionArgs) {
           deleteUserWorkoutSession(user.id, id)
           return { message: "Workout has been deleted" }
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -190,7 +190,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

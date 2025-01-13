@@ -1,5 +1,5 @@
 import { LoadUnit } from "@prisma/client";
-import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data, redirect } from "@remix-run/node";
 import { Form, Link, useLoaderData, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
@@ -38,7 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     throw redirect("/app", 401)
   }
   if (!program) {
-    throw json(
+    throw data(
       { message: "The program you are attempting to log does not exist"},
       { status: 404, statusText: "Program Not Found" }
     )
@@ -217,7 +217,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }))
     }))
   }
-  return json({
+  return {
     program,
     programLength,
     programDay,
@@ -226,7 +226,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     movementPrep: tokenMappedMovementPrep,
     warmup: tokenMappedWarmup,
     cooldown: tokenMappedCooldown,
-  })
+  }
 }
 
 // Define Zod schema for form validation
@@ -289,14 +289,14 @@ export async function action({ request }: ActionFunctionArgs) {
             }
           });
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -304,7 +304,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

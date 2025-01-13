@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data } from "@remix-run/node";
 import { Link, useLoaderData, useNavigation, useSubmit } from "@remix-run/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import clsx from "clsx";
@@ -25,7 +25,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -33,7 +33,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {
@@ -47,7 +47,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   const programId = params.programId as string;
   const program = await getProgramById(programId)
   if (!program) {
-    throw json(
+    throw data(
       { message: "The program you are attempting to view does not exist"},
       { status: 404, statusText: "Program Not Found" }
     )
@@ -58,7 +58,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   const programWeek = Math.ceil(((userCurrentProgramLogs.length) % (programLength) + 1) / program.weeks[0].days.length)
   const cookieHeader = request.headers.get("cookie");
 	const newlogId = await newSavedProgramLogCookie.parse(cookieHeader);
-  return json({
+  return {
     program: {
       ...program,
       owns: program?.userId === user.id,
@@ -67,7 +67,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     programDay,
     programWeek,
     newLogSaved: userCurrentProgramLogs.find(log => log.id === newlogId)
-  });
+  };
 }
 
 export default function ProgramDetail() {

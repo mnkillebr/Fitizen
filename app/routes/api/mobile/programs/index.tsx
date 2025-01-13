@@ -1,11 +1,11 @@
-import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, data, LoaderFunctionArgs } from "@remix-run/node";
 import { getAllPrograms } from "~/models/program.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const programs = await getAllPrograms(query)
-  return json(programs);
+  return programs;
 };
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -23,6 +23,6 @@ export async function action({ request }: ActionFunctionArgs) {
       // Handle program deletion
       break;
     default:
-      return json({ error: "Method not allowed" }, { status: 405 });
+      return data({ error: "Method not allowed" }, { status: 405 });
   }
 };

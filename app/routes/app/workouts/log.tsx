@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data, redirect } from "@remix-run/node";
 import { Form, Link, useLoaderData, useNavigate, useNavigation } from "@remix-run/react";
 import db from "~/db.server";
 import { requireLoggedInUser } from "~/utils/auth.server";
@@ -81,7 +81,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     throw redirect("/app", 401)
   }
   if (!workout) {
-    throw json(
+    throw data(
       { message: "The workout you are attempting to log does not exist"},
       { status: 404, statusText: "Workout Not Found" }
     )
@@ -112,7 +112,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     }
   })
-  return json({ workout, exerciseDetails: tokenMappedDetails })
+  return { workout, exerciseDetails: tokenMappedDetails }
 }
 
 // Define Zod schema for form validation
@@ -171,14 +171,14 @@ export async function action({ request }: ActionFunctionArgs) {
             }
           });
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -186,7 +186,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

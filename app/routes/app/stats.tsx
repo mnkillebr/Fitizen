@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
@@ -265,13 +265,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
       exerciseName: exerciseLog.exercise.name,
     }))
   })) : []
-  return json({
+  return {
     userProgramLogs,
     userWorkoutLogs,
     allProgramOptions,
     allUserWorkoutOptions,
     allExerciseOptions,
-  })
+  }
 }
 
 const themeSchema = z.object({
@@ -285,7 +285,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -293,7 +293,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

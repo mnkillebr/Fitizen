@@ -1,5 +1,5 @@
 import { Exercise as ExerciseType } from "@prisma/client";
-import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, data, LoaderFunctionArgs } from "@remix-run/node";
 import { hash } from "~/cryptography.server";
 import { getAllExercisesPaginated } from "~/models/exercise.server";
 import { generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
@@ -46,7 +46,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
   }) : []
   const exercisesMobileEtag = hash(JSON.stringify(tokenMappedExercises))
-  return json(
+  return data(
     {
       exercises: tokenMappedExercises,
       exercisesCount: pageExercises.count,
@@ -77,6 +77,6 @@ export async function action({ request }: ActionFunctionArgs) {
       // Handle exercise deletion
       break;
     default:
-      return json({ error: "Method not allowed" }, { status: 405 });
+      return data({ error: "Method not allowed" }, { status: 405 });
   }
 };

@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect, unstable_composeUploadHandlers, unstable_createMemoryUploadHandler, unstable_parseMultipartFormData } from "@remix-run/node";
+import { ActionFunctionArgs, data, LoaderFunctionArgs, redirect, unstable_composeUploadHandlers, unstable_createMemoryUploadHandler, unstable_parseMultipartFormData } from "@remix-run/node";
 import { Form, useActionData, useFetcher, useLoaderData, useNavigation } from "@remix-run/react";
 import { requireLoggedInUser } from "~/utils/auth.server";
 import { Camera } from "lucide-react";
@@ -37,7 +37,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     throw redirect("/login");
   }
 
-  return json({
+  return {
     user: {
       firstName: user.firstName,
       lastName: user.lastName,
@@ -45,7 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       email: user.email,
       fitnessProfile: user.fitnessProfile
     } 
-  })
+  }
 }
 
 interface avatarFetcherType extends ActionFunctionArgs{
@@ -140,7 +140,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const avatarFormData = await unstable_parseMultipartFormData(request, uploadHandler);
     const resultString = avatarFormData.get("file") as string | null;
     if (!resultString) {
-      return json({ error: "Upload failed" }, { status: 500 });
+      return data({ error: "Upload failed" }, { status: 500 });
     }
     try {
       const result = JSON.parse(resultString) as CloudinaryUploadResult;
@@ -149,9 +149,9 @@ export async function action({ request }: ActionFunctionArgs) {
       if (updatedProfilePhoto && currentPublicId) {
         deleteCloudinaryAsset(currentPublicId)
       }
-      return json({ success: true, url: result.url, filename: result.filename });
+      return { success: true, url: result.url, filename: result.filename };
     } catch (error) {
-      return json({ error: "Failed to process upload result" }, { status: 500 });
+      return data({ error: "Failed to process upload result" }, { status: 500 });
     }
   }
 
@@ -162,7 +162,7 @@ export async function action({ request }: ActionFunctionArgs) {
         formData,
         updateUserProfileSchema,
         (data) => updateUserProfile(user.id, data.email, data.firstName, data.lastName),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "updateFitnessProfile": {
@@ -210,14 +210,14 @@ export async function action({ request }: ActionFunctionArgs) {
           return updateUserFitnessProfile(user.id, fitnessProfileObj)
           // return null
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -225,7 +225,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

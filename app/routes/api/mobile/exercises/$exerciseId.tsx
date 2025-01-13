@@ -1,4 +1,4 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node";
+import { LoaderFunctionArgs } from "@remix-run/node";
 import { getExercise } from "~/models/exercise.server";
 import { generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
 
@@ -12,5 +12,5 @@ export async function loader({ params }: LoaderFunctionArgs) {
       videoToken,
       thumbnail: thumbnailToken ? `https://image.mux.com/${exercise.muxPlaybackId}/thumbnail.png?token=${thumbnailToken}` : undefined,
     }
-  return json(videoMappedExercise);
+  return videoMappedExercise;
 };

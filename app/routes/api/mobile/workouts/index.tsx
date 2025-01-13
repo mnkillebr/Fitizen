@@ -1,5 +1,5 @@
 import { ExerciseTarget, LoadUnit } from "@prisma/client";
-import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, data, LoaderFunctionArgs } from "@remix-run/node";
 import { getAllWorkouts, saveUserWorkoutLog } from "~/models/workout.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -7,7 +7,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const query = url.searchParams.get("q");
   const workouts = await getAllWorkouts(query);
 
-  return json(workouts)
+  return workouts
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -17,7 +17,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   switch (method) {
     case "POST": {
-      const userId = "cm3xe717y0000lg2hh66kwcrs" // test user
+      const userId = "cm3xe717y0000lg2hh66kwcrs" // testuser@email.com
       const mappedExerciseLogs = jsonData.exerciseLogs.map((exercise) => ({
         exerciseId: exercise.exerciseId,
         circuitId: exercise.circuitId,
@@ -32,8 +32,10 @@ export async function action({ request }: ActionFunctionArgs) {
           unit: set.unit === "bw" ? LoadUnit.bodyweight : set.unit === "lb(s)" ? LoadUnit.pound : LoadUnit.kilogram,
         }))
       }))
-      const savedLog = await saveUserWorkoutLog(userId, jsonData.workoutId, jsonData.duration, mappedExerciseLogs)
-      return savedLog
+      // const savedLog = await saveUserWorkoutLog(userId, jsonData.workoutId, jsonData.duration, mappedExerciseLogs)
+      // return savedLog
+      console.log("save mobile log", userId, mappedExerciseLogs)
+      return null
     }
     case "PUT":
       // Handle workout update
@@ -42,6 +44,6 @@ export async function action({ request }: ActionFunctionArgs) {
       // Handle workout deletion
       break;
     default:
-      return json({ error: "Method not allowed" }, { status: 405 });
+      return data({ error: "Method not allowed" }, { status: 405 });
   }
 };

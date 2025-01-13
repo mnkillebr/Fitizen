@@ -8,13 +8,13 @@ import {
   useMatches,
   useRouteError,
   isRouteErrorResponse,
-  json,
   useSubmit,
   useLoaderData,
+  data,
 } from "@remix-run/react";
 import "./tailwind.css";
 import { useState, } from "react";
-import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction, } from "@remix-run/node";
 import globalStyles from "~/tailwind.css?url";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -84,7 +84,7 @@ export const links: LinksFunction = () => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getCurrentUser(request);
-  return json({ user, isLoggedIn: user !== null })
+  return { user, isLoggedIn: user !== null }
 }
 
 const themeSchema = z.object({
@@ -98,7 +98,7 @@ export async function action({ request }: ActionFunctionArgs) {
     case "logout": {
       const cookieHeader = request.headers.get("cookie")
       const session = await getSession(cookieHeader)
-      return json("logging out", {
+      return data("logging out", {
         headers: {
           "Set-Cookie": await destroySession(session)
         }
@@ -108,7 +108,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -116,7 +116,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

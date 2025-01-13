@@ -1,10 +1,8 @@
-import { LoaderFunctionArgs, json } from "@remix-run/node";
+import { LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData, useRouteError } from "@remix-run/react";
 
 export function loader({ request }: LoaderFunctionArgs) {
- return json(
-  { message: 'We have are kings and queens!' }
- );
+ return { message: 'We have are kings and queens!' };
 };
 
 export default function History() {

@@ -1,5 +1,5 @@
 import { useEffect, } from "react";
-import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data, redirect } from "@remix-run/node";
 import { Link, useFetcher, useLoaderData, useNavigation, useSubmit } from "@remix-run/react";
 import clsx from "clsx";
 import { ClockIcon, FireIcon, PlayIcon, BarsIcon, ContextMenuIcon, TrashIcon, PencilIcon, ChevronLeft, CalendarIcon } from "images/icons";
@@ -298,12 +298,12 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("cookie");
 	const newlogId = await newSavedWorkoutLogCookie.parse(cookieHeader);
   if (!workout) {
-    throw json(
+    throw data(
       { message: "The workout you are attempting to view does not exist"},
       { status: 404, statusText: "Workout Not Found" }
     )
   }
-  return json({
+  return {
     workout: {
       ...workout,
       owns: workout?.userId === user.id,
@@ -312,7 +312,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     logs,
     newLogSaved: logs.find(log => log.id === newlogId),
     role: user.role,
-  });
+  };
 }
 
 const themeSchema = z.object({
@@ -331,7 +331,7 @@ export async function action({ request }: ActionFunctionArgs) {
           const workout = await getWorkout(workoutId);
 
           if (workout !== null && workout.userId && workout.userId !== user.id) {
-            throw json(
+            throw data(
               { message: "This workout routine is not yours, so you cannot delete it."},
               { status: 401 }
             )
@@ -339,7 +339,7 @@ export async function action({ request }: ActionFunctionArgs) {
           deleteWorkout(workoutId)
           return redirect("/app/workouts");
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "schedule_workout": {
@@ -357,14 +357,14 @@ export async function action({ request }: ActionFunctionArgs) {
           }
           return createUserWorkoutSession(user.id, workoutId, sessionObj)
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -372,7 +372,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

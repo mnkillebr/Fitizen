@@ -1,4 +1,4 @@
-import { json } from "@remix-run/react";
+import { data } from "@remix-run/node"
 import Cryptr from "cryptr";
 import { sendEmail } from "./utils/emails.server";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -42,7 +42,7 @@ function isMagicLinkPayload(value: any): value is MagicLinkPayload {
 };
 
 export function invalidMagicLink(message: string) {
-  return json({ message }, { status: 400 })
+  return data({ message }, { status: 400 })
 };
 
 export function getMagicLinkPayload(request: Request) {

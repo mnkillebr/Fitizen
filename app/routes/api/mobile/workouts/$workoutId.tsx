@@ -1,5 +1,5 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node";
-import { getWorkout } from "~/models/workout.server";
+import { data, LoaderFunctionArgs } from "@remix-run/node";
+import { getWorkout, getWorkoutLogsById } from "~/models/workout.server";
 import { generateMuxGifToken, generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
 import { exerciseDetailsMap } from "~/routes/app/workouts/$workoutId";
 
@@ -37,10 +37,18 @@ export async function loader({ params }: LoaderFunctionArgs) {
       gif: gifToken ? `https://image.mux.com/${ex_item.exercise.muxPlaybackId}/animated.gif?token=${gifToken}` : undefined
     }
   }) ?? []
-
   const exerciseDetails = exerciseDetailsMap(workout?.exercises, tokenMappedExercises)
-  return json({
+  const userId = "cm3xe717y0000lg2hh66kwcrs" // testuser@email.com
+  const logs = await getWorkoutLogsById(userId, workoutId)
+  if (!workout) {
+    throw data(
+      { message: "The workout you are attempting to view does not exist"},
+      { status: 404, statusText: "Workout Not Found" }
+    )
+  }
+  return {
     workout,
     exerciseDetails,
-  });
+    logs,
+  };
 };

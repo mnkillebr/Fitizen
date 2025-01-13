@@ -1,6 +1,6 @@
 import { MagnifyingGlassIcon as SearchIcon } from "@heroicons/react/24/outline";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data } from "@remix-run/node";
 import { Form, Link, Outlet, isRouteErrorResponse, useFetcher, useLoaderData, useMatches, useNavigation, useRouteError, useSearchParams } from "@remix-run/react";
 import { PrimaryButton } from "~/components/form";
 import { z } from "zod";
@@ -38,7 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     sampleWorkout = await createWorkoutWithExercise();
   }
   const allWorkouts = sampleWorkout ? [...workouts, sampleWorkout] : workouts
-  return json({ workouts: allWorkouts, role })
+  return { workouts: allWorkouts, role }
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -95,21 +95,21 @@ export async function action({ request }: ActionFunctionArgs) {
           const workout = await getWorkout(workoutId);
 
           if (workout !== null && workout.userId && workout.userId !== user.id) {
-            throw json(
+            throw data(
               { message: "This workout routine is not yours, so you cannot delete it."},
               { status: 401 }
             )
           }
           return deleteWorkout(workoutId);
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -117,7 +117,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

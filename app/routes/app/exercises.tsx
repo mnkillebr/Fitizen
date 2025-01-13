@@ -1,7 +1,7 @@
 import { HeartIcon as HeartOutline, MagnifyingGlassIcon as SearchIcon, } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid, PlusIcon, TrashIcon, ArrowDownTrayIcon, Bars3Icon } from "@heroicons/react/24/solid";
 
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data } from "@remix-run/node";
 import { useFetcher, useLoaderData, useNavigation } from "@remix-run/react";
 import { DeleteButton, ErrorMessage, } from "~/components/form";
 import { createExercise, deleteExercise, getAllExercisesPaginated, updateExerciseName } from "~/models/exercise.server";
@@ -41,7 +41,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const page = parseInt(url.searchParams.get("page") ?? "1");
-  console.log("page", page)
+  // console.log("page", page)
   const skip = (page - 1) * EXERCISE_ITEMS_PER_PAGE;
   // const exercises = await getAllExercises(query);
   const pageExercises = await getAllExercisesPaginated(query, skip, EXERCISE_ITEMS_PER_PAGE) as { exercises: ExerciseType[]; count: number }
@@ -75,7 +75,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
   }) : []
   const exercisesEtag = hash(JSON.stringify(tokenMappedExercises))
-  return json(
+  return data(
     {
       exercises: tokenMappedExercises,
       exercisesCount: pageExercises.count,
@@ -102,7 +102,7 @@ export async function action({ request }: ActionFunctionArgs) {
         formData,
         deleteExerciseSchema,
         (data) => deleteExercise(data.exerciseId),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "updateExerciseName": {
@@ -110,14 +110,14 @@ export async function action({ request }: ActionFunctionArgs) {
         formData,
         updateExerciseNameSchema,
         (data) => updateExerciseName(data.exerciseId, data.exerciseName),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -125,7 +125,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

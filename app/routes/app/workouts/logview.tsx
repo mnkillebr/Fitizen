@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data, redirect } from "@remix-run/node";
 import { Link, useLoaderData, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { ChevronLeft } from "images/icons";
@@ -109,7 +109,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     }, [])
   }
-  return json({ userLog: nameMappedUserLog })
+  return { userLog: nameMappedUserLog }
 };
 
 const themeSchema = z.object({
@@ -123,7 +123,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -131,7 +131,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

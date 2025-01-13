@@ -2,7 +2,7 @@ import { BaseSyntheticEvent, useCallback, useEffect, useMemo, useState } from 'r
 import { Form, Link, useFetcher, useLoaderData, useLocation, useNavigation, useSearchParams, useSubmit, } from '@remix-run/react';
 import { z } from 'zod';
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
-import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/node';
+import { ActionFunctionArgs, LoaderFunctionArgs, data, redirect } from '@remix-run/node';
 import { getAllExercises, getAllExercisesPaginated, getExercisesById } from '~/models/exercise.server';
 import { AnimatePresence, motion } from "framer-motion";
 import { workoutFormDataToObject, } from '~/utils/misc';
@@ -118,7 +118,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     throw redirect("/app", 401)
   }
   if (!workout) {
-    throw json(
+    throw data(
       { message: "The workout you are attempting to edit does not exist"},
       { status: 404, statusText: "Workout Not Found" }
     )
@@ -153,7 +153,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }) : []
   const exerciseDetails = exerciseDetailsMap(workout?.exercises, allExercises, true)
   const exercisesEtag = hash(JSON.stringify(tokenMappedExercises))
-  return json(
+  return data(
     {
       workout,
       exerciseDetails,
@@ -229,14 +229,14 @@ export async function action({ request }: ActionFunctionArgs) {
           await updateUserWorkoutWithExercises(user.id, workoutId, workoutName, workoutDescription, updatedExercises, newExercises, deletedExerciseIds)
           return redirect(`/app/workouts/${workoutId}`);
         },
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "toggleDarkMode": {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -244,7 +244,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     default: {

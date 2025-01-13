@@ -1,3 +1,4 @@
+import { FileUpload } from "@mjackson/form-data-parser";
 import { writeAsyncIterableToWritable } from "@remix-run/node";
 import { v2 as cloudinary } from "cloudinary";
 // import { Cloudinary } from "@cloudinary/url-gen"
@@ -119,6 +120,61 @@ export const uploadToCloudinary = async ({ name, contentType, data, filename }: 
 
   return uploadPromise;
 };
+
+export const uploadToCloudinaryV2 = ({ name, fieldName, type, stream }: FileUpload) => {
+  if (fieldName !== "file") {
+    return undefined;
+  }
+  const uploadPromise = new Promise<string>((resolve, reject) => {
+    let uploadStream;
+
+    (async () => {
+      // Determine resource type and file extension
+      let resourceType: CloudinaryResourceType = "raw";
+      if (type.startsWith('image/')) {
+        resourceType = "image";
+      } else if (type.startsWith('video/')) {
+        resourceType = "video";
+      }
+      const fileExtension = name.split('.').pop();
+
+      const uploadOptions = {
+        asset_folder: "fitizen",
+        display_name: name,
+        format: fileExtension,
+        public_id: `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
+        resource_type: resourceType,
+        type: "private",
+      };
+
+      const uploadCallback = (error: any, result: any) => {
+        if (error) {
+          reject(error);
+        } else if (result && result.secure_url) {
+          const uploadResult: CloudinaryUploadResult = {
+            asset_folder: result.asset_folder,
+            display_name: result.display_name,
+            filename: name,
+            format: result.format,
+            original_filename: result.original_filename,
+            public_id: result.public_id,
+            resource_type: result.resource_type,
+            secure_url: result.secure_url,
+            signature: result.signature,
+            url: result.url,
+          };
+          resolve(JSON.stringify(uploadResult));
+        } else {
+          reject(new Error("Upload failed: No secure URL received"));
+        }
+      };
+
+      uploadStream = cldInstance.uploader.upload_stream(uploadOptions, uploadCallback).end(stream);
+    })();
+  });
+
+  return uploadPromise;
+}
 
 export const deleteCloudinaryAsset = (public_id: string, resourceType: string = "image") => {
   const destroyOptions = {

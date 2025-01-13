@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, json } from "@remix-run/node";
+import { LoaderFunctionArgs, data } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { RootNavLink } from "~/components/AppNavLink";
 import { destroySession, getSession } from "~/sessions";
@@ -6,7 +6,7 @@ import { destroySession, getSession } from "~/sessions";
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("cookie")
   const session = await getSession(cookieHeader)
-  return json("logging out", {
+  return data("logging out", {
     headers: {
       "Set-Cookie": await destroySession(session)
     }

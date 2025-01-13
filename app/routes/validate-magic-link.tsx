@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import { z } from "zod";
 import { ErrorMessage, PrimaryButton, PrimaryInput } from "~/components/form";
@@ -48,7 +48,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       },
     });
   }
-  return json("ok", {
+  return data("ok", {
     headers: {
       "Set-Cookie": await commitSession(session),
     }
@@ -83,7 +83,7 @@ export async function action({ request }: ActionFunctionArgs) {
         }
       });
     },
-    (errors) => json(
+    (errors) => data(
       {
         errors,
         firstName: formData.get("firstName"),

@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, data } from "@remix-run/node";
 import { Form, Outlet, useLoaderData, useMatches, useNavigate, useNavigation } from "@remix-run/react";
 import clsx from "clsx";
 import { z } from "zod";
@@ -25,7 +25,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return new Response(null, { status: 304 })
   }
   const allPrograms = introProgram ? [...programs, introProgram] : programs
-  return json(
+  return data(
     { programs: allPrograms, role },
     { headers: {
         programsEtag,
@@ -45,7 +45,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return validateForm(
         formData,
         themeSchema,
-        async ({ darkMode }) => json(
+        async ({ darkMode }) => data(
           { success: true },
           {
             headers: {
@@ -53,7 +53,7 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           }
         ),
-        (errors) => json({ errors }, { status: 400 })
+        (errors) => data({ errors }, { status: 400 })
       )
     }
     case "createIntroProgram": {
