@@ -2,8 +2,10 @@ import { data, LoaderFunctionArgs } from "@remix-run/node";
 import { getWorkout, getWorkoutLogsById } from "~/models/workout.server";
 import { generateMuxGifToken, generateMuxThumbnailToken, generateMuxVideoToken } from "~/mux-tokens.server";
 import { exerciseDetailsMap } from "~/routes/app/workouts/$workoutId";
+import { requireAuth } from "~/utils/auth.server";
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  const user = await requireAuth(request)
   const workoutId = params.workoutId as string;
   const workout = await getWorkout(workoutId)
   const tokenMappedExercises = workout?.exercises.map(ex_item => {
@@ -38,7 +40,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     }
   }) ?? []
   const exerciseDetails = exerciseDetailsMap(workout?.exercises, tokenMappedExercises)
-  const userId = "cm3xe717y0000lg2hh66kwcrs" // testuser@email.com
+  const userId = user.id
   const logs = await getWorkoutLogsById(userId, workoutId)
   if (!workout) {
     throw data(

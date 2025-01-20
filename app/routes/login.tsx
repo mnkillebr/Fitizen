@@ -33,23 +33,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   await requireLoggedOutUser(request);
-  const supabase = createSupabaseClient(request);
+  const { supabaseClient, headers } = createSupabaseClient(request);
   const cookieHeader = request.headers.get("cookie");
   const session = await getSession(cookieHeader);
   const formData = await request.formData();
   switch (formData.get("_action")) {
     case "google_auth": {
-      const { data: supabaseData, error } = await supabase.auth.signInWithOAuth({
+      const { data: supabaseData, error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: "http://localhost:3000/auth/callback",
+          scopes: "email profile",
         }
       });
-      console.log("here", supabaseData, error)
       if (error) {
         return data({ error: error.message }, { status: 400 });
       }
-      return { redirectTo: supabaseData.url };
+      return redirect(supabaseData.url, { headers });
     }
     default: {
       return validateForm(

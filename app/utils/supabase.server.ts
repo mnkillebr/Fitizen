@@ -8,7 +8,7 @@ export function createSupabaseClient(request: Request) {
   // const session = await getSession(cookieHeader)
   const headers = new Headers();
 
-  return createServerClient(
+  const supabaseClient = createServerClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_ANON_KEY!,
     // {
@@ -39,4 +39,6 @@ export function createSupabaseClient(request: Request) {
       },
     }
   );
+
+  return { supabaseClient, headers }
 }

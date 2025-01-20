@@ -3,7 +3,6 @@ import { ActionFunctionArgs, LoaderFunctionArgs, data, redirect } from "@remix-r
 import { Link, useFetcher, useLoaderData, useNavigation, useSubmit } from "@remix-run/react";
 import clsx from "clsx";
 import { ClockIcon, FireIcon, PlayIcon, BarsIcon, ContextMenuIcon, TrashIcon, PencilIcon, ChevronLeft, CalendarIcon } from "images/icons";
-import db from "~/db.server";
 import { Popover, PopoverButton, PopoverPanel, Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { Exercise as ExerciseType, Recurrence, RoutineExercise as RoutineExerciseType } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
@@ -252,16 +251,7 @@ function ExercisesPanel({ exerciseDetailsArray, openDialog }: ExercisesPanelProp
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const user = await requireLoggedInUser(request);
   const workoutId = params.workoutId as string;
-  const workout = await db.routine.findUnique({
-    where: { id: workoutId },
-    include: {
-      exercises: {
-        include: {
-          exercise: true,
-        }
-      }
-    }
-  });
+  const workout = await getWorkout(workoutId);
 
   const tokenMappedExercises = workout?.exercises.map(ex_item => {
     const smartCrop = () => {

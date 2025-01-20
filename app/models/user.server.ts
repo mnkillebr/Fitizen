@@ -17,6 +17,22 @@ export function getUserById(userId: string) {
   });
 };
 
+export function getUserByProvider(email: string, providerUserId: string) {
+  return db.user.findFirst({
+    where: {
+      email,
+      socialLogins: {
+        some: {
+          providerUserId,
+        },
+      },
+    },
+    include: {
+      socialLogins: true,
+    },
+  })
+}
+
 export function createUser(email: string, firstName: string, lastName: string) {
   return db.user.create({
     data: {
@@ -27,6 +43,25 @@ export function createUser(email: string, firstName: string, lastName: string) {
     }
   });
 };
+
+export function createUserWithProvider(email: string, firstName: string, lastName: string, provider: string, providerUserId: string) {
+  return db.user.create({
+    data: {
+      email: email!,
+      firstName,
+      lastName,
+      role: Role.user,
+      socialLogins: {
+        create: [
+          {
+            provider,
+            providerUserId,
+          }
+        ]
+      }
+    },
+  });
+}
 
 export async function updateUserProfile(userId: string, email: string, firstName: string, lastName: string) {
   try {

@@ -1,7 +1,10 @@
 import { ActionFunctionArgs, data, LoaderFunctionArgs } from "@remix-run/node";
 import { getAllPrograms } from "~/models/program.server";
+import { requireAuth } from "~/utils/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await requireAuth(request);
+  console.log("users", user)
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const programs = await getAllPrograms(query)
