@@ -749,14 +749,14 @@ export default function WorkoutDetail() {
                   {data.logs.length ? data.logs.map(log => {
                     return (
                       <div key={log.id} className="flex flex-col shadow-md dark:shadow-sm dark:shadow-border-muted rounded-md *:content-center bg-white snap-start dark:bg-background">
-                        <div className="bg-slate-400 dark:bg-zinc-700 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
-                          <label className="text-sm font-medium w-20">Date</label>
-                          <label className="text-sm font-medium w-24">Duration</label>
+                        <div className="bg-slate-400 dark:bg-zinc-700 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white *:w-24">
+                          <label className="text-sm font-medium">Date</label>
+                          <label className="text-sm font-medium">Duration</label>
                           <label className="text-sm font-medium invisible">View</label>
                         </div>
-                        <div className="w-full rounded-b-md flex justify-between px-3 py-1">
-                          <p className="text-sm h-5 w-20">{new Date(log.date).toLocaleDateString()}</p>
-                          <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
+                        <div className="w-full rounded-b-md flex justify-between px-3 py-1 *:w-24">
+                          <p className="text-sm h-5">{new Date(log.date).toLocaleDateString()}</p>
+                          <p className="text-sm h-5">{formatDuration(parseInt(log.duration))}</p>
                           <Link
                             to={`/app/workouts/logview?id=${log.id}`}
                             className={clsx(
@@ -799,14 +799,14 @@ export default function WorkoutDetail() {
                 {data.logs.length ? data.logs.map(log => {
                   return (
                     <div key={log.id} className="flex flex-col shadow-md dark:shadow-sm dark:shadow-border-muted rounded-md *:content-center bg-white dark:bg-background snap-start">
-                      <div className="bg-slate-400 dark:bg-zinc-700 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white">
-                        <label className="text-sm font-medium w-20">Date</label>
-                        <label className="text-sm font-medium w-24">Duration</label>
+                      <div className="bg-slate-400 dark:bg-zinc-700 w-full rounded-t-md flex justify-between px-3 py-1 *:text-white *:w-24">
+                        <label className="text-sm font-medium">Date</label>
+                        <label className="text-sm font-medium">Duration</label>
                         <label className="text-sm font-medium invisible">View</label>
                       </div>
-                      <div className="w-full rounded-b-md flex justify-between px-3 py-1">
-                        <p className="text-sm h-5 w-20">{new Date(log.date).toLocaleDateString()}</p>
-                        <p className="text-sm h-5 w-24">{formatDuration(parseInt(log.duration))}</p>
+                      <div className="w-full rounded-b-md flex justify-between px-3 py-1 *:w-24">
+                        <p className="text-sm h-5">{new Date(log.date).toLocaleDateString()}</p>
+                        <p className="text-sm h-5">{formatDuration(parseInt(log.duration))}</p>
                         <Link
                           to={`/app/workouts/logview?id=${log.id}`}
                           className={clsx(

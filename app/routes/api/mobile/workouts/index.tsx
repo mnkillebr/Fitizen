@@ -1,6 +1,7 @@
 import { ExerciseTarget, LoadUnit } from "@prisma/client";
 import { ActionFunctionArgs, data, LoaderFunctionArgs } from "@remix-run/node";
 import { getAllWorkouts, saveUserWorkoutLog } from "~/models/workout.server";
+import { requireAuth } from "~/utils/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -11,13 +12,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  const user = await requireAuth(request);
   const jsonData = await request.json();
   // const formData = await request.formData();
   const method = request.method;
 
   switch (method) {
     case "POST": {
-      const userId = "cm3xe717y0000lg2hh66kwcrs" // testuser@email.com
+      const userId = user.id // testuser@email.com
       const mappedExerciseLogs = jsonData.exerciseLogs.map((exercise) => ({
         exerciseId: exercise.exerciseId,
         circuitId: exercise.circuitId,
@@ -32,10 +34,10 @@ export async function action({ request }: ActionFunctionArgs) {
           unit: set.unit === "bw" ? LoadUnit.bodyweight : set.unit === "lb(s)" ? LoadUnit.pound : LoadUnit.kilogram,
         }))
       }))
-      // const savedLog = await saveUserWorkoutLog(userId, jsonData.workoutId, jsonData.duration, mappedExerciseLogs)
-      // return savedLog
-      console.log("save mobile log", userId, mappedExerciseLogs)
-      return null
+      const savedLog = await saveUserWorkoutLog(userId, jsonData.workoutId, jsonData.duration, mappedExerciseLogs)
+      return savedLog
+      // console.log("save mobile log", userId, mappedExerciseLogs)
+      // return null
     }
     case "PUT":
       // Handle workout update
