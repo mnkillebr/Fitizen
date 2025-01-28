@@ -111,7 +111,7 @@ export async function requireAuth(request: Request) {
   const fitizenUserId = request.headers.get("fitizen-user-id")
 
   if (!authHeader) {
-    throw new Response("Unauthorized", { status: 401 });
+    throw new Response("Unauthorized", { status: 401, statusText: "Unauthorized" });
   }
 
   const [bearer, token] = authHeader.split(" ");
@@ -126,5 +126,5 @@ export async function requireAuth(request: Request) {
   const jwtUser = await verifyJWT(token);
   if (jwtUser) return jwtUser;
 
-  throw new Response("Invalid token", { status: 401 });
+  throw new Response("Invalid token", { status: 401, statusText: "Invalid token" });
 }

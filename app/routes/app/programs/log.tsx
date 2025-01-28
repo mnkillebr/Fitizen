@@ -582,7 +582,7 @@ export default function ProgramLog() {
               ) : null}
               {warmup.power && warmup.power.length ? (
                 <div className="bg-slate-100 dark:bg-background px-2 py-1 rounded">
-                  <div className="tex-base font-semibold mb-1">Activation</div>
+                  <div className="tex-base font-semibold mb-1">Power</div>
                   <div className="flex flex-col gap-1">
                     {warmup.power.map((power, power_idx) => (
                       <div key={power_idx} className="flex flex-wrap gap-x-3">
