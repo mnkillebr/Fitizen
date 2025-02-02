@@ -1,13 +1,12 @@
-import { Role } from "@prisma/client";
+import { LoadUnit, Role } from "@prisma/client";
 import { ActionFunctionArgs, data, LoaderFunctionArgs } from "@remix-run/node";
 import db from "~/db.server";
-import { createUser, createUserWithProvider, getUserByEmail, getUserByProvider } from "~/models/user.server";
-import { generateToken } from "~/utils/auth.server";
+import { createUser, createUserWithProvider, getUserByEmail, getUserByProvider, updateUserFitnessProfile } from "~/models/user.server";
+import { generateToken, requireAuth } from "~/utils/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const email = url.searchParams.get("email");
-  console.log("check user", email)
   if (!email) {
     return Response.error()
   }
@@ -58,6 +57,53 @@ export async function action({ request }: ActionFunctionArgs) {
             return Response.json({ user, token })
           } catch (error) {
             return data({ errors: { error: "Failed to create user" } }, { status: 500 });
+          }
+        }
+        case "updateUserProfile": {
+          const user = await requireAuth(request);
+          const fitnessProfileObj = {
+            unit: rest.unit === "lbs" ? LoadUnit.pound : LoadUnit.kilogram,
+            currentWeight: rest.currentWeight ? parseInt(rest.currentWeight) : null,
+            targetWeight: rest.targetWeight ? parseInt(rest.targetWeight) : null,
+            goal_fatLoss: rest["fat-loss"] ? true : null,
+            goal_endurance: rest.endurance ? true : null,
+            goal_buildMuscle: rest["build-muscle"] ? true : null,
+            goal_loseWeight: rest["lose-weight"] ? true : null,
+            goal_improveBalance: rest["improve-balance"] ? true : null,
+            goal_improveFlexibility: rest["improve-flexibility"] ? true : null,
+            goal_learnNewSkills: rest["learn-new-skills"] ? true : null,
+            parq_heartCondition: rest["heart-condition"] ? true : rest["heart-condition"] === false ? false : null,
+            parq_chestPainActivity: rest["chest-pain-activity"] ? true : rest["chest-pain-activity"] === false ? false : null,
+            parq_chestPainNoActivity: rest["chest-pain-no-activity"] ? true : rest["chest-pain-no-activity"] === false ? false : null,
+            parq_balanceConsciousness: rest["balance-consciousness"] ? true : rest["balance-consciousness"] === false ? false : null,
+            parq_boneJoint: rest["bone-joint"] ? true : rest["bone-joint"] === false ? false : null,
+            parq_bloodPressureMeds: rest["blood-pressure-meds"] ? true : rest["blood-pressure-meds"] === false ? false : null,
+            parq_otherReasons: rest["other-reasons"] ? true : rest["other-reasons"] === false ? false : null,
+            operational_occupation: rest.occupation ?? null,
+            operational_extendedSitting: rest["extended-sitting"] ? true : rest["extended-sitting"] === false ? false : null,
+            operational_repetitiveMovements: rest["repetitive-movements"] ? true : rest["repetitive-movements"] === false ? false : null,
+            operational_explanation_repetitiveMovements: rest["explanation_repetitive-movements"] ?? null,
+            operational_heelShoes: rest["heel-shoes"] ? true : rest["heel-shoes"] === false ? false : null,
+            operational_mentalStress: rest["mental-stress"] ? true : rest["mental-stress"] === false ? false : null,
+            recreational_physicalActivities: rest["physical-activities"] ? true : rest["physical-activities"] === false ? false : null,
+            recreational_explanation_physicalActivities: rest["explanation_physical-activities"] ?? null,
+            recreational_hobbies: rest.hobbies ? true : rest.hobbies === false ? false : null,
+            recreational_explanation_hobbies: rest.explanation_hobbies ?? null,
+            medical_injuriesPain: rest["injuries-pain"] ? true : rest["injuries-pain"] === false ? false : null,
+            medical_explanation_injuriesPain: rest["explanation_injuries-pain"] ?? null,
+            medical_surgeries: rest.surgeries ? true : rest.surgeries === false ? false : null,
+            medical_explanation_surgeries: rest.explanation_surgeries ?? null,
+            medical_chronicDisease: rest["chronic-disease"] ? true : rest["chronic-disease"] === false ? false : null,
+            medical_explanation_chronicDisease: rest["explanation_chronic-disease"] ?? null,
+            medical_medications: rest.medications ? true : rest.medications === false ? false : null,
+            medical_explanation_medications: rest.explanation_medications ?? null,
+          }
+          try {
+            const userWithProfile = await updateUserFitnessProfile(user.id, fitnessProfileObj)
+            const userProfile = userWithProfile.fitnessProfile
+            return Response.json(userProfile)
+          } catch (error) {
+            return data({ errors: { error: "Failed to update user profile" } }, { status: 500 });
           }
         }
         default: {

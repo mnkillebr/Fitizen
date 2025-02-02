@@ -13,6 +13,9 @@ export function getUserById(userId: string) {
   return db.user.findUnique({
     where: {
       id: userId,
+    },
+    include: {
+      fitnessProfile: true,
     }
   });
 };
@@ -121,6 +124,9 @@ export async function updateUserFitnessProfile(userId: string, profile: FitnessP
             update: profile,
           },
         }
+      },
+      include: {
+        fitnessProfile: true,
       }
     })
     return user

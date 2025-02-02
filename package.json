@@ -48,7 +48,7 @@
     "cloudinary-video-player": "^2.1.0",
     "clsx": "^2.1.1",
     "cryptr": "^6.3.0",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.1.0",
     "embla-carousel": "^8.3.0",
     "embla-carousel-react": "^8.3.0",
     "form-data": "^4.0.0",

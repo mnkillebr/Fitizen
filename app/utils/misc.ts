@@ -229,7 +229,7 @@ export function calculateWeeklyStreak(entries: DateEntry[], currentDate: Date = 
 
   // Parse and sort the entry dates in ascending order
   const sortedEntries = entries
-    .map(entry => parseISO(entry.date))
+    .map(entry => new Date(entry.date))
     .sort((a, b) => a.getTime() - b.getTime());
 
   // Get the earliest and latest dates in the dataset
@@ -263,12 +263,11 @@ export function calculateAverageEntriesPerWeek(entries: DateEntry[], currentDate
   if (entries.length === 0) {
     return 0;
   }
-
   // Parse and sort the entry dates
   const sortedEntries = entries
-    .map(entry => parseISO(entry.date))
-    .sort((a, b) => a.getTime() - b.getTime());
-
+  .map(entry => new Date(entry.date))
+  .sort((a, b) => a.getTime() - b.getTime());
+  
   // Get the earliest and latest dates in the dataset
   const earliestDate = sortedEntries[0];
   const latestDate = currentDate;

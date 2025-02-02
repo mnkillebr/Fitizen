@@ -209,7 +209,7 @@ export default function Workouts() {
           Create Workout
         </Link>
       </div>
-      <div className="flex flex-col gap-y-4 xl:grid xl:grid-cols-2 xl:gap-4 snap-y snap-mandatory overflow-y-auto px-2 pb-6">
+      <div className="flex flex-col gap-y-4 md:gap-4 md:grid md:grid-rows-2 lg:grid-cols-2 xl:grid-cols-3 snap-y snap-mandatory overflow-y-auto px-2 pb-6">
         {data.workouts.map((workout) => (
           <Workout
             key={workout.id}
@@ -256,8 +256,8 @@ function Workout({ workout, role, loading }: WorkoutProps) {
         />
         <div className="flex justify-between">
           <div className="flex flex-col p-4">
-            <p className="font-bold max-w-40 text-foreground xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden lg:overflow-visible">{workout.name}</p>
-            <p className="text-sm max-w-40 xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden lg:overflow-visible">{workout.description}</p>
+            <p className="font-bold max-w-40 text-foreground xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden">{workout.name}</p>
+            <p className="text-sm max-w-40 xs:max-w-64 truncate sm:overflow-visible md:overflow-hidden">{workout.description}</p>
           </div>
           <div className="px-4 border-l border-border-muted h-full flex flex-col justify-center hover:bg-primary rounded-r-lg">
             {/* <ArrowRight className=""/> */}
