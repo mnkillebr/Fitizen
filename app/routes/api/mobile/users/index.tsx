@@ -1,4 +1,4 @@
-import { LoadUnit, Role } from "@prisma/client";
+import { HeightUnit, LoadUnit, Role } from "@prisma/client";
 import { ActionFunctionArgs, data, LoaderFunctionArgs } from "@remix-run/node";
 import db from "~/db.server";
 import { createUser, createUserWithProvider, getUserByEmail, getUserByProvider, updateUserFitnessProfile } from "~/models/user.server";
@@ -62,6 +62,8 @@ export async function action({ request }: ActionFunctionArgs) {
         case "updateUserProfile": {
           const user = await requireAuth(request);
           const fitnessProfileObj = {
+            height: rest.height ? parseInt(rest.height) : null,
+            heightUnit: rest.heightUnit === "in" ? HeightUnit.inches : HeightUnit.centimeters,
             unit: rest.unit === "lbs" ? LoadUnit.pound : LoadUnit.kilogram,
             currentWeight: rest.currentWeight ? parseInt(rest.currentWeight) : null,
             targetWeight: rest.targetWeight ? parseInt(rest.targetWeight) : null,

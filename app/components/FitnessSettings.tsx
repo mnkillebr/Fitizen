@@ -146,9 +146,11 @@ export function FitnessSettings({ fitnessProfile }: { fitnessProfile: FitnessPro
     }
     return resultObj
   }, {})
+  const incomingUnit = fitnessProfile.unit === "pound" ? "lbs" : "kg"
+  const incomingHeightUnit = fitnessProfile.heightUnit === "inches" ? "in" : "cm"
 
-  const [selectedUnit, setSelectedUnit] = useState<"lbs" | "kg">("lbs");
-  const [selectedHeightUnit, setSelectedHeightUnit] = useState<"in" | "cm">("in");
+  const [selectedUnit, setSelectedUnit] = useState<"lbs" | "kg">(incomingUnit ?? "lbs");
+  const [selectedHeightUnit, setSelectedHeightUnit] = useState<"in" | "cm">(incomingHeightUnit ?? "in");
   const [height, setHeight] = useState(fitnessProfile.height ?? "")
   const [selectedGoals, setSelectedGoals] = useState<string[]>(incomingFitnessGoals ?? []);
   const [parqAnswers, setParqAnswers] = useState<Record<string, boolean>>(incomingParQAnswers ?? {});
