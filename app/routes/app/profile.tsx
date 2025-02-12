@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { FitnessSettings } from "~/components/FitnessSettings";
-import { LoadUnit } from "@prisma/client";
+import { HeightUnit, LoadUnit } from "@prisma/client";
 import db from "~/db.server";
 import { getSession } from "~/sessions";
 
@@ -87,6 +87,8 @@ const updateUserProfileSchema = z.object({
 })
 
 const updateFitnessProfileSchema = z.object({
+  heightUnit: z.string().optional(),
+  userHeight: z.string().optional(),
   unit: z.string().optional(),
   currentWeight: z.string().optional(),
   targetWeight: z.string().optional(),
@@ -171,6 +173,8 @@ export async function action({ request }: ActionFunctionArgs) {
         updateFitnessProfileSchema,
         (data) => {
           const fitnessProfileObj = {
+            heightUnit: data.heightUnit === "in" ? HeightUnit.inches : HeightUnit.centimeters,
+            height: data.userHeight ? parseInt(data.userHeight) : null,
             unit: data.unit === "lbs" ? LoadUnit.pound : LoadUnit.kilogram,
             currentWeight: data.currentWeight ? parseInt(data.currentWeight) : null,
             targetWeight: data.targetWeight ? parseInt(data.targetWeight) : null,

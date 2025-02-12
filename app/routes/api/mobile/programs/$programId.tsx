@@ -25,5 +25,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     userCurrentProgramLogs,
     programDay,
     programWeek,
+    programLength,
   }
 };

@@ -42,6 +42,8 @@ model FitnessProfile {
   id                                  String        @id @default(cuid())
   user                                User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId                              String        @unique
+  heightUnit                          HeightUnit    @default(inches)
+  height                              Int?
   unit                                LoadUnit      @default(pound)
   currentWeight                       Int?
   targetWeight                        Int?
@@ -571,6 +573,11 @@ enum Joint {
 enum LiftType {
   compound
   isolation
+}
+
+enum HeightUnit {
+  inches
+  centimeters
 }
 
 enum LoadUnit {

@@ -148,6 +148,8 @@ export function FitnessSettings({ fitnessProfile }: { fitnessProfile: FitnessPro
   }, {})
 
   const [selectedUnit, setSelectedUnit] = useState<"lbs" | "kg">("lbs");
+  const [selectedHeightUnit, setSelectedHeightUnit] = useState<"in" | "cm">("in");
+  const [height, setHeight] = useState(fitnessProfile.height ?? "")
   const [selectedGoals, setSelectedGoals] = useState<string[]>(incomingFitnessGoals ?? []);
   const [parqAnswers, setParqAnswers] = useState<Record<string, boolean>>(incomingParQAnswers ?? {});
   const [weights, setWeights] = useState({
@@ -233,6 +235,49 @@ export function FitnessSettings({ fitnessProfile }: { fitnessProfile: FitnessPro
 
   return (
     <div className="space-y-4">
+      {/* Height Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Height</CardTitle>
+          <CardDescription>
+            Set your height
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <RadioGroup
+              defaultValue={selectedHeightUnit}
+              onValueChange={(value) => setSelectedHeightUnit(value as "in" | "cm")}
+              className="flex space-x-4"
+              name="heightUnit"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="in" id="in" />
+                <Label htmlFor="in">Inches (in)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="cm" id="cm" />
+                <Label htmlFor="cm">Centimeters (cm)</Label>
+              </div>
+            </RadioGroup>
+
+            <div className="space-y-2 sm:w-1/2">
+              <Label htmlFor="user-height">Height</Label>
+              <Input
+                id="user-height"
+                name="userHeight"
+                type="number"
+                min="0"
+                step="1"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                placeholder={`Enter height in ${selectedHeightUnit === "in" ? "inches" : "centimeters"}`}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Weight Settings */}
       <Card>
         <CardHeader>
